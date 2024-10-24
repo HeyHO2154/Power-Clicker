@@ -28,7 +28,7 @@ android {
         versionName "1.0.1"  // 선택 사항으로, 원하는 버전 이름으로 변경
     }
 
-    def keystorePropertiesFile = file("C:/Users/SSAFY/Desktop/GitDesktop/Mafia/Frontend/android/app/key.properties")
+    def keystorePropertiesFile = file("C:/Users/SSAFY/Desktop/GitDesktop/MemeCat/Frontend/android/app/key.properties")
     def keystoreProperties = [:]
 
     if (keystorePropertiesFile.exists()) {
