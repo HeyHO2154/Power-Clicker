@@ -1,4 +1,4 @@
-package Main;
+package Main.User;
 
 import java.util.List;
 import java.util.Optional;

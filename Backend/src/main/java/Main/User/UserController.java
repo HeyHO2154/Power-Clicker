@@ -1,5 +1,5 @@
 // UserController.java
-package Main;
+package Main.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
