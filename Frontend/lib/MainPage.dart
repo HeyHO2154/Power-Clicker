@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import 'MainPage/Mining.dart';
@@ -14,30 +15,48 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  String? userId; // 사용자 ID
   int userPoints = 0;
+  bool isLoading = true; // 로딩 상태 변수
 
   @override
   void initState() {
     super.initState();
-    _fetchUserPoints(); // 포인트 정보 불러오기
+    _loadUserId(); // 사용자 ID 불러오기
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadUserId(); // 메인 페이지로 돌아올 때마다 포인트 다시 불러오기
   }
 
-  Future<void> _fetchUserPoints() async {
-    if (Login.userId == null) return; // userId가 null일 경우 반환
 
-    final response = await http.post(
-      Uri.parse('${Login.url}/api/getPoints'), // 쿼리 파라미터 없이 URL만 사용
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': Login.userId}), // userId를 body에 담아 전달
+  Future<void> _loadUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('user_id'); // 저장된 userId 불러오기
+    if (userId != null) {
+      await _loadPoints(); // userId를 사용하여 포인트 불러오기
+    }
+    setState(() {
+      isLoading = false; // 포인트 불러오기가 완료된 후 로딩 상태 해제
+    });
+  }
+
+  Future<void> _loadPoints() async {
+    if (userId == null) return;
+
+    // 서버로부터 포인트 가져오기
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8080/api/getPoints?user_id=$userId'),
     );
 
     if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
       setState(() {
-        userPoints = result['points']; // 보유 포인트 업데이트
+        userPoints = data['points']; // 포인트 업데이트
       });
     } else {
-      print('Failed to fetch user points');
+      print('Failed to load points');
     }
   }
 

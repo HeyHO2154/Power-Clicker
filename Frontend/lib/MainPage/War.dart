@@ -187,13 +187,13 @@ class _WarState extends State<War> {
 
                 Widget divider = Container();
                 if (index == 0) {
-                  divider = Divider(thickness: 2, color: Colors.yellow.shade800);
-                } else if (index == 2) {
-                  divider = Divider(thickness: 1.5, color: Colors.purple);
+                  divider = Divider(thickness: 2.5, color: Colors.yellow.shade800);
                 } else if (index == 4) {
-                  divider = Divider(thickness: 1, color: Colors.green);
+                  divider = Divider(thickness: 2, color: Colors.purple);
                 } else if (index == 9) {
-                  divider = Divider(thickness: 0.5, color: Colors.red);
+                  divider = Divider(thickness: 1.5, color: Colors.green);
+                } else if (index == 19) {
+                  divider = Divider(thickness: 1, color: Colors.red);
                 }
 
                 return Column(
@@ -245,11 +245,11 @@ class _WarState extends State<War> {
       return Colors.blue;
     } else if (index == 0) {
       return Colors.yellow.shade700;
-    } else if (index <= 2) {
-      return Colors.purple;
     } else if (index <= 4) {
-      return Colors.green;
+      return Colors.purple;
     } else if (index <= 9) {
+      return Colors.green;
+    } else if (index <= 19) {
       return Colors.red;
     } else {
       return Colors.grey;
