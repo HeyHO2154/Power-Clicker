@@ -66,48 +66,54 @@ class _LoginState extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedUserId = prefs.getString('user_id');
 
-    // 이미 저장된 아이디가 있다면 기존 아이디로 로그인
-    if (savedUserId != null) {
-      Login.userId = savedUserId;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
-      return;
-    }
+    try {
+      // 백엔드에 저장된 user_id가 존재하는지 확인 요청
+      final response = await http.post(
+        Uri.parse('${Login.url}/api/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'user_id': savedUserId ?? _controller.text}),
+      );
 
-    // 저장된 아이디가 없는 경우에만 새로운 닉네임으로 회원가입 요청 진행
-    final response = await http.post(
-      Uri.parse('${Login.url}/api/register'), // URL 참조
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': _controller.text}),
-    );
-
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      if (result['success']) {
-        prefs.setString('user_id', _controller.text);
-        Login.userId = _controller.text;
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+      // 서버에 저장된 아이디가 이미 존재하는 경우
+      if (response.statusCode == 400) {
+        final result = jsonDecode(response.body);
+        if (result['message'] == "중복된 닉네임입니다.") {
+          // 기존 저장된 아이디로 로그인 진행
+          Login.userId = savedUserId;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+          return;
+        }
+      }
+      // 새로운 회원가입 요청을 진행할 경우
+      else if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        if (result['success']) {
+          // 새로 입력된 아이디로 회원가입 완료
+          prefs.setString('user_id', _controller.text);
+          Login.userId = _controller.text;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+        } else {
+          setState(() {
+            _errorMessage = result['message'];
+            _isTextFieldEnabled = false;
+            _controller.clear();
+            _isErrorState = true;
+          });
+        }
       } else {
+        // 서버가 열려 있으나 예기치 않은 오류 발생
         setState(() {
-          _errorMessage = result['message']; // 중복된 닉네임 메시지
-          _isTextFieldEnabled = false; // TextField 비활성화
-          _controller.clear(); // 입력된 닉네임을 지움
-          _isErrorState = true; // 에러 상태로 설정
+          _errorMessage = '알 수 없는 오류가 발생했습니다.';
         });
       }
-    } else if (response.statusCode == 400) {
-      final result = jsonDecode(response.body);
+    } catch (e) {
+      // 서버 연결이 되지 않는 경우
       setState(() {
-        _errorMessage = result['message']; // 중복 닉네임에 대한 에러 메시지 설정
-        _isTextFieldEnabled = false; // TextField 비활성화
-        _controller.clear(); // 입력된 닉네임을 지움
-        _isErrorState = true; // 에러 상태로 설정
-      });
-    } else {
-      setState(() {
-        _errorMessage = '알 수 없는 오류가 발생했습니다.'; // 기타 에러 처리
+        _errorMessage = '서버 연결에 문제가 있습니다. 인터넷 환경을 확인해주세요.';
       });
     }
   }
+
 
   // 입력 필드를 다시 활성화하는 함수
   void _enableTextField() {
@@ -128,6 +134,10 @@ class _LoginState extends State<Login> {
             'assets/Logo.png', // 로고 이미지 파일 경로
             width: 600, // 로고 너비 설정
             height: 200, // 로고 높이 설정
+          ),
+          Text(
+            "인터넷을 연결하고 '참여하기'를 눌러주세요!", // 문구 추가
+            style: TextStyle(fontSize: 16, color: Colors.black), // 스타일 설정
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
