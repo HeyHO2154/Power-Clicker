@@ -212,7 +212,7 @@ class _MiningState extends State<Mining> {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: "(광물 클릭시 ",
+                        text: "( 광물 클릭시 ",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -228,7 +228,7 @@ class _MiningState extends State<Mining> {
                         ),
                       ),
                       TextSpan(
-                        text: " 확률로 피버타임 발생)",
+                        text: " 확률로 피버타임 발생 )",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

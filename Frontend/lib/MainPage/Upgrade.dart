@@ -14,6 +14,7 @@ class Upgrade extends StatefulWidget {
 class _UpgradeState extends State<Upgrade> {
   Random random = Random();
   int totalPoints = 0;
+  bool isFactoryActive = false;
   TextEditingController _userIdController = TextEditingController();
 
   @override
@@ -67,28 +68,55 @@ class _UpgradeState extends State<Upgrade> {
     }
   }
 
-  Future<void> _updateUserId() async {
-    final response = await http.post(
-      Uri.parse("${Login.url}/api/updateUserId"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "user_id": Login.userId,
-        "new_user_id": _userIdController.text,
-      }),
-    );
+  Future<void> _toggleFactoryActivation() async {
+    // 포인트를 최신 상태로 업데이트
+    await _fetchPoints();
 
-    if (response.statusCode == 200) {
-      print("아이디 변경 성공: ${response.body}");
-      await _updateLocalUserId(_userIdController.text);
+    // 최신 포인트를 기반으로 유효성 판단 후 공장 활성화 또는 비활성화
+    if (isFactoryActive) {
       setState(() {
-        Login.userId = _userIdController.text;
-        _userIdController.clear();
+        isFactoryActive = false;
       });
-      _decreasePoints(1000);
-    } else if (response.statusCode == 409) {
-      _showErrorDialog("이미 존재하는 아이디입니다.");
+    } else if (totalPoints >= 5000) {
+      await _decreasePoints(5000);
+      setState(() {
+        isFactoryActive = true;
+      });
     } else {
-      _showErrorDialog("아이디 변경에 실패했습니다.");
+      _showErrorDialog("포인트가 부족하여 공장을 활성화할 수 없습니다.");
+    }
+  }
+
+  Future<void> _updateUserId() async {
+    // 포인트를 최신 상태로 업데이트
+    await _fetchPoints();
+
+    // 포인트가 충분한지 확인 후 유효성 판단
+    if (totalPoints >= 1000) {
+      final response = await http.post(
+        Uri.parse("${Login.url}/api/updateUserId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "user_id": Login.userId,
+          "new_user_id": _userIdController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("아이디 변경 성공: ${response.body}");
+        await _updateLocalUserId(_userIdController.text);
+        setState(() {
+          Login.userId = _userIdController.text;
+          _userIdController.clear();
+        });
+        _decreasePoints(1000); // 아이디 변경 후 포인트 차감
+      } else if (response.statusCode == 409) {
+        _showErrorDialog("이미 존재하는 아이디입니다.");
+      } else {
+        _showErrorDialog("아이디 변경에 실패했습니다.");
+      }
+    } else {
+      _showErrorDialog("포인트가 부족하여 아이디를 변경할 수 없습니다.");
     }
   }
 
@@ -101,7 +129,7 @@ class _UpgradeState extends State<Upgrade> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("중복된 아이디"),
+        title: Text("에러"),
         content: Text(message),
         actions: [
           TextButton(
@@ -148,6 +176,15 @@ class _UpgradeState extends State<Upgrade> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "( 공장 활성화시 1초당 1포인트 자동 증가 )",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
                     ),
                   ),
                 ],
@@ -215,27 +252,41 @@ class _UpgradeState extends State<Upgrade> {
                 ],
               ),
             ),
-            // 공장 활성화 이미지 및 버튼만 유지
+            Text(
+              "자동화 공장",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset("assets/factory.png",
-                      width: MediaQuery.of(context).size.width - 40),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ColorFiltered(
+                        colorFilter: isFactoryActive
+                            ? ColorFilter.mode(Colors.transparent, BlendMode.multiply)
+                            : ColorFilter.mode(Colors.grey, BlendMode.saturation),
+                        child: Image.asset("assets/factory.png",
+                            width: MediaQuery.of(context).size.width - 40),
                       ),
-                    ),
-                    child: Text(
-                      "공장 활성화",
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
+                      Positioned(
+                        child: ElevatedButton(
+                          onPressed: totalPoints >= 5000 || isFactoryActive ? _toggleFactoryActivation : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isFactoryActive ? Colors.grey.shade700 : Colors.lightBlue, // 비활성화일 때 빨간색
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            isFactoryActive ? "공장 비활성화" : "공장 활성화 (5000 P)",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -284,7 +335,7 @@ class _UpgradeState extends State<Upgrade> {
                 ),
                 child: Text(
                   bonus,
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ),

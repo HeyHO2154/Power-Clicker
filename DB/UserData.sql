@@ -19,4 +19,4 @@ INSERT INTO users (user_id, point) VALUES ('tesawst', 300);
 INSERT INTO users (user_id, point) VALUES ('1234', 424);
 INSERT INTO users (user_id, point) VALUES ('sssd', 511);
 SELECT * FROM users;
-UPDATE users SET point = 100000 WHERE id = '39';
+UPDATE users SET point = 0 WHERE id = '7';
