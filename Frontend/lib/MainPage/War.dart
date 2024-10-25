@@ -185,19 +185,23 @@ class _WarState extends State<War> {
                 final user = users[index];
                 bool isCurrentUser = user['user_id'] == userId;
 
-                Widget divider = Container();
+                // 구간 설명 박스 위젯
+                Widget benefitBox = Container();
                 if (index == 0) {
-                  divider = Divider(thickness: 2.5, color: Colors.yellow.shade800);
-                } else if (index == 4) {
-                  divider = Divider(thickness: 2, color: Colors.purple);
-                } else if (index == 9) {
-                  divider = Divider(thickness: 1.5, color: Colors.green);
-                } else if (index == 19) {
-                  divider = Divider(thickness: 1, color: Colors.red);
+                  benefitBox = _buildBenefitBox("파워 클리커 = ", Colors.yellow.shade700);
+                } else if (index == 1) {
+                  benefitBox = _buildBenefitBox("TOP 5 = ", Colors.purple.shade200);
+                } else if (index == 5) {
+                  benefitBox = _buildBenefitBox("TOP 10 = 광질하기가 고양이 터치로 변경", Colors.green.shade300);
+                } else if (index == 10) {
+                  benefitBox = _buildBenefitBox("TOP 20 = 메인 화면에 고양이 등장", Colors.red.shade300);
+                } else if (index >= 20){
+                  benefitBox = _buildBenefitBox("기본 기능 제공", Colors.grey);
                 }
 
                 return Column(
                   children: [
+                    benefitBox,
                     ListTile(
                       leading: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -229,7 +233,6 @@ class _WarState extends State<War> {
                         _decreasePoints(user['user_id']);
                       },
                     ),
-                    divider,
                   ],
                 );
               },
@@ -256,3 +259,31 @@ class _WarState extends State<War> {
     }
   }
 }
+// 구간 설명 박스를 위한 메서드
+Widget _buildBenefitBox(String text, Color color) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Divider(thickness: 2, color: color), // 구간별 선 색상
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 18),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
