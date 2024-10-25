@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Login.dart';
 
@@ -13,15 +14,12 @@ class Upgrade extends StatefulWidget {
 class _UpgradeState extends State<Upgrade> {
   Random random = Random();
   int totalPoints = 0;
-  bool isFactoryActive = false;
-  DateTime? factoryActivatedTime;
-  Duration remainingTime = Duration.zero;
+  TextEditingController _userIdController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchPoints();
-    _updateRemainingTime();
   }
 
   Future<void> _fetchPoints() async {
@@ -69,32 +67,42 @@ class _UpgradeState extends State<Upgrade> {
     }
   }
 
-  Future<void> _checkAndExecutePurchase(int cost, Function onSuccess) async {
-    final response = await http.get(Uri.parse("${Login.url}/api/getPoints?user_id=${Login.userId}"));
+  Future<void> _updateUserId() async {
+    final response = await http.post(
+      Uri.parse("${Login.url}/api/updateUserId"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "user_id": Login.userId,
+        "new_user_id": _userIdController.text,
+      }),
+    );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final currentPoints = data['points'];
-
-      if (currentPoints >= cost) {
-        await onSuccess();
-        setState(() {
-          totalPoints = currentPoints - cost;
-        });
-      } else {
-        _showInsufficientPointsDialog();
-      }
+      print("아이디 변경 성공: ${response.body}");
+      await _updateLocalUserId(_userIdController.text);
+      setState(() {
+        Login.userId = _userIdController.text;
+        _userIdController.clear();
+      });
+      _decreasePoints(1000);
+    } else if (response.statusCode == 409) {
+      _showErrorDialog("이미 존재하는 아이디입니다.");
     } else {
-      print("Error fetching points: ${response.body}");
+      _showErrorDialog("아이디 변경에 실패했습니다.");
     }
   }
 
-  void _showInsufficientPointsDialog() {
+  Future<void> _updateLocalUserId(String newUserId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_id', newUserId);
+  }
+
+  void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("포인트 부족"),
-        content: Text("포인트가 부족하여 구매할 수 없습니다."),
+        title: Text("중복된 아이디"),
+        content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -105,52 +113,12 @@ class _UpgradeState extends State<Upgrade> {
     );
   }
 
-  Future<void> _attemptNicknameChange() async {
-    await _checkAndExecutePurchase(1000, () async {
-      await _decreasePoints(1000);
-      print("닉네임이 성공적으로 변경되었습니다.");
-    });
-  }
-
-  Future<void> _attemptFactoryActivationOrExtension() async {
-    await _checkAndExecutePurchase(5000, () async {
-      await _decreasePoints(5000);
-      setState(() {
-        isFactoryActive = true;
-        factoryActivatedTime = factoryActivatedTime == null
-            ? DateTime.now()
-            : factoryActivatedTime!.add(Duration(hours: 24));
-        _updateRemainingTime();
-      });
-    });
-  }
-
-  void _updateRemainingTime() {
-    if (factoryActivatedTime != null) {
-      final now = DateTime.now();
-      final duration = factoryActivatedTime!.difference(now);
-
-      setState(() {
-        remainingTime = duration > Duration.zero ? duration : Duration.zero;
-        isFactoryActive = remainingTime > Duration.zero;
-      });
-    }
-  }
-
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 상단 박스
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 30),
@@ -182,19 +150,9 @@ class _UpgradeState extends State<Upgrade> {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "(공장 활성화 = 초당 1P 수익 발생)",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
                 ],
               ),
             ),
-            // 닉네임 바꾸기
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -208,21 +166,30 @@ class _UpgradeState extends State<Upgrade> {
                     children: [
                       Expanded(
                         child: TextField(
+                          controller: _userIdController,
                           decoration: InputDecoration(
                             hintText: "${Login.userId}",
                           ),
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: totalPoints >= 1000 ? _attemptNicknameChange : null,
-                        child: Text("닉네임 변경 (1000 P)"),
+                        onPressed: totalPoints >= 1000 ? _updateUserId : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.lightBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          "닉네임 변경 (1000 P)",
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            // 포인트 충전 (가로 스크롤 및 박스형태)
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -248,38 +215,28 @@ class _UpgradeState extends State<Upgrade> {
                 ],
               ),
             ),
-            // 공장 활성화
+            // 공장 활성화 이미지 및 버튼만 유지
             Padding(
-              padding: const EdgeInsets.all(0.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "공장",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  // 공장 이미지
-                  ColorFiltered(
-                    colorFilter: isFactoryActive
-                        ? ColorFilter.mode(Colors.transparent, BlendMode.multiply)
-                        : ColorFilter.mode(Colors.grey, BlendMode.saturation),
-                    child: Image.asset("assets/factory.png",
-                        width: MediaQuery.of(context).size.width - 40), // 좌우로 꽉 차게 배치
-                  ),
+                  Image.asset("assets/factory.png",
+                      width: MediaQuery.of(context).size.width - 40),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: totalPoints >= 5000 ? _attemptFactoryActivationOrExtension : null,
-                    child: Text(isFactoryActive ? "연장하기 (5000 P)" : "공장 활성화 (5000 P)"),
-                  ),
-                  if (isFactoryActive)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        "남은 시간: ${_formatDuration(remainingTime)}",
-                        style: TextStyle(fontSize: 16, color: Colors.green),
+                    onPressed: null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.lightBlue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
+                    child: Text(
+                      "공장 활성화",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
             ),

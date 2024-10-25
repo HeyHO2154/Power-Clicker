@@ -14,7 +14,7 @@ class _WarState extends State<War> {
   Map<String, dynamic>? currentUser;
   ScrollController _scrollController = ScrollController();
 
-  int meDecrease = 9;
+  int meDecrease = 5;
   int otherDecrease = 10;
   int userPoints = 0; // 사용자 포인트 변수 추가
 
@@ -167,7 +167,7 @@ class _WarState extends State<War> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "(본인 9포인트로, 상대 10포인트 감소)",
+                  "(본인 5포인트로, 상대 10포인트 감소)",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

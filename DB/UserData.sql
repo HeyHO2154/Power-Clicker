@@ -17,6 +17,6 @@ INSERT INTO users (user_id, point) VALUES ('fas', 200);
 INSERT INTO users (user_id, point) VALUES ('gdssdd', 150);
 INSERT INTO users (user_id, point) VALUES ('tesawst', 300);
 INSERT INTO users (user_id, point) VALUES ('1234', 424);
-INSERT INTO users (user_id, point) VALUES ('sdf32', 511);
+INSERT INTO users (user_id, point) VALUES ('sssd', 511);
 SELECT * FROM users;
-UPDATE users SET point = 100000 WHERE id = '31';
+UPDATE users SET point = 100000 WHERE id = '39';

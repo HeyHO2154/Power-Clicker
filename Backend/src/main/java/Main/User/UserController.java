@@ -64,22 +64,32 @@ public class UserController {
         return result;
     }
     
-    // 닉네임 변경 메서드
-    @PostMapping("/updateNickname")
-    public ResponseEntity<?> updateNickname(@RequestBody Map<String, String> request) {
-        String userId = request.get("user_id");
-        String newNickname = request.get("nickname");
+ // 아이디 변경 메서드
+    @PostMapping("/updateUserId")
+    public ResponseEntity<?> updateUserId(@RequestBody Map<String, String> request) {
+        String currentUserId = request.get("user_id"); // 현재 사용 중인 아이디
+        String newUserId = request.get("new_user_id"); // 변경할 아이디
 
-        Optional<User> userOptional = userRepository.findByUserId(userId);
+        // 새 아이디의 중복 검사
+        Optional<User> existingUser = userRepository.findByUserId(newUserId);
+        if (existingUser.isPresent()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Collections.singletonMap("message", "이미 존재하는 아이디입니다."));
+        }
 
+        // 현재 사용자 정보 가져오기
+        Optional<User> userOptional = userRepository.findByUserId(currentUserId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            user.setUserId(newNickname); // 닉네임 업데이트
+            user.setUserId(newUserId); // 아이디 변경
             userRepository.save(user);
-            return ResponseEntity.ok(Collections.singletonMap("message", "닉네임이 성공적으로 변경되었습니다."));
+            return ResponseEntity
+                    .ok(Collections.singletonMap("message", "아이디가 성공적으로 변경되었습니다."));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("message", "유저를 찾을 수 없습니다."));
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("message", "사용자를 찾을 수 없습니다."));
         }
     }
 
