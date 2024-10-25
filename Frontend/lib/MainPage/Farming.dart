@@ -44,7 +44,8 @@ class _FarmingState extends State<Farming> {
   }
 
   Future<void> fetchPoints() async {
-    final response = await http.get(Uri.parse("${Login.url}/api/getPoints?user_id=$userId"));
+    final response = await http.get(
+        Uri.parse("${Login.url}/api/getPoints?user_id=$userId"));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
@@ -161,7 +162,7 @@ class _FarmingState extends State<Farming> {
         return {"message": "씨앗이 다 날아갔습니다!", "points": 0};
       case "여름":
         return {
-          "message": "이른 수확입니다! 심었던 포인트(${selectedSeeds})를 회수합니다.",
+          "message": "이른 수확입니다! 심었던 (${selectedSeeds}) 포인트를 회수합니다.",
           "points": selectedSeeds
         };
       case "가을":
@@ -171,6 +172,21 @@ class _FarmingState extends State<Farming> {
         };
       default:
         return {"message": "", "points": 0};
+    }
+  }
+
+  String getSeasonIcon(String currentSeason) {
+    switch (currentSeason) {
+      case "봄":
+        return 'assets/spring.png';
+      case "여름":
+        return 'assets/summer.png';
+      case "가을":
+        return 'assets/autumn.png';
+      case "겨울":
+        return 'assets/winter.png';
+      default:
+        return 'assets/spring.png'; // 기본값
     }
   }
 
@@ -213,7 +229,7 @@ class _FarmingState extends State<Farming> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "(광물 클릭시 10% 확률로 피버타임 발생)",
+                  "( 봄: x0 / 여름: x1 / 가을: x3 / 겨울: x0 )",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -227,16 +243,22 @@ class _FarmingState extends State<Farming> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Image.asset(
+                  getSeasonIcon(currentSeason), // 현재 계절에 맞는 아이콘을 표시
+                  width: 100, // 아이콘 크기
+                  height: 100,
+                ),
+                SizedBox(height: 30,),
                 Text(
                   isRouletteSpinning
-                      ? "현재의 계절: $currentSeason"
-                      : "씨앗을 심고 수확을 기다리세요!",
+                      ? "현재 계절: $currentSeason"
+                      : "씨앗을 심고 수확 타이밍을 맞춰보세요!",
                   style: TextStyle(fontSize: 20, color: Colors.black),
                 ),
+                SizedBox(height: 30,),
                 if (!isRouletteSpinning)
                   Column(
                     children: [
-                      Text("심을 씨앗을 선택하세요:"),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -254,14 +276,43 @@ class _FarmingState extends State<Farming> {
                     onPressed: () {
                       stopRoulette();
                     },
-                    child: Text("수확"),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      backgroundColor: Colors.brown.shade200,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      shadowColor: Colors.greenAccent,
+                      elevation: 8,
+                    ),
+                    child: Text(
+                      "수확하기",
+                      style: TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
+                    ),
                   ),
                 SizedBox(height: 20),
                 if (!isRouletteSpinning && resultMessage.isNotEmpty)
-                  Text(
-                    resultMessage,
-                    style: TextStyle(fontSize: 18, color: Colors.red),
-                    textAlign: TextAlign.center,
+                  Card(
+                    color: Colors.redAccent.withOpacity(0.8),
+                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Text(
+                        resultMessage,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -282,7 +333,25 @@ class _FarmingState extends State<Farming> {
         });
       }
           : null,
-      child: Text("$seedCount개 심기"),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        backgroundColor: totalPoints >= seedCount ? Colors.brown : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        shadowColor: totalPoints >= seedCount ? Colors.orange : Colors
+            .transparent,
+        elevation: totalPoints >= seedCount ? 8 : 0,
+      ),
+      child: Text(
+        "$seedCount개 심기",
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: totalPoints >= seedCount ? Colors.yellow.shade600 : Colors
+              .black54, // 텍스트 색상 설정
+        ),
+      ),
     );
   }
 }

@@ -208,14 +208,36 @@ class _MiningState extends State<Mining> {
                   ),
                 ),
                 SizedBox(height: 8), // 줄바꿈을 위한 여백
-                Text(
-                  "(광물 클릭시 ${feverProbability}% 확률로 피버타임 발생)", // 피버타임 확률 반영
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white70, // 부가 설명 글씨는 조금 연하게 설정
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "(광물 클릭시 ",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "$feverProbability%",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.cyan.shade200, // 확률 부분만 핑크 색상
+                        ),
+                      ),
+                      TextSpan(
+                        text: " 확률로 피버타임 발생)",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                )
               ],
             ),
           ),
