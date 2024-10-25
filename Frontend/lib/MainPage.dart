@@ -51,12 +51,12 @@ class _MainPageState extends State<MainPage> {
               SizedBox(height: 100),
               Row(
                 children: [
-                  Icon(Icons.person, color: Colors.grey, size: 24),
+                  Icon(Icons.person, color: Colors.grey, size: 30),
                   SizedBox(width: 8),
                   Text(
                     '${Login.userId}',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.purpleAccent.shade700,
                     ),
@@ -64,7 +64,7 @@ class _MainPageState extends State<MainPage> {
                   Text(
                     '님 환영합니다!',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey,
                     ),
@@ -74,12 +74,12 @@ class _MainPageState extends State<MainPage> {
               SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(Icons.attach_money, color: Colors.grey, size: 24),
+                  Icon(Icons.attach_money, color: Colors.grey, size: 30),
                   SizedBox(width: 8),
                   Text(
                     '보유 포인트: ',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey,
                     ),
@@ -87,7 +87,7 @@ class _MainPageState extends State<MainPage> {
                   Text(
                     '${userPoints}P',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.purpleAccent,
                     ),
@@ -103,7 +103,6 @@ class _MainPageState extends State<MainPage> {
                   height: 200,
                 ),
               ),
-              SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
                   await Navigator.push(
