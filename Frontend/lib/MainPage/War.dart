@@ -195,7 +195,7 @@ class _WarState extends State<War> {
                   benefitBox = _buildBenefitBox("TOP 10 = 광질하기가 고양이 터치로 변경", Colors.green.shade300);
                 } else if (index == 10) {
                   benefitBox = _buildBenefitBox("TOP 20 = 메인 화면에 고양이 등장", Colors.red.shade300);
-                } else if (index >= 20){
+                } else if (index == 20){
                   benefitBox = _buildBenefitBox("기본 기능 제공", Colors.grey);
                 }
 

@@ -22,7 +22,7 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    //_clearLocalData(); // 로컬 데이터 초기화 함수 호출
+    _clearLocalData(); // 로컬 데이터 초기화 함수 호출
     _checkUserId();
   }
 

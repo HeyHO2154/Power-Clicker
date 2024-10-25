@@ -11,12 +11,12 @@ CREATE TABLE users (
 );
 
 DELETE FROM users;
-INSERT INTO users (user_id, point) VALUES ('test', 1000);
-INSERT INTO users (user_id, point) VALUES ('asdasd', 100);
-INSERT INTO users (user_id, point) VALUES ('fas', 200);
-INSERT INTO users (user_id, point) VALUES ('gdssdd', 150);
-INSERT INTO users (user_id, point) VALUES ('tesawst', 300);
-INSERT INTO users (user_id, point) VALUES ('1234', 424);
-INSERT INTO users (user_id, point) VALUES ('sssd', 511);
+INSERT INTO users (user_id, point) VALUES ('ts2t', 1000);
+INSERT INTO users (user_id, point) VALUES ('as2asd', 100);
+INSERT INTO users (user_id, point) VALUES ('f2s', 200);
+INSERT INTO users (user_id, point) VALUES ('g2dsdd', 150);
+INSERT INTO users (user_id, point) VALUES ('te2awst', 300);
+INSERT INTO users (user_id, point) VALUES ('1324', 424);
+INSERT INTO users (user_id, point) VALUES ('s2ss', 999511);
 SELECT * FROM users;
-UPDATE users SET point = 0 WHERE id = '7';
+UPDATE users SET point = 20000 WHERE user_id = 'Gabin';
