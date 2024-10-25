@@ -22,7 +22,8 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _clearLocalData(); // 로컬 데이터 초기화 함수 호출
+    //_clearLocalData(); // 로컬 데이터 초기화 함수 호출
+    _checkUserId();
   }
 
   Future<void> _clearLocalData() async {
@@ -33,13 +34,46 @@ class _LoginState extends State<Login> {
   Future<void> _checkUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedUserId = prefs.getString('user_id');
+
     if (savedUserId != null) {
-      Login.userId = savedUserId;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+      try {
+        final response = await http.post(
+          Uri.parse('${Login.url}/api/register'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'user_id': savedUserId}),
+        );
+
+        if (response.statusCode == 400) {
+          final result = jsonDecode(response.body);
+          if (result['message'] == "중복된 닉네임입니다.") {
+            Login.userId = savedUserId;
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+          }
+        } else {
+          setState(() {
+            _errorMessage = '서버 연결에 문제가 있습니다. 다시 시도해주세요.';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage = '서버가 닫혀 있어 작동할 수 없습니다.';
+        });
+      }
     }
   }
 
   Future<void> _registerUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedUserId = prefs.getString('user_id');
+
+    // 이미 저장된 아이디가 있다면 기존 아이디로 로그인
+    if (savedUserId != null) {
+      Login.userId = savedUserId;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+      return;
+    }
+
+    // 저장된 아이디가 없는 경우에만 새로운 닉네임으로 회원가입 요청 진행
     final response = await http.post(
       Uri.parse('${Login.url}/api/register'), // URL 참조
       headers: {'Content-Type': 'application/json'},
@@ -49,7 +83,6 @@ class _LoginState extends State<Login> {
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
       if (result['success']) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('user_id', _controller.text);
         Login.userId = _controller.text;
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));

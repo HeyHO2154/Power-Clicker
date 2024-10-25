@@ -96,7 +96,7 @@ class _MainPageState extends State<MainPage> {
               ),
               SizedBox(height: 30),
               Padding(
-                padding: const EdgeInsets.only(bottom: 50.0),
+                padding: const EdgeInsets.only(bottom: 40.0),
                 child: Image.asset(
                   'assets/Logo.png',
                   width: 500,

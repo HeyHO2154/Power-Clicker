@@ -64,7 +64,27 @@ public class UserController {
         return result;
     }
     
- // UserController.java (포인트 감소)
+    // 닉네임 변경 메서드
+    @PostMapping("/updateNickname")
+    public ResponseEntity<?> updateNickname(@RequestBody Map<String, String> request) {
+        String userId = request.get("user_id");
+        String newNickname = request.get("nickname");
+
+        Optional<User> userOptional = userRepository.findByUserId(userId);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setUserId(newNickname); // 닉네임 업데이트
+            userRepository.save(user);
+            return ResponseEntity.ok(Collections.singletonMap("message", "닉네임이 성공적으로 변경되었습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("message", "유저를 찾을 수 없습니다."));
+        }
+    }
+
+    
+    // UserController.java (포인트 감소)
     @PostMapping("/decrease")
     public ResponseEntity<?> decreasePoints(@RequestBody Map<String, Object> request) {
         String userId = (String) request.get("user_id");
@@ -87,7 +107,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "유저를 찾을 수 없습니다."));
     }
     
- // UserController.java (포인트 증가 - 광질하기)
+    // UserController.java (포인트 증가 - 광질하기)
     @PostMapping("/increase")
     public ResponseEntity<?> increasePoints(@RequestBody Map<String, Object> request) {
         String userId = (String) request.get("user_id");
@@ -105,7 +125,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "유저를 찾을 수 없습니다."));
     }
 
- // 포인트 조회 메서드
+    // 포인트 조회 메서드
     @GetMapping("/getPoints")
     public ResponseEntity<?> getPoints(@RequestParam String user_id) {
         Optional<User> user = userRepository.findByUserId(user_id);

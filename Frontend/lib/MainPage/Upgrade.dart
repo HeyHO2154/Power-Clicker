@@ -69,15 +69,60 @@ class _UpgradeState extends State<Upgrade> {
     }
   }
 
-  Future<void> _activateOrExtendFactory() async {
-    if (totalPoints >= 5000) {
+  Future<void> _checkAndExecutePurchase(int cost, Function onSuccess) async {
+    final response = await http.get(Uri.parse("${Login.url}/api/getPoints?user_id=${Login.userId}"));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final currentPoints = data['points'];
+
+      if (currentPoints >= cost) {
+        await onSuccess();
+        setState(() {
+          totalPoints = currentPoints - cost;
+        });
+      } else {
+        _showInsufficientPointsDialog();
+      }
+    } else {
+      print("Error fetching points: ${response.body}");
+    }
+  }
+
+  void _showInsufficientPointsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("포인트 부족"),
+        content: Text("포인트가 부족하여 구매할 수 없습니다."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _attemptNicknameChange() async {
+    await _checkAndExecutePurchase(1000, () async {
+      await _decreasePoints(1000);
+      print("닉네임이 성공적으로 변경되었습니다.");
+    });
+  }
+
+  Future<void> _attemptFactoryActivationOrExtension() async {
+    await _checkAndExecutePurchase(5000, () async {
       await _decreasePoints(5000);
       setState(() {
         isFactoryActive = true;
-        factoryActivatedTime = factoryActivatedTime == null ? DateTime.now() : factoryActivatedTime!.add(Duration(hours: 24));
+        factoryActivatedTime = factoryActivatedTime == null
+            ? DateTime.now()
+            : factoryActivatedTime!.add(Duration(hours: 24));
         _updateRemainingTime();
       });
-    }
+    });
   }
 
   void _updateRemainingTime() {
@@ -169,11 +214,7 @@ class _UpgradeState extends State<Upgrade> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: totalPoints >= 1000
-                            ? () {
-                          _decreasePoints(1000);
-                        }
-                            : null,
+                        onPressed: totalPoints >= 1000 ? _attemptNicknameChange : null,
                         child: Text("닉네임 변경 (1000 P)"),
                       ),
                     ],
@@ -228,7 +269,7 @@ class _UpgradeState extends State<Upgrade> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: totalPoints >= 5000 ? _activateOrExtendFactory : null,
+                    onPressed: totalPoints >= 5000 ? _attemptFactoryActivationOrExtension : null,
                     child: Text(isFactoryActive ? "연장하기 (5000 P)" : "공장 활성화 (5000 P)"),
                   ),
                   if (isFactoryActive)

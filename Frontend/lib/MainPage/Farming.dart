@@ -81,6 +81,31 @@ class _FarmingState extends State<Farming> {
     fetchPoints();
   }
 
+  Future<void> attemptStartFarming(int seedCount) async {
+    final response = await http.get(
+        Uri.parse("${Login.url}/api/getPoints?user_id=$userId"));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final currentPoints = data['points'];
+
+      if (currentPoints >= seedCount) {
+        setState(() {
+          selectedSeeds = seedCount;
+        });
+        await decreasePoints(selectedSeeds);
+        startRoulette();
+      } else {
+        setState(() {
+          resultMessage = "포인트가 부족합니다.";
+        });
+      }
+    } else {
+      setState(() {
+        resultMessage = "포인트를 확인하는 중 오류가 발생했습니다.";
+      });
+    }
+  }
+
   void startRoulette() {
     setState(() {
       isRouletteSpinning = true;
@@ -158,8 +183,9 @@ class _FarmingState extends State<Farming> {
   Map<String, dynamic> calculateReward() {
     switch (currentSeason) {
       case "봄":
+        return {"message": "봄은 춥습니다, 씨앗이 다 날아갔습니다!", "points": 0};
       case "겨울":
-        return {"message": "씨앗이 다 날아갔습니다!", "points": 0};
+        return {"message": "겨울은 춥습니다, 씨앗이 다 날아갔습니다!", "points": 0};
       case "여름":
         return {
           "message": "이른 수확입니다! 심었던 (${selectedSeeds}) 포인트를 회수합니다.",
@@ -244,8 +270,8 @@ class _FarmingState extends State<Farming> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  getSeasonIcon(currentSeason), // 현재 계절에 맞는 아이콘을 표시
-                  width: 100, // 아이콘 크기
+                  getSeasonIcon(currentSeason),
+                  width: 100,
                   height: 100,
                 ),
                 SizedBox(height: 30,),
@@ -326,11 +352,7 @@ class _FarmingState extends State<Farming> {
     return ElevatedButton(
       onPressed: totalPoints >= seedCount
           ? () {
-        setState(() {
-          selectedSeeds = seedCount;
-          decreasePoints(selectedSeeds);
-          startRoulette();
-        });
+        attemptStartFarming(seedCount);
       }
           : null,
       style: ElevatedButton.styleFrom(
@@ -339,8 +361,7 @@ class _FarmingState extends State<Farming> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
-        shadowColor: totalPoints >= seedCount ? Colors.orange : Colors
-            .transparent,
+        shadowColor: totalPoints >= seedCount ? Colors.orange : Colors.transparent,
         elevation: totalPoints >= seedCount ? 8 : 0,
       ),
       child: Text(
@@ -348,8 +369,7 @@ class _FarmingState extends State<Farming> {
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: totalPoints >= seedCount ? Colors.yellow.shade600 : Colors
-              .black54, // 텍스트 색상 설정
+          color: totalPoints >= seedCount ? Colors.yellow.shade600 : Colors.black54,
         ),
       ),
     );
