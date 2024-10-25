@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,14 +32,20 @@ public class UserController {
         Optional<User> existingUser = userRepository.findByUserId(userId);
 
         if (existingUser.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "중복 닉네임입니다."));
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)  // UTF-8로 설정
+                    .body(Collections.singletonMap("message", "중복된 닉네임입니다."));
         }
 
         User newUser = new User();
         newUser.setUserId(userId);
         newUser.setPoint(0); // 초기 포인트 설정
         userRepository.save(newUser);
-        return ResponseEntity.ok(Collections.singletonMap("success", true));
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON_UTF8)  // UTF-8로 설정
+                .body(Collections.singletonMap("success", true));
     }
     
     // UserController.java (유저 리스트 가져오기)

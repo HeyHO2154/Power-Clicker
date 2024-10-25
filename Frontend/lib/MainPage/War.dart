@@ -34,13 +34,14 @@ class _WarState extends State<War> {
       List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(jsonDecode(response.body));
 
       setState(() {
+        // 유저 목록을 포인트 기준으로 정렬
+        allUsers.sort((a, b) => b['point'].compareTo(a['point']));
+        users = allUsers;
         // 본인 정보 설정
         currentUser = allUsers.firstWhere(
               (user) => user['user_id'] == userId,
           orElse: () => {'user_id': userId, 'point': 0}, // 기본 값을 제공
         );
-        // 피라미드에 본인도 포함되도록 설정
-        users = allUsers;
       });
     }
   }
@@ -82,78 +83,63 @@ class _WarState extends State<War> {
       appBar: AppBar(
         title: Text('전쟁하기'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 상위 10명의 유저를 피라미드 방식으로 배치 (본인도 포함)
-            if (users.isNotEmpty)
-              Column(
-                children: [
-                  if (users.length >= 1) _buildUserRow([users[0]], true), // 1등 (노란색 아이콘)
-                  if (users.length >= 2) _buildUserRow([users[1], users[2]], false), // 2, 3등
-                  if (users.length >= 4) _buildUserRow([users[3], users[4], users[5]], false), // 4, 5, 6등
-                  if (users.length >= 7)
-                    _buildUserRow(users.sublist(6, users.length > 10 ? 10 : users.length), false), // 7~10등
-                ],
-              ),
-
-            SizedBox(height: 20),
-
-            // 피라미드에 본인이 포함되든 포함되지 않든 항상 피라미드 하단에 본인 표시
-            if (currentUser != null)
-              ListTile(
-                title: Text(
-                  '${currentUser!["user_id"]} - ${currentUser!["point"]}점 (본인)',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      body: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          final user = users[index];
+          bool isCurrentUser = user['user_id'] == userId;
+          return ListTile(
+            leading: Row(
+              mainAxisSize: MainAxisSize.min, // 공간을 최소화해서 사람 아이콘과 등수가 붙어서 나타나게 함
+              children: [
+                Text(
+                  '${index + 1}등', // 등수 표시
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: index < 10 ? FontWeight.bold : FontWeight.normal, // 10등까지는 Bold
+                  ),
                 ),
-                trailing: Icon(Icons.person, size: 40, color: Colors.blue), // 본인 아이콘 파란색
-                onTap: null, // 본인은 클릭되지 않음
+                SizedBox(width: 10), // 아이콘과 등수 사이 간격
+                Icon(
+                  Icons.person,
+                  size: 40,
+                  color: _getUserColor(index, isCurrentUser), // 아이콘 색상 설정
+                ),
+              ],
+            ),
+            title: Text(
+              '${user["user_id"]} : ${user["point"]}점',
+              style: TextStyle(
+                fontWeight: isCurrentUser || index < 10 ? FontWeight.bold : FontWeight.normal, // 본인 또는 10등까지 Bold
+                fontSize: 18,
+                color: isCurrentUser ? Colors.blue : Colors.black, // 본인은 파란색
               ),
-          ],
-        ),
+            ),
+            onTap: isCurrentUser
+                ? null // 본인은 클릭 불가
+                : () {
+              _decreasePoints(user['user_id'], user['point']); // 사람 아이콘 클릭 시 포인트 감소
+            },
+          );
+        },
       ),
     );
   }
 
-  // 피라미드식 유저 배치 (아이콘 클릭)
-  Widget _buildUserRow(List<Map<String, dynamic>> rowUsers, bool isTopRank) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: rowUsers.map((user) {
-        bool isCurrentUser = user['user_id'] == userId; // 본인 여부 확인
-
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Text(
-                '${user["user_id"]}',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // 글자 크기 크게
-              ),
-              Text(
-                '${user["point"]}점',
-                style: TextStyle(fontSize: 16), // 글자 크기 크게
-              ),
-              GestureDetector(
-                onTap: isCurrentUser
-                    ? null // 본인은 클릭 불가
-                    : () {
-                  _decreasePoints(user['user_id'], user['point']); // 사람 아이콘 클릭 시 포인트 감소
-                },
-                child: Icon(
-                  Icons.person,
-                  size: 40,
-                  color: isCurrentUser
-                      ? Colors.blue // 본인 아이콘은 파란색
-                      : isTopRank
-                      ? Colors.orangeAccent // 1등은 노란색
-                      : Colors.red, // 나머지는 빨간색
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
+  // 유저의 순위에 따라 색상 반환
+  Color _getUserColor(int index, bool isCurrentUser) {
+    if (isCurrentUser) {
+      return Colors.blue; // 본인은 파란색
+    } else if (index == 0) {
+      return Colors.yellow; // 1등은 노란색
+    } else if (index <= 2) {
+      return Colors.orange; // ~3등은 주황색
+    } else if (index <= 9) {
+      return Colors.green; // ~10등은 초록색
+    } else if (index <= 19) {
+      return Colors.red; // 20등은 빨간색
+    } else {
+      return Colors.grey; // 나머지는 회색
+    }
   }
 }
