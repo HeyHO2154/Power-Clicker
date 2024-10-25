@@ -120,7 +120,7 @@ class _LoginState extends State<Login> {
                 child: TextField(
                   controller: _controller,
                   enabled: _isTextFieldEnabled, // TextField 활성화/비활성화 상태
-                  maxLength: 15, // 닉네임을 10글자 이하로 제한
+                  maxLength: 20, // 닉네임을 10글자 이하로 제한
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.person, color: Colors.grey), // 아이콘 추가 (사람 모양)
                     hintText: '사용하실 닉네임을 적어주세요',

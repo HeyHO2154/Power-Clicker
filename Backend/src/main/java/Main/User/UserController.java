@@ -66,18 +66,21 @@ public class UserController {
     
  // UserController.java (포인트 감소)
     @PostMapping("/decrease")
-    public ResponseEntity<?> decreasePoints(@RequestBody Map<String, String> request) {
-        String userId = request.get("user_id");
+    public ResponseEntity<?> decreasePoints(@RequestBody Map<String, Object> request) {
+        String userId = (String) request.get("user_id");
+        int pointsToDecrease = (int) request.get("points");
+
         Optional<User> userOptional = userRepository.findByUserId(userId);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (user.getPoint() >= 10) {
-                user.setPoint(user.getPoint() - 10);
+            if (user.getPoint() >= pointsToDecrease) {
+                user.setPoint(user.getPoint() - pointsToDecrease);
                 userRepository.save(user);
-                return ResponseEntity.ok(Collections.singletonMap("message", "포인트가 10 감소되었습니다."));
+                return ResponseEntity.ok(Collections.singletonMap("message", "포인트가 " + pointsToDecrease + " 감소되었습니다."));
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "포인트가 충분하지 않습니다."));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Collections.singletonMap("message", "포인트가 충분하지 않습니다."));
             }
         }
 

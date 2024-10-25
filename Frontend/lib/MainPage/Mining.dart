@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async'; // 타이머 사용을 위해 추가
+import 'dart:async';
+
+import '../Login.dart'; // 타이머 사용을 위해 추가
 
 class Mining extends StatefulWidget {
   @override
@@ -16,10 +18,10 @@ class _MiningState extends State<Mining> {
   int totalPoints = 0; // 포인트 저장 변수
   String? userId; // 사용자 ID
   bool isLoading = true; // 로딩 상태 변수
-  String? scoreMessage; // 획득한 점수 메시지
-  Offset? messagePosition; // 점수 메시지의 위치
+  List<Map<String, dynamic>> scoreMessages = []; // 점수 메시지와 위치를 저장할 리스트
   bool isFeverTime = false; // 피버 타임 여부
   Timer? feverTimer; // 피버 타임 타이머
+  int feverProbability = 1; // 피버 타임 발생 확률
 
   @override
   void initState() {
@@ -75,7 +77,7 @@ class _MiningState extends State<Mining> {
           onTap: () {
             setState(() {
               // 원의 크기에 따라 점수 증가
-              int points = 100 - size.toInt(); // 원이 작을수록 큰 점수
+              int points = ((100 - size) / 5).round() + 1; // 원의 크기가 작을수록 큰 점수 부여, 소수점 반올림
               if (isFeverTime) {
                 points *= 2; // 피버 타임이면 2배로 증가
               }
@@ -84,9 +86,13 @@ class _MiningState extends State<Mining> {
               _showScoreMessage(points, position); // 점수 메시지 표시
               _updatePoints(points); // 서버에 포인트 업데이트
 
-              // 10% 확률로 피버 타임 활성화 (중첩 방지)
-              if (!isFeverTime && random.nextInt(100) < 10) {
-                _startFeverTime();
+              // 피버 타임 발생 로직
+              if (!isFeverTime) {
+                if (random.nextInt(100) < feverProbability) {
+                  _startFeverTime();
+                } else {
+                  feverProbability++; // 피버 타임이 발생하지 않으면 확률 증가
+                }
               }
             });
           },
@@ -99,9 +105,9 @@ class _MiningState extends State<Mining> {
       ));
     });
 
-    // 피버 타임이 아닌 경우 1~5초 간격으로 새로운 원 생성
+    // 피버 타임이 아닌 경우 2~7초 간격으로 새로운 원 생성
     if (!isFeverTime) {
-      Future.delayed(Duration(seconds: random.nextInt(5) + 1), _generateCircle);
+      Future.delayed(Duration(seconds: random.nextInt(6) + 2), _generateCircle);
     }
   }
 
@@ -109,6 +115,7 @@ class _MiningState extends State<Mining> {
   void _startFeverTime() {
     setState(() {
       isFeverTime = true; // 피버 타임 시작
+      feverProbability = 1; // 피버 타임 확률 초기화
     });
 
     // 피버 타임 동안 원이 1초마다 생성
@@ -131,7 +138,7 @@ class _MiningState extends State<Mining> {
 
     // 서버로 포인트 업데이트 요청 보내기
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/increase'),
+      Uri.parse('${Login.url}/api/increase'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'user_id': userId, 'points': points}),
     );
@@ -143,17 +150,22 @@ class _MiningState extends State<Mining> {
     }
   }
 
-  // 점수 메시지를 표시하고 1초 후에 사라지게 하는 함수
+  // 점수 메시지를 표시하고 3초 후에 사라지게 하는 함수
   void _showScoreMessage(int points, Offset position) {
+    final messageId = DateTime.now().millisecondsSinceEpoch; // 고유 ID 생성
+
     setState(() {
-      scoreMessage = '+$points'; // 획득한 점수 메시지 설정
-      messagePosition = position; // 점수 메시지 위치 설정
+      scoreMessages.add({
+        'message': '+$points',
+        'position': position,
+        'id': messageId, // 고유 ID를 부여하여 메시지 식별
+      });
     });
 
-    // 1초 후에 메시지를 사라지게 함
-    Future.delayed(Duration(seconds: 1), () {
+    // 3초 후에 해당 메시지 삭제
+    Future.delayed(Duration(seconds: 3), () {
       setState(() {
-        scoreMessage = null;
+        scoreMessages.removeWhere((msg) => msg['id'] == messageId);
       });
     });
   }
@@ -161,51 +173,96 @@ class _MiningState extends State<Mining> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('광질하기'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: isLoading
-                  ? CircularProgressIndicator() // 로딩 중일 때 표시
-                  : Text(
-                '포인트: $totalPoints', // 포인트 실시간 표시
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-          )
-        ],
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator()) // 로딩 중일 때 표시
-          : Stack(
+      body: Column(
         children: [
-          ...circles,
-          if (scoreMessage != null && messagePosition != null)
-            Positioned(
-              left: messagePosition!.dx,
-              top: messagePosition!.dy - 30, // 원 위쪽에 표시
-              child: Text(
-                scoreMessage!,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
+          // 상단 박스
+          Container(
+            width: double.infinity, // 좌우로 꽉 채움
+            padding: EdgeInsets.symmetric(vertical: 30), // 상하 padding만 설정
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.green.shade700, Colors.grey.shade500], // 하늘색과 회색 그라데이션
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(20), // 아래쪽만 둥근 모서리
               ),
             ),
-          if (isFeverTime)
-            Center(
-              child: Text(
-                '피버 타임!!',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
+            child: Column(
+              children: [
+                Text(
+                  "${Login.userId} : ${totalPoints}P",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.yellow, // 글씨가 잘 보이도록 설정
+                  ),
                 ),
-              ),
+                Text(
+                  "광물을 클릭해서 포인트를 모으세요!",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black, // 글씨가 잘 보이도록 설정
+                  ),
+                ),
+                SizedBox(height: 8), // 줄바꿈을 위한 여백
+                Text(
+                  "(광물 클릭시 ${feverProbability}% 확률로 피버타임 발생)", // 피버타임 확률 반영
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white70, // 부가 설명 글씨는 조금 연하게 설정
+                  ),
+                ),
+              ],
             ),
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                ...circles,
+                for (var message in scoreMessages)
+                  Positioned(
+                    left: message['position'].dx,
+                    top: message['position'].dy - 30, // 원 위쪽에 표시
+                    child: Text(
+                      message['message'],
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                if (isFeverTime)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
+                      children: [
+                        Text(
+                          '피버 타임!!',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                        Text(
+                          '(획득 포인트 2배)',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );

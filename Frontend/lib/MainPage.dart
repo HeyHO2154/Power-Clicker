@@ -1,41 +1,156 @@
-// mainPage.dart
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'MainPage/Mining.dart';
 import 'MainPage/Upgrade.dart';
 import 'MainPage/War.dart';
+import 'MainPage/Farming.dart'; // Farming.dart 파일을 import
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  String? userId;
+  int userPoints = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('user_id');
+    });
+    _fetchUserPoints(); // 포인트 정보 불러오기
+  }
+
+  Future<void> _fetchUserPoints() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/getPoints?user_id=$userId'));
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body);
+      setState(() {
+        userPoints = result['points']; // 보유 포인트 업데이트
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Main Page'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Mining()));
-              },
-              child: Text('광질하기'),
+      body: Column(
+        children: [
+          SizedBox(height: 50),
+          // 상단에 닉네임과 포인트 표시
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '$userId님 환영합니다!',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '보유 포인트: $userPoints',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => War()));
-              },
-              child: Text('전쟁하기'),
+          ),
+          SizedBox(height: 50),
+          // 로고 추가
+          Padding(
+            padding: const EdgeInsets.only(bottom: 50.0), // 로고와 버튼 사이 간격 설정
+            child: Image.asset(
+              'assets/Logo.png', // 로고 이미지 경로
+              width: 500, // 로고 너비
+              height: 200, // 로고 높이
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Upgrade()));
-              },
-              child: Text('업그레이드'),
+          ),
+          SizedBox(height: 10),
+
+          // 전쟁하기 버튼 (첫번째 버튼)
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => War()));
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white, backgroundColor: Colors.pink, // 텍스트 색상
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // 버튼 패딩 설정
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // 둥근 모서리
+              ),
             ),
-          ],
-        ),
+            child: Text(
+              '전쟁하기',
+              style: TextStyle(fontSize: 20), // 텍스트 크기 설정
+            ),
+          ),
+          SizedBox(height: 20), // 버튼 사이 간격
+
+          // 광질하기 버튼 (두번째 버튼)
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Mining()));
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white, backgroundColor: Colors.green, // 텍스트 색상
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // 버튼 패딩 설정
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // 둥근 모서리
+              ),
+            ),
+            child: Text(
+              '광질하기',
+              style: TextStyle(fontSize: 20), // 텍스트 크기 설정
+            ),
+          ),
+          SizedBox(height: 20), // 버튼 사이 간격
+
+          // 농사하기 버튼 (세번째 버튼)
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Farming()));
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white, backgroundColor: Colors.orange, // 텍스트 색상
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // 버튼 패딩 설정
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // 둥근 모서리
+              ),
+            ),
+            child: Text(
+              '농사하기',
+              style: TextStyle(fontSize: 20), // 텍스트 크기 설정
+            ),
+          ),
+          SizedBox(height: 20), // 버튼 사이 간격
+
+          // 업그레이드 버튼 (네번째 버튼)
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Upgrade()));
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white, backgroundColor: Colors.blue, // 텍스트 색상
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15), // 버튼 패딩 설정
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // 둥근 모서리
+              ),
+            ),
+            child: Text(
+              '업그레이드',
+              style: TextStyle(fontSize: 20), // 텍스트 크기 설정
+            ),
+          ),
+        ],
       ),
     );
   }
