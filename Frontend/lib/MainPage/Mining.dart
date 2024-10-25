@@ -192,7 +192,7 @@ class _MiningState extends State<Mining> {
             child: Column(
               children: [
                 Text(
-                  "${Login.userId} : ${totalPoints}P",
+                  "${totalPoints}P",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

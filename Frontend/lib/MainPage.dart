@@ -46,25 +46,54 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(height: 50),
+          SizedBox(height: 100),
           // 상단에 닉네임과 포인트 표시
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '$userId님 환영합니다!',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Icon(Icons.person, color: Colors.grey, size: 24), // 사용자 아이콘 추가
+              SizedBox(width: 8),
+              Text(
+                '$userId', // 닉네임 부분만 보라색
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.purpleAccent.shade700,
                 ),
-                Text(
-                  '보유 포인트: $userPoints',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '님 환영합니다!',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          SizedBox(height: 50),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.attach_money, color: Colors.grey, size: 24), // 포인트 아이콘 추가
+              SizedBox(width: 8),
+              Text(
+                '보유 포인트: ',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+              Text(
+                '${userPoints}P', // 포인트 값과 "P"만 오렌지색으로 설정
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.purpleAccent,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 30),
           // 로고 추가
           Padding(
             padding: const EdgeInsets.only(bottom: 50.0), // 로고와 버튼 사이 간격 설정
