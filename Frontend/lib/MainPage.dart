@@ -73,7 +73,7 @@ class _MainPageState extends State<MainPage> {
           if (userRank <= 20)
             Positioned.fill(
               child: Opacity(
-                opacity: 0.5,
+                opacity: 0.6,
                 child: Image.asset(
                   'assets/cat.png',
                   fit: BoxFit.cover,
@@ -89,7 +89,7 @@ class _MainPageState extends State<MainPage> {
                   SizedBox(height: 100),
                   Row(
                     children: [
-                      Icon(Icons.person, color: Colors.grey.shade800, size: 30),
+                      Icon(Icons.person, color: Colors.grey.shade700, size: 30),
                       SizedBox(width: 8),
                       Text(
                         '${Login.userId}',
@@ -104,7 +104,7 @@ class _MainPageState extends State<MainPage> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                          color: Colors.grey.shade700,
                         ),
                       ),
                     ],
@@ -112,14 +112,14 @@ class _MainPageState extends State<MainPage> {
                   SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(Icons.attach_money, color: Colors.grey, size: 30),
+                      Icon(Icons.attach_money, color: Colors.grey.shade700, size: 30),
                       SizedBox(width: 8),
                       Text(
                         '보유 포인트: ',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                          color: Colors.grey.shade700,
                         ),
                       ),
                       Text(
