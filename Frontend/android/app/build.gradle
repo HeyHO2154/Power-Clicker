@@ -21,16 +21,16 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.hsj.frontend"  // 따옴표를 사용해야 합니다.
+        applicationId "com.hsj.powerclicker"  // 따옴표를 사용해야 합니다.
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
 
         // Flutter의 동적 값 대신 직접 지정한 정적 값으로 변경
-        versionCode 2  // 고유한 정수 값으로 변경
-        versionName "1.0.1"  // 선택 사항으로, 원하는 버전 이름으로 변경
+        versionCode 30  // 고유한 정수 값으로 변경
+        versionName "0.3"  // 선택 사항으로, 원하는 버전 이름으로 변경
     }
 
-    def keystorePropertiesFile = file("C:/Users/SSAFY/Desktop/GitDesktop/MemeCat/Frontend/android/app/key.properties")
+    def keystorePropertiesFile = file("C:/Users/PRO/Desktop/GitDesktop/MemeCat/Frontend/android/app/key.properties")
     def keystoreProperties = [:]
 
     if (keystorePropertiesFile.exists()) {

@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Login.dart';
+
 class War extends StatefulWidget {
   @override
   _WarState createState() => _WarState();
@@ -14,8 +16,8 @@ class _WarState extends State<War> {
   Map<String, dynamic>? currentUser;
   ScrollController _scrollController = ScrollController();
 
-  int meDecrease = 5;
-  int otherDecrease = 10;
+  int meDecrease = 50;
+  int otherDecrease = 100;
   int userPoints = 0; // 사용자 포인트 변수 추가
 
   @override
@@ -41,9 +43,10 @@ class _WarState extends State<War> {
   }
 
   Future<void> _loadUsers() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/users'));
+    final response = await http.get(Uri.parse('${Login.url}/api/users'));
     if (response.statusCode == 200) {
-      List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(
+          jsonDecode(utf8.decode(response.bodyBytes))); // UTF-8로 디코딩
       setState(() {
         allUsers.sort((a, b) => b['point'].compareTo(a['point']));
         users = allUsers;
@@ -54,24 +57,23 @@ class _WarState extends State<War> {
       });
     }
   }
-
   Future<void> _loadPoints() async {
     if (userId == null) return;
 
-    // 서버로부터 사용자 포인트 가져오기
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/getPoints?user_id=$userId'),
+      Uri.parse('${Login.url}/api/getPoints?user_id=$userId'),
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(utf8.decode(response.bodyBytes)); // UTF-8로 디코딩
       setState(() {
-        userPoints = data['points']; // 사용자 포인트 업데이트
+        userPoints = data['points'];
       });
     } else {
       print('Failed to load points');
     }
   }
+
 
   void _scrollToCurrentUser() {
     if (currentUser != null) {
@@ -107,7 +109,7 @@ class _WarState extends State<War> {
     }
 
     await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/decrease'),
+      Uri.parse('${Login.url}/api/decrease'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': targetUserId,
@@ -116,7 +118,7 @@ class _WarState extends State<War> {
     );
 
     await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/decrease'),
+      Uri.parse('${Login.url}/api/decrease'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': userId,
@@ -167,7 +169,7 @@ class _WarState extends State<War> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "(본인 5포인트로, 상대 10포인트 감소)",
+                  "(본인 ${meDecrease}포인트로, 상대 ${otherDecrease}포인트 감소)",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -186,17 +188,17 @@ class _WarState extends State<War> {
                 bool isCurrentUser = user['user_id'] == userId;
 
                 // 구간 설명 박스 위젯
-                Widget benefitBox = Container();
+                Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
-                  benefitBox = _buildBenefitBox("파워 클리커 = ", Colors.yellow.shade700);
-                } else if (index == 1) {
-                  benefitBox = _buildBenefitBox("TOP 5 = ", Colors.purple.shade200);
-                } else if (index == 5) {
-                  benefitBox = _buildBenefitBox("TOP 10 = 광질하기가 고양이 터치로 변경", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox("TOP 3 특권", "VIP 대화방 버튼 추가", Colors.yellow.shade700);
+                } else if (index == 3) {
+                  benefitBox = _buildBenefitBox("TOP 10 특권", "피버타임에 고양이 영상 재생", Colors.purple.shade200);
                 } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 = 메인 화면에 고양이 등장", Colors.red.shade300);
-                } else if (index == 20){
-                  benefitBox = _buildBenefitBox("기본 기능 제공", Colors.grey);
+                  benefitBox = _buildBenefitBox("TOP 20 특권", "광질하기가 고양이 터치로 변경", Colors.green.shade300);
+                } else if (index == 20) {
+                  benefitBox = _buildBenefitBox("TOP 30 특권", "메인 화면에 고양이 등장", Colors.red.shade300);
+                } else if (index == 30) {
+                  benefitBox = _buildBenefitBox("TOP 30 이하", "기본 기능 제공", Colors.grey);
                 }
 
                 return Column(
@@ -221,17 +223,42 @@ class _WarState extends State<War> {
                           ),
                         ],
                       ),
-                      title: Text(
-                        '[ ${user["user_id"]} ] ${user["point"]}P',
-                        style: TextStyle(
-                          fontWeight: isCurrentUser || index < 10 ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 18,
-                          color: isCurrentUser ? Colors.blue : Colors.black,
-                        ),
+                      title: Row(
+                        children: [
+                          // 닉네임 부분에만 색상 적용 (본인은 withOpacity(1), 다른 사람은 withOpacity(0.8))
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _getUserColor(index, isCurrentUser)
+                                  .withOpacity(isCurrentUser ? 0.6 : 0.3), // 본인은 불투명, 다른 사람은 약간 투명
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${user["user_id"]}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          // 포인트는 기존 텍스트 스타일로 표시
+                          Text(
+                            '${user["point"]}P',
+                            style: TextStyle(
+                              fontWeight: index < 10 ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 18,
+                              color: isCurrentUser ? Colors.blue : Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
+// 클릭 시 포인트 감소 기능을 호출
                       onTap: isCurrentUser ? null : () {
                         _decreasePoints(user['user_id']);
                       },
+
                     ),
                   ],
                 );
@@ -246,13 +273,13 @@ class _WarState extends State<War> {
   Color _getUserColor(int index, bool isCurrentUser) {
     if (isCurrentUser) {
       return Colors.blue;
-    } else if (index == 0) {
+    } else if (index <= 2) {
       return Colors.yellow.shade700;
-    } else if (index <= 4) {
-      return Colors.purple;
     } else if (index <= 9) {
-      return Colors.green;
+      return Colors.purple;
     } else if (index <= 19) {
+      return Colors.green;
+    } else if (index <= 29) {
       return Colors.red;
     } else {
       return Colors.grey;
@@ -260,7 +287,7 @@ class _WarState extends State<War> {
   }
 }
 // 구간 설명 박스를 위한 메서드
-Widget _buildBenefitBox(String text, Color color) {
+Widget _buildBenefitBox(String text1, String text2, Color color) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Stack(
@@ -268,22 +295,43 @@ Widget _buildBenefitBox(String text, Color color) {
       children: [
         Divider(thickness: 2, color: color), // 구간별 선 색상
         Container(
-          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 18),
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+          alignment: Alignment.center,
+          constraints: BoxConstraints(maxWidth: 290), // 너비 제한 추가
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 첫째 줄 텍스트
+              Text(
+                text1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,  // 첫째 줄 폰트 크기
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,  // 첫째 줄 글자색
+                ),
+              ),
+              SizedBox(height: 4), // 줄 간격
+              // 둘째 줄 텍스트
+              Text(
+                text2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,  // 둘째 줄 폰트 크기
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,  // 둘째 줄 글자색
+                ),
+              ),
+            ],
           ),
         ),
       ],
     ),
   );
 }
+
 

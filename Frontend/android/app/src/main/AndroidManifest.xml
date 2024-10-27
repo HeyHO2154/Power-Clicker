@@ -3,7 +3,7 @@
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
-        android:label="frontend"
+        android:label="파워 클리커"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

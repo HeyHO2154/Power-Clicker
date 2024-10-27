@@ -7,7 +7,7 @@ import 'MainPage.dart';
 
 class Login extends StatefulWidget {
   static String? userId;
-  static String url = 'http://10.0.2.2:8080'; // URL을 전역적으로 사용 가능하게 설정
+  static String url = 'http://ekaf.kro.kr:25500'; // URL을 전역적으로 사용 가능하게 설정
 
   @override
   _LoginState createState() => _LoginState();
@@ -22,7 +22,7 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _clearLocalData(); // 로컬 데이터 초기화 함수 호출
+    //_clearLocalData(); // 로컬 데이터 초기화 함수 호출
     _checkUserId();
   }
 
@@ -35,24 +35,31 @@ class _LoginState extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedUserId = prefs.getString('user_id');
 
+    // 1. 로컬에 저장된 아이디가 있는 경우
     if (savedUserId != null) {
       try {
+        // 서버로 아이디를 확인 요청
         final response = await http.post(
           Uri.parse('${Login.url}/api/register'),
-          headers: {'Content-Type': 'application/json'},
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'user_id': savedUserId}),
         );
 
-        if (response.statusCode == 400) {
+        // 서버에 아이디가 존재하는 경우 로그인
+        if (response.statusCode == 200) {
+          Login.userId = savedUserId;
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+        } else if (response.statusCode == 400) {
+          // 서버에서 중복된 닉네임 메시지를 반환했으나, 로컬 저장된 아이디로 로그인
           final result = jsonDecode(response.body);
           if (result['message'] == "중복된 닉네임입니다.") {
             Login.userId = savedUserId;
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+          } else {
+            setState(() {
+              _errorMessage = '서버 연결에 문제가 있습니다. 다시 시도해주세요.';
+            });
           }
-        } else {
-          setState(() {
-            _errorMessage = '서버 연결에 문제가 있습니다. 다시 시도해주세요.';
-          });
         }
       } catch (e) {
         setState(() {
@@ -62,57 +69,47 @@ class _LoginState extends State<Login> {
     }
   }
 
+  // 로컬에 아이디가 없는 경우 새로 입력된 닉네임을 등록
   Future<void> _registerUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedUserId = prefs.getString('user_id');
+    String newUserId = _controller.text;
 
     try {
-      // 백엔드에 저장된 user_id가 존재하는지 확인 요청
+      // 새 닉네임이 중복인지 확인
       final response = await http.post(
         Uri.parse('${Login.url}/api/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'user_id': savedUserId ?? _controller.text}),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({'user_id': newUserId}),
       );
 
-      // 서버에 저장된 아이디가 이미 존재하는 경우
-      if (response.statusCode == 400) {
+      if (response.statusCode == 200) {
+        // 새로운 닉네임으로 회원가입 성공 시
+        prefs.setString('user_id', newUserId); // 로컬에 저장
+        Login.userId = newUserId; // static 변수에 설정
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
+      } else if (response.statusCode == 400) {
+        // 중복 닉네임 에러 처리
         final result = jsonDecode(response.body);
         if (result['message'] == "중복된 닉네임입니다.") {
-          // 기존 저장된 아이디로 로그인 진행
-          Login.userId = savedUserId;
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
-          return;
-        }
-      }
-      // 새로운 회원가입 요청을 진행할 경우
-      else if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
-        if (result['success']) {
-          // 새로 입력된 아이디로 회원가입 완료
-          prefs.setString('user_id', _controller.text);
-          Login.userId = _controller.text;
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
-        } else {
           setState(() {
-            _errorMessage = result['message'];
+            _errorMessage = "중복된 닉네임입니다. 다른 닉네임을 사용하세요.";
             _isTextFieldEnabled = false;
             _controller.clear();
             _isErrorState = true;
           });
         }
       } else {
-        // 서버가 열려 있으나 예기치 않은 오류 발생
         setState(() {
           _errorMessage = '알 수 없는 오류가 발생했습니다.';
         });
       }
     } catch (e) {
-      // 서버 연결이 되지 않는 경우
       setState(() {
         _errorMessage = '서버 연결에 문제가 있습니다. 인터넷 환경을 확인해주세요.';
       });
     }
   }
+
 
 
   // 입력 필드를 다시 활성화하는 함수

@@ -227,7 +227,7 @@ class _FarmingState extends State<Farming> {
             padding: EdgeInsets.symmetric(vertical: 30),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange, Colors.brown.shade400],
+                colors: [Colors.orange, Colors.brown.shade200],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -356,10 +356,10 @@ class _FarmingState extends State<Farming> {
       }
           : null,
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         backgroundColor: totalPoints >= seedCount ? Colors.brown : Colors.grey,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(20),
         ),
         shadowColor: totalPoints >= seedCount ? Colors.orange : Colors.transparent,
         elevation: totalPoints >= seedCount ? 8 : 0,

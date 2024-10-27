@@ -36,6 +36,8 @@ dependencies:
   web_socket_channel: ^2.1.0
   in_app_purchase: ^3.1.5
   intl: ^0.17.0  # 또는 최신 버전
+  video_player: ^2.1.15
+  audioplayers: ^6.1.0
 
 
 
@@ -71,6 +73,14 @@ flutter:
     - assets/money2.png
     - assets/money3.png
     - assets/cat.png
+    - assets/cat1.png
+    - assets/cat2.png
+    - assets/cat3.png
+    - assets/cat4.png
+    - assets/cat5.png
+    - assets/cat6.png
+    - assets/cat7.png
+    - assets/cat.mp4
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

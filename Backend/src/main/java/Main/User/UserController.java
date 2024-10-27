@@ -23,6 +23,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class UserController {
 
+	private List<Map<String, String>> chatMessages = new ArrayList<>(); // userId와 message를 함께 저장하는 리스트
+
+    @PostMapping("/sendMessage")
+    public ResponseEntity<?> sendMessage(@RequestBody Map<String, String> request) {
+        String userId = request.get("user_id");
+        String message = request.get("message");
+
+        if (chatMessages.size() >= 6) {
+            chatMessages.remove(0);  // 10개 초과 시 맨 앞 메시지 삭제
+        }
+        chatMessages.add(Map.of("userId", userId, "message", message));
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Message sent successfully"));
+    }
+
+    @GetMapping("/getMessages")
+    public List<Map<String, String>> getMessages() {
+        return chatMessages;
+    }
+
+	
     @Autowired
     private UserRepository userRepository;
 
