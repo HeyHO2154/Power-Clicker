@@ -192,9 +192,9 @@ class _WarState extends State<War> {
                 if (index == 0) {
                   benefitBox = _buildBenefitBox("TOP 10 특권", "VIP 대화방 버튼 추가", Colors.yellow.shade700);
                 } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 특권", "피버타임에 고양이 영상 재생", Colors.purple.shade200);
+                  benefitBox = _buildBenefitBox("TOP 20 특권", "농사하기가 도지 피하기로 변경", Colors.purple.shade200);
                 } else if (index == 20) {
-                  benefitBox = _buildBenefitBox("TOP 30 특권", "피버타임에 고양이 영상 재생", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox("TOP 30 특권", "피버타임에 고양이 춤 영상 추가", Colors.green.shade300);
                 } else if (index == 30) {
                   benefitBox = _buildBenefitBox("TOP 40 특권", "광질하기가 고양이 터치로 변경", Colors.orange.shade300);
                 } else if (index == 40) {

@@ -64,10 +64,6 @@ dev_dependencies:
 flutter:
   assets:
     - assets/Logo.png
-    - assets/spring.png
-    - assets/summer.png
-    - assets/autumn.png
-    - assets/winter.png
     - assets/factory.png
     - assets/money1.png
     - assets/money2.png
@@ -81,6 +77,8 @@ flutter:
     - assets/cat6.png
     - assets/cat7.png
     - assets/cat.mp4
+    - assets/ccat.png
+    - assets/ddog.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
