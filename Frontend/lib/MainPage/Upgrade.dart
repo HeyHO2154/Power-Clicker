@@ -369,7 +369,7 @@ class _UpgradeState extends State<Upgrade> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "( 공장 활성화시 1초당 1포인트 자동 증가 )",
+                  "( 공장 활성화시 3시간마다 자동 수익 )",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

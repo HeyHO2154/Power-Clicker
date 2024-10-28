@@ -30,7 +30,7 @@ public class UserController {
         String userId = request.get("user_id");
         String message = request.get("message");
 
-        if (chatMessages.size() >= 6) {
+        if (chatMessages.size() >= 20) {
             chatMessages.remove(0);  // 10개 초과 시 맨 앞 메시지 삭제
         }
         chatMessages.add(Map.of("userId", userId, "message", message));
