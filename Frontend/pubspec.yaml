@@ -38,6 +38,8 @@ dependencies:
   intl: ^0.17.0  # 또는 최신 버전
   video_player: ^2.1.15
   audioplayers: ^6.1.0
+  flutter_local_notifications: ^17.2.4
+  permission_handler: ^10.2.0
 
 
 
