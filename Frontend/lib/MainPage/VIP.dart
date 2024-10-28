@@ -181,7 +181,7 @@ class _VipState extends State<Vip> {
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: isMyMessage
-                                ? Colors.yellow.shade500
+                                ? Colors.yellow.shade600
                                 : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(15),
                           ),
@@ -203,22 +203,30 @@ class _VipState extends State<Vip> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: messageController,
-                    decoration: InputDecoration(
-                      hintText: "메시지를 입력하세요",
-                      border: OutlineInputBorder(),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: TextField(
+                      controller: messageController,
+                      decoration: InputDecoration(
+                        hintText: "메시지를 입력하세요...",
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _sendMessage,
-                  style: ElevatedButton.styleFrom(
+                SizedBox(width: 10),
+                GestureDetector(
+                  onTap: _sendMessage,
+                  child: CircleAvatar(
+                    radius: 24,
                     backgroundColor: Colors.orange,
-                    foregroundColor: Colors.black, // 텍스트 색상을 검정으로 설정
+                    child: Icon(Icons.send, color: Colors.white),
                   ),
-                  child: Text("전송"),
                 ),
               ],
             ),
