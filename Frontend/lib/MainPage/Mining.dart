@@ -95,7 +95,7 @@ class _MiningState extends State<Mining> {
     );
 
     if (response.statusCode == 200) {
-      final List users = jsonDecode(response.body);
+      final List users = jsonDecode(utf8.decode(response.bodyBytes)); // UTF-8로 디코딩
       int rank = users.indexWhere((user) => user['user_id'] == userId) + 1;
 
       setState(() {
@@ -105,6 +105,7 @@ class _MiningState extends State<Mining> {
       print('Failed to load user rank');
     }
   }
+
 
   void _generateCircle() {
     double size = random.nextDouble() * 50 + 50; // 크기 랜덤
@@ -130,7 +131,7 @@ class _MiningState extends State<Mining> {
               // 원의 크기에 따라 점수 증가
               int points = ((100 - size) / 10).round() + 1; // 원의 크기가 작을수록 큰 점수 부여
               if (isFeverTime) {
-                points *= 2; // 피버 타임이면 2배로 증가
+                points *= 1; // 피버 타임이면 1배로 증가 => 지금 피버타임 0.5초로 줄어서 1배가 맞음
               }
               totalPoints += points;
               _showScoreMessage(points, position); // 점수 메시지 표시
@@ -149,8 +150,8 @@ class _MiningState extends State<Mining> {
               }
             });
           },
-          // userRank가 20등 이하일 경우 cat 이미지, 그렇지 않으면 원을 표시
-          child: userRank <= 20
+          // userRank가 40등 이하일 경우 cat 이미지, 그렇지 않으면 원을 표시
+          child: userRank <= 40
               ? Image.asset(
             catImages[random.nextInt(catImages.length)],
             width: size,
@@ -182,8 +183,8 @@ class _MiningState extends State<Mining> {
       isFeverTime = true; // 피버 타임 시작
       feverProbability = 1; // 피버 타임 확률 초기화
 
-      // 등수가 10 이하인 경우에만 비디오 재생
-      if (userRank <= 10) {
+      // 등수가 30 이하인 경우에만 비디오 재생
+      if (userRank <= 30) {
         // 피버 타임 시작 시 비디오 재생
         _videoPlayerController?.play();
       }
@@ -191,8 +192,8 @@ class _MiningState extends State<Mining> {
 
     });
 
-    // 피버 타임 동안 원이 1초마다 생성
-    feverTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    // 피버 타임 동안 원이 0.1초마다 생성
+    feverTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
       _generateCircle();
     });
 
@@ -348,7 +349,7 @@ class _MiningState extends State<Mining> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized && userRank <= 10)
+                        if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized && userRank <= 30)  //피버타임에 고양이 영상 재생, 30등 이상 특권
                           AspectRatio(
                             aspectRatio: _videoPlayerController!.value.aspectRatio,
                             child: VideoPlayer(_videoPlayerController!),

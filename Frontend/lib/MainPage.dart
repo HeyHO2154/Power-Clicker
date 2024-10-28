@@ -76,8 +76,8 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // cat.png 배경 이미지 (30등 이하일 때만)
-          if (userRank <= 30)
+          // cat.png 배경 이미지 (50등 이하일 때만)
+          if (userRank <= 50)
             Positioned.fill(
               child: Opacity(
                 opacity: 0.5,
@@ -156,8 +156,8 @@ class _MainPageState extends State<MainPage> {
                     height: 200,
                   ),
                 ),
-                // VIP 대화방 버튼 (3등 이하일 때만 표시)
-                if (userRank <= 3)
+                // VIP 대화방 버튼 (10등 이하일 때만 표시)
+                if (userRank <= 10)
                   ElevatedButton(
                     onPressed: () async {
                       await Navigator.push(
@@ -168,13 +168,13 @@ class _MainPageState extends State<MainPage> {
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.yellow.shade900,
                       backgroundColor: Colors.yellowAccent,
-                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: Text(
-                      'VIP 대화방',
+                      '대화하기',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -262,7 +262,7 @@ class _MainPageState extends State<MainPage> {
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
-                SizedBox(height: 120),
+                SizedBox(height: 140),
               ],
             ),
           ),

@@ -190,15 +190,17 @@ class _WarState extends State<War> {
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
-                  benefitBox = _buildBenefitBox("TOP 3 특권", "VIP 대화방 버튼 추가", Colors.yellow.shade700);
-                } else if (index == 3) {
-                  benefitBox = _buildBenefitBox("TOP 10 특권", "피버타임에 고양이 영상 재생", Colors.purple.shade200);
+                  benefitBox = _buildBenefitBox("TOP 10 특권", "VIP 대화방 버튼 추가", Colors.yellow.shade700);
                 } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 특권", "광질하기가 고양이 터치로 변경", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox("TOP 20 특권", "피버타임에 고양이 영상 재생", Colors.purple.shade200);
                 } else if (index == 20) {
-                  benefitBox = _buildBenefitBox("TOP 30 특권", "메인 화면에 고양이 등장", Colors.red.shade300);
+                  benefitBox = _buildBenefitBox("TOP 30 특권", "피버타임에 고양이 영상 재생", Colors.green.shade300);
                 } else if (index == 30) {
-                  benefitBox = _buildBenefitBox("TOP 30 이하", "기본 기능 제공", Colors.grey);
+                  benefitBox = _buildBenefitBox("TOP 40 특권", "광질하기가 고양이 터치로 변경", Colors.orange.shade300);
+                } else if (index == 40) {
+                  benefitBox = _buildBenefitBox("TOP 50 특권", "메인 화면에 고양이 등장", Colors.red.shade300);
+                } else if (index == 50) {
+                  benefitBox = _buildBenefitBox("일반 유저", "기본 기능 제공", Colors.grey);
                 }
 
                 return Column(
@@ -212,7 +214,8 @@ class _WarState extends State<War> {
                             '${index + 1}등',
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: index < 10 ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: index < 10 ? FontWeight.bold : FontWeight.bold,
+                              color: _getUserColor(index, isCurrentUser), // 구역 색상 적용
                             ),
                           ),
                           SizedBox(width: 10),
@@ -247,7 +250,7 @@ class _WarState extends State<War> {
                           Text(
                             '${user["point"]}P',
                             style: TextStyle(
-                              fontWeight: index < 10 ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: FontWeight.normal,
                               fontSize: 18,
                               color: isCurrentUser ? Colors.blue : Colors.black,
                             ),
@@ -273,13 +276,15 @@ class _WarState extends State<War> {
   Color _getUserColor(int index, bool isCurrentUser) {
     if (isCurrentUser) {
       return Colors.blue;
-    } else if (index <= 2) {
-      return Colors.yellow.shade700;
     } else if (index <= 9) {
-      return Colors.purple;
+      return Colors.yellow.shade700;
     } else if (index <= 19) {
-      return Colors.green;
+      return Colors.purple;
     } else if (index <= 29) {
+      return Colors.green;
+    } else if (index <= 39) {
+      return Colors.orange;
+    } else if (index <= 49) {
       return Colors.red;
     } else {
       return Colors.grey;
