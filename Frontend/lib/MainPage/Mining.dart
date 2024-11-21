@@ -284,7 +284,7 @@ class _MiningState extends State<Mining> {
                   ),
                 ),
                 Text(
-                  "광물을 클릭해서 포인트를 모으세요!",
+                  "Click Target to Earn Points!",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -296,7 +296,7 @@ class _MiningState extends State<Mining> {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: "( 광물 클릭시 ",
+                        text: "(  ",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -306,29 +306,29 @@ class _MiningState extends State<Mining> {
                       TextSpan(
                         text: "$feverProbability%",
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.cyan.shade200, // 확률 부분만 핑크 색상
                         ),
                       ),
                       TextSpan(
-                        text: " 확률로 ",
+                        text: " to ",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white70,
                         ),
                       ),
                       TextSpan(
-                        text: "피버타임 ",
+                        text: "FEVER TIME",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.pink.shade200,
                         ),
                       ),
                       TextSpan(
-                        text: " 발생 )",
+                        text: "  )",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -355,7 +355,7 @@ class _MiningState extends State<Mining> {
                             child: VideoPlayer(_videoPlayerController!),
                           ),
                         Text(
-                          '피버 타임!!',
+                          'FEVER TIME!!',
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
@@ -363,7 +363,7 @@ class _MiningState extends State<Mining> {
                           ),
                         ),
                         Text(
-                          '(획득 포인트 2배)',
+                          '(x2 Points)',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

@@ -103,7 +103,7 @@ class _WarState extends State<War> {
 
     if (currentUserPoints < meDecrease || targetUserPoints < otherDecrease) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('본인이나 상대방의 포인트가 부족하여 전쟁을 할 수 없습니다.')),
+        SnackBar(content: Text('You or Others have small point to War..')),
       );
       return;
     }
@@ -160,18 +160,18 @@ class _WarState extends State<War> {
                   ),
                 ),
                 Text(
-                  "상대를 클릭해서 순위를 끌어내리세요!",
+                  "Click Other Player to WAR!!",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "(본인 ${meDecrease}포인트로, 상대 ${otherDecrease}포인트 감소)",
+                  "(Use ${meDecrease}P to reduce(-) other's ${otherDecrease}P)",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.orange.shade100,
                   ),
@@ -190,17 +190,17 @@ class _WarState extends State<War> {
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
-                  benefitBox = _buildBenefitBox("TOP 10 특권", "VIP 대화방 버튼 추가", Colors.yellow.shade700);
+                  benefitBox = _buildBenefitBox("TOP 10 Player", "VIP Chat Available", Colors.yellow.shade700);
                 } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 특권", "농사하기가 도지 피하기로 변경", Colors.purple.shade200);
+                  benefitBox = _buildBenefitBox("TOP 20 Player", "Dodging change to DOGE", Colors.purple.shade200);
                 } else if (index == 20) {
-                  benefitBox = _buildBenefitBox("TOP 30 특권", "피버타임에 고양이 춤 영상 추가", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox("TOP 30 Player", "Car dancing at FEVER TIME", Colors.green.shade300);
                 } else if (index == 30) {
-                  benefitBox = _buildBenefitBox("TOP 40 특권", "광질하기가 고양이 터치로 변경", Colors.orange.shade300);
+                  benefitBox = _buildBenefitBox("TOP 40 Player", "Mining turn into Cat", Colors.orange.shade300);
                 } else if (index == 40) {
-                  benefitBox = _buildBenefitBox("TOP 50 특권", "메인 화면에 고양이 등장", Colors.red.shade300);
+                  benefitBox = _buildBenefitBox("TOP 50 Player", "Cat Background Image", Colors.red.shade300);
                 } else if (index == 50) {
-                  benefitBox = _buildBenefitBox("일반 유저", "기본 기능 제공", Colors.grey);
+                  benefitBox = _buildBenefitBox("Other Player", "default option", Colors.grey);
                 }
 
                 return Column(
@@ -211,7 +211,7 @@ class _WarState extends State<War> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${index + 1}등',
+                            '#${index + 1}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: index < 10 ? FontWeight.bold : FontWeight.bold,

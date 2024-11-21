@@ -26,11 +26,11 @@ android {
         targetSdkVersion flutter.targetSdkVersion
 
         // Flutter의 동적 값 대신 직접 지정한 정적 값으로 변경
-        versionCode 100  // 고유한 정수 값으로 변경
-        versionName "1.0"  // 선택 사항으로, 원하는 버전 이름으로 변경
+        versionCode 1000  // 고유한 정수 값으로 변경
+        versionName "1.0.0"  // 선택 사항으로, 원하는 버전 이름으로 변경
     }
 
-    def keystorePropertiesFile = file("C:/Users/PRO/Desktop/GitDesktop/MemeCat/Frontend/android/app/key.properties")
+    def keystorePropertiesFile = file("C:/Users/SSAFY/Desktop/GitDesktop/Power-Clicker/Frontend/android/app/key.properties")
     def keystoreProperties = [:]
 
     if (keystorePropertiesFile.exists()) {

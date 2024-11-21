@@ -57,13 +57,13 @@ class _LoginState extends State<Login> {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
           } else {
             setState(() {
-              _errorMessage = '서버 연결에 문제가 있습니다. 다시 시도해주세요.';
+              _errorMessage = 'Server error. Try again.';
             });
           }
         }
       } catch (e) {
         setState(() {
-          _errorMessage = '서버가 닫혀 있어 작동할 수 없습니다.';
+          _errorMessage = 'Server Closed';
         });
       }
     }
@@ -92,7 +92,7 @@ class _LoginState extends State<Login> {
         final result = jsonDecode(response.body);
         if (result['message'] == "중복된 닉네임입니다.") {
           setState(() {
-            _errorMessage = "중복된 닉네임입니다. 다른 닉네임을 사용하세요.";
+            _errorMessage = "Nickname taken. Try other";
             _isTextFieldEnabled = false;
             _controller.clear();
             _isErrorState = true;
@@ -100,12 +100,12 @@ class _LoginState extends State<Login> {
         }
       } else {
         setState(() {
-          _errorMessage = '알 수 없는 오류가 발생했습니다.';
+          _errorMessage = 'Unknown Error.';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = '서버 연결에 문제가 있습니다. 인터넷 환경을 확인해주세요.';
+        _errorMessage = 'Server error. Check Internet status.';
       });
     }
   }
@@ -133,8 +133,8 @@ class _LoginState extends State<Login> {
             height: 200, // 로고 높이 설정
           ),
           Text(
-            "인터넷을 연결하고 '참여하기'를 눌러주세요!", // 문구 추가
-            style: TextStyle(fontSize: 16, color: Colors.black), // 스타일 설정
+            "Connect Internet to Play!!", // 문구 추가
+            style: TextStyle(fontSize: 25, color: Colors.black), // 스타일 설정
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -163,7 +163,7 @@ class _LoginState extends State<Login> {
                   maxLength: 20, // 닉네임을 10글자 이하로 제한
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.person, color: Colors.grey), // 아이콘 추가 (사람 모양)
-                    hintText: '사용하실 닉네임을 적어주세요',
+                    hintText: 'Enter Nickname',
                     hintStyle: TextStyle(color: Colors.grey), // 힌트 텍스트 색상
                     filled: true,
                     fillColor: Colors.white, // 내부 배경 하얀색
@@ -208,7 +208,7 @@ class _LoginState extends State<Login> {
               ),
             ),
             child: Text(
-              '참여하기',
+              'Play',
               style: GoogleFonts.notoSans(fontSize: 20), // 텍스트 크기 및 폰트 설정
             ),
           ),

@@ -16,108 +16,28 @@ class Upgrade extends StatefulWidget {
 class _UpgradeState extends State<Upgrade> {
   Random random = Random();
   int totalPoints = 0;
+  int FactoryTime = 10;
   bool isFactoryActive = false;
+  Duration remainingTime = Duration.zero;
+  Timer? countdownTimer;
+  TextEditingController _userIdController = TextEditingController();
   DateTime? factoryEndTime;
   Timer? refreshTimer;
-  TextEditingController _userIdController = TextEditingController();
-  List<ProductDetails> _products = [];
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  bool _isAvailable = false;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
 
   @override
   void initState() {
     super.initState();
-    _initializeGoogleInApp();
+    _initializeInAppPurchase();
     _fetchPoints();
-    _loadProducts(); // 상품 정보 로드
     _loadFactoryStatus();
+    _loadProducts(); // 상품 목록 불러오기 추가
     refreshTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       _checkFactoryStatus();
     });
   }
-
-  void _initializeGoogleInApp() {
-    InAppPurchase.instance.purchaseStream.listen((purchaseDetailsList) {
-      _handlePurchaseUpdates(purchaseDetailsList);
-    });
-  }
-  Future<void> _loadProducts() async {
-    const Set<String> productIds = {'point_1000', 'point_5500', 'point_12000'};
-    final ProductDetailsResponse response =
-    await InAppPurchase.instance.queryProductDetails(productIds);
-
-    if (response.error != null) {
-      print("Failed to load products: ${response.error!.message}");
-      _showErrorDialog("No products, please try again");
-      return;
-    }
-
-    if (response.productDetails.isEmpty) {
-      print("No products found.");
-      _showErrorDialog("No products, please try again");
-      return;
-    }
-
-    setState(() {
-      _products = response.productDetails;
-    });
-    print("Products loaded successfully: $_products");
-  }
-  void _buyProduct(ProductDetails productDetails) {
-    try {
-      final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
-      InAppPurchase.instance.buyConsumable(purchaseParam: purchaseParam);
-    } catch (e) {
-      print("구매 요청 중 예외 발생: $e");
-      _showErrorDialog("Error, please try again");
-    }
-  }
-  void _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetailsList) {
-    for (var purchaseDetails in purchaseDetailsList) {
-      switch (purchaseDetails.status) {
-        case PurchaseStatus.purchased:
-          _grantPoints(purchaseDetails.productID);
-          InAppPurchase.instance.completePurchase(purchaseDetails);
-          break;
-        case PurchaseStatus.pending:
-          print("결제 대기 중...");
-          break;
-        case PurchaseStatus.restored:
-          print("복원된 구매: ${purchaseDetails.productID}");
-          InAppPurchase.instance.completePurchase(purchaseDetails);
-          break;
-        case PurchaseStatus.error:
-          print("Purchase error: ${purchaseDetails.error}");
-          break;
-        default:
-          break;
-      }
-    }
-  }
-  Future<void> _grantPoints(String productId) async {
-    int pointsToGrant = 0;
-
-    // 구매한 상품 ID에 따라 지급할 포인트 결정
-    switch (productId) {
-      case 'point_1000':
-        pointsToGrant = 1000;
-        break;
-      case 'point_5500':
-        pointsToGrant = 5500;
-        break;
-      case 'point_12000':
-        pointsToGrant = 12000;
-        break;
-      default:
-        print("Unknown ID: $productId");
-        return;
-    }
-
-    // `_increasePoints` 메서드를 호출하여 포인트 증가 처리
-    await _increasePoints(pointsToGrant);
-
-    // 성공적인 포인트 지급 로그
-    print("$pointsToGrant 포인트가 지급되었습니다 (상품 ID: $productId).");
-  }
-
 
   Future<void> _fetchPoints() async {
     final response = await http.get(
@@ -129,7 +49,7 @@ class _UpgradeState extends State<Upgrade> {
         totalPoints = data['points'];
       });
     } else {
-      print("포인트 정보를 가져오는 중 오류 발생: ${response.body}");
+      print("Error fetching point: ${response.body}");
     }
   }
 
@@ -145,7 +65,7 @@ class _UpgradeState extends State<Upgrade> {
         totalPoints += points;
       });
     } else {
-      print("포인트 증가 중 오류 발생: ${response.body}");
+      print("Error increasing points: ${response.body}");
     }
   }
 
@@ -161,7 +81,7 @@ class _UpgradeState extends State<Upgrade> {
         totalPoints -= points;
       });
     } else {
-      print("포인트 감소 중 오류 발생: ${response.body}");
+      print("Error decreasing points: ${response.body}");
     }
   }
 
@@ -186,9 +106,9 @@ class _UpgradeState extends State<Upgrade> {
         });
         _decreasePoints(1000);
       } else if (response.statusCode == 409) {
-        _showErrorDialog("Name already taken");
+        _showErrorDialog("Name already Taken");
       } else {
-        _showErrorDialog("Name change failed");
+        _showErrorDialog("Failed to change Name");
       }
     } else {
       _showErrorDialog("Not enough points");
@@ -222,13 +142,12 @@ class _UpgradeState extends State<Upgrade> {
     _removeFactoryStatus();
   }
 
+
   Future<void> _saveFactoryStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isFactoryActive', isFactoryActive);
-    await prefs.setString(
-        'factoryEndTime', factoryEndTime?.toIso8601String() ?? '');
+    await prefs.setString('factoryEndTime', factoryEndTime?.toIso8601String() ?? '');
   }
-
   Future<void> _loadFactoryStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? savedFactoryStatus = prefs.getBool('isFactoryActive');
@@ -242,7 +161,7 @@ class _UpgradeState extends State<Upgrade> {
           factoryEndTime = savedEndTime;
         });
       } else {
-        _deactivateFactory(6000);
+        _deactivateFactory(6000); // 시간이 지나면 6천 포인트 회수
       }
     }
   }
@@ -256,9 +175,9 @@ class _UpgradeState extends State<Upgrade> {
   void _checkFactoryStatus() {
     if (isFactoryActive && factoryEndTime != null) {
       if (factoryEndTime!.isBefore(DateTime.now())) {
-        _deactivateFactory(6000);
+        _deactivateFactory(6000); // 시간이 다 지나면 6천 포인트 회수
       } else {
-        setState(() {});
+        setState(() {}); // 남은 시간 표시를 위해 UI 업데이트
       }
     }
   }
@@ -269,55 +188,102 @@ class _UpgradeState extends State<Upgrade> {
     final hours = remaining.inHours.toString().padLeft(2, '0');
     final minutes = remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return "Time left for +6,000 P: $hours:$minutes:$seconds";
+    return "Time Left to get +6,000 P $hours:$minutes:$seconds";
   }
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Error"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text("Ok"),
-          ),
-        ],
-      ),
-    );
+
+  void _initializeInAppPurchase() async {
+    _isAvailable = await _inAppPurchase.isAvailable();
+    if (_isAvailable) {
+      _loadProducts();
+      _subscription = _inAppPurchase.purchaseStream.listen(
+            (purchases) => _onPurchaseUpdated(purchases),
+      );
+    }
   }
+
+  List<ProductDetails> _products = []; // 구매 가능한 상품 목록 초기화
+
+  void _loadProducts() async {
+    const Set<String> _kIds = {'point_1000', 'point_5500', 'point_12000'};
+    final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(_kIds);
+
+    if (response.notFoundIDs.isEmpty) {
+      setState(() {
+        _products = response.productDetails;
+      });
+    } else {
+      print("Error: Some product IDs were not found: ${response.notFoundIDs}");
+    }
+  }
+
+  void _buyProduct(ProductDetails product) {
+    final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
+    _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+  }
+
+
+  void _onPurchaseUpdated(List<PurchaseDetails> purchases) async {
+    for (var purchase in purchases) {
+      if (purchase.status == PurchaseStatus.purchased) {
+        // 여기에 서버 검증 코드를 추가하고, 포인트를 지급하는 로직을 작성합니다.
+        await _grantPoints(purchase.productID);
+      }
+      if (purchase.pendingCompletePurchase) {
+        await _inAppPurchase.completePurchase(purchase);
+      }
+    }
+  }
+
+  Future<void> _grantPoints(String productId) async {
+    int pointsToGrant = 0;
+    if (productId == 'point_1000') {
+      pointsToGrant = 1000;
+    } else if (productId == 'point_5500') {
+      pointsToGrant = 5500;
+    } else if (productId == 'point_12000') {
+      pointsToGrant = 12000;
+    }
+    await _increasePoints(pointsToGrant);
+  }
+
   @override
   void dispose() {
+    _subscription.cancel();
     refreshTimer?.cancel();
-    InAppPurchase.instance.purchaseStream.drain(); // 리스너 해제
     super.dispose();
   }
 
-  Widget _buildPointBox(String points, int increaseAmount, String imagePath, {String? bonus}) {
-// `_products`가 비어 있는 경우 초기 처리
-    if (_products.isEmpty) {
-      print("상품 정보가 없습니다.");
-      return SizedBox.shrink(); // 빈 위젯 반환
-    }
 
-    final product = _products.firstWhere(
-          (p) => p.id == (increaseAmount == 1000
-          ? "point_1000"
-          : increaseAmount == 5500
-          ? "point_5500"
-          : "point_12000"),
-      orElse: null, // orElse를 사용하지 않고 사전 체크를 활용
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            title: Text("Error"),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text("Ok"),
+              ),
+            ],
+          ),
     );
+  }
 
-// 상품이 없는 경우 처리
-    if (product == null) {
-      print("상품을 찾을 수 없습니다.");
-      return SizedBox.shrink();
-    }
-
-
+  Widget _buildPointBox(String points, int increaseAmount, String imagePath, {String? bonus}) {
     return GestureDetector(
-      onTap: () => _buyProduct(product),
+      onTap: () {
+        final product = _products.firstWhere(
+              (p) => p.id == (increaseAmount == 1000 ? "point_1000" : increaseAmount == 5500 ? "point_5500" : "point_12000"),
+          orElse: () => throw Exception("Product not found"), // null 대신 예외 처리
+        );
+        if (product != null) {
+          _buyProduct(product); // 상품 구매 함수 호출
+        } else {
+          print("Product not found");
+        }
+      },
       child: Stack(
         children: [
           Container(
@@ -330,17 +296,9 @@ class _UpgradeState extends State<Upgrade> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 0),
                 Image.asset(imagePath, width: 80, height: 80),
                 SizedBox(height: 5),
-                Text(
-                  points,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.yellow.shade900,
-                  ),
-                ),
+                Text(points, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.yellow.shade900)),
                 SizedBox(height: 0),
               ],
             ),
@@ -350,7 +308,7 @@ class _UpgradeState extends State<Upgrade> {
               right: 0,
               top: 0,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                padding: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.only(
@@ -360,11 +318,7 @@ class _UpgradeState extends State<Upgrade> {
                 ),
                 child: Text(
                   bonus,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ),
@@ -374,11 +328,12 @@ class _UpgradeState extends State<Upgrade> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.all(0),
+      body: ListView( // SingleChildScrollView 대신 ListView로 변경
+        padding: EdgeInsets.all(0), // 패딩 조정
         children: [
           Container(
             width: double.infinity,
@@ -413,7 +368,7 @@ class _UpgradeState extends State<Upgrade> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "( Factory : Auto Points for every 3 Hour )",
+                  "( Factory : Auto Points for 3 Hour )",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -430,7 +385,7 @@ class _UpgradeState extends State<Upgrade> {
               children: [
                 Text(
                   "Change Name",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Row(
                   children: [
@@ -451,7 +406,7 @@ class _UpgradeState extends State<Upgrade> {
                         ),
                       ),
                       child: Text(
-                        "Change (1,000 P)",
+                        "Change (1000 P)",
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold),
                       ),
@@ -496,7 +451,7 @@ class _UpgradeState extends State<Upgrade> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
-                "Factory(Auto Points)",
+                "Factory",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -530,7 +485,7 @@ class _UpgradeState extends State<Upgrade> {
                           ),
                         ),
                         child: Text(
-                          isFactoryActive ? (factoryEndTime!.isAfter(DateTime.now()) ? "Get 4,000 P now.." : "Get 6,000 P !!") : "Active Factory (5000 P)",
+                          isFactoryActive ? (factoryEndTime!.isAfter(DateTime.now()) ? "get 4,000 P.." : "Get 6,000 P !!") : "Activate Factory (5000 P)",
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -543,7 +498,7 @@ class _UpgradeState extends State<Upgrade> {
                     child: Text(
                       factoryEndTime!.isAfter(DateTime.now())
                           ? _formatFactoryEndTime()
-                          : "You've got 6,000 P from Factory!",
+                          : "Get +6,000 P! From Factory!",
                       style: TextStyle(fontSize: 16, color: Colors.red),
                     ),
                   ),
@@ -555,3 +510,5 @@ class _UpgradeState extends State<Upgrade> {
     );
   }
 }
+
+

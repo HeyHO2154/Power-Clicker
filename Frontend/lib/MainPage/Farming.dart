@@ -165,7 +165,7 @@ class _FarmingState extends State<Farming> {
       if ((bullet['position'] - circlePosition).distance < circleSize / 3) { // 정확히 닿았을 때만 게임 종료
         setState(() {
           isGameOver = true;
-          resultMessage = "획득한 점수: $localScore 점";
+          resultMessage = "Total: +${localScore}P !";
         });
         bulletTimer?.cancel();
         moveTimer?.cancel();
@@ -242,7 +242,7 @@ class _FarmingState extends State<Farming> {
             child: Column(
               children: [
                 Text(
-                  "${totalPoints}P",
+                  "${totalPoints} P",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -250,18 +250,18 @@ class _FarmingState extends State<Farming> {
                   ),
                 ),
                 Text(
-                  "비를 피해 농작물을 지켜내세요!",
+                  "Avoid and Survive!!",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "( 게임이 종료되어야 보상이 주어집니다 )",
+                  "( Survive long, Get More Points! )",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -272,9 +272,9 @@ class _FarmingState extends State<Farming> {
           SizedBox(height: 10),
           // 실시간 점수 표시
           Text(
-            "누적된 점수: $localScore 점",
+            "Total: +${localScore} P",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -350,9 +350,9 @@ class _FarmingState extends State<Farming> {
                             ),
                           ),
                           child: Text(
-                            "메뉴로 가기",
+                            "To Menu",
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),

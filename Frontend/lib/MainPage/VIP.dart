@@ -134,7 +134,7 @@ class _VipState extends State<Vip> {
                   ),
                 ),
                 Text(
-                  "VIP들끼리 메시지를 주고 받아보세요!",
+                  "Chat with VIPS ONLY!",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -143,9 +143,9 @@ class _VipState extends State<Vip> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "( 여기까지 온 당신, 정말 대단합니다!! )",
+                  "(You are VIP! So amazing sir..)",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -213,7 +213,7 @@ class _VipState extends State<Vip> {
                     child: TextField(
                       controller: messageController,
                       decoration: InputDecoration(
-                        hintText: "메시지를 입력하세요...",
+                        hintText: "Enter message",
                         border: InputBorder.none,
                       ),
                     ),

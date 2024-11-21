@@ -112,14 +112,6 @@ class _MainPageState extends State<MainPage> {
                               color: Colors.purpleAccent.shade700,
                             ),
                           ),
-                          Text(
-                            '님 환영합니다!',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
                         ],
                       ),
                       SizedBox(height: 10),
@@ -127,14 +119,6 @@ class _MainPageState extends State<MainPage> {
                         children: [
                           Icon(Icons.attach_money, color: Colors.grey.shade700, size: 30),
                           SizedBox(width: 8),
-                          Text(
-                            '보유 포인트: ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
                           Text(
                             '${userPoints}P',
                             style: TextStyle(
@@ -174,7 +158,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                     ),
                     child: Text(
-                      '대화하기',
+                      'VIP Chat',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -195,7 +179,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   child: Text(
-                    '전쟁하기',
+                    '    War    ',
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
@@ -216,7 +200,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   child: Text(
-                    '광질하기',
+                    ' Mining ',
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
@@ -237,7 +221,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   child: Text(
-                    '농사하기',
+                    'Dodging',
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
@@ -258,7 +242,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   child: Text(
-                    '업그레이드',
+                    '  Upgrade  ',
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
