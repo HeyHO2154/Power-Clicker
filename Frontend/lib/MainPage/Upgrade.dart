@@ -49,7 +49,7 @@ class _UpgradeState extends State<Upgrade> {
         totalPoints = data['points'];
       });
     } else {
-      print("Error fetching points: ${response.body}");
+      print("Error fetching point: ${response.body}");
     }
   }
 
