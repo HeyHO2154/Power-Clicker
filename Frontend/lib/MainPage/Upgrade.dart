@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Login.dart';
-import '../main.dart';
 
 class Upgrade extends StatefulWidget {
   @override
@@ -42,7 +41,7 @@ class _UpgradeState extends State<Upgrade> {
 
   Future<void> _fetchPoints() async {
     final response = await http.get(
-        Uri.parse("${MyApp.url}/api/getPoints?user_id=${MyApp.user_name}"));
+        Uri.parse("${Login.url}/api/getPoints?user_id=${Login.userId}"));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -56,9 +55,9 @@ class _UpgradeState extends State<Upgrade> {
 
   Future<void> _increasePoints(int points) async {
     final response = await http.post(
-      Uri.parse("${MyApp.url}/api/increase"),
+      Uri.parse("${Login.url}/api/increase"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"user_id": MyApp.user_name, "points": points}),
+      body: jsonEncode({"user_id": Login.userId, "points": points}),
     );
 
     if (response.statusCode == 200) {
@@ -72,9 +71,9 @@ class _UpgradeState extends State<Upgrade> {
 
   Future<void> _decreasePoints(int points) async {
     final response = await http.post(
-      Uri.parse("${MyApp.url}/api/decrease"),
+      Uri.parse("${Login.url}/api/decrease"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"user_id": MyApp.user_name, "points": points}),
+      body: jsonEncode({"user_id": Login.userId, "points": points}),
     );
 
     if (response.statusCode == 200) {
@@ -90,10 +89,10 @@ class _UpgradeState extends State<Upgrade> {
     await _fetchPoints();
     if (totalPoints >= 1000) {
       final response = await http.post(
-        Uri.parse("${MyApp.url}/api/updateUserId"),
+        Uri.parse("${Login.url}/api/updateUserId"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "user_id": MyApp.user_name,
+          "user_id": Login.userId,
           "new_user_id": _userIdController.text,
         }),
       );
@@ -102,7 +101,7 @@ class _UpgradeState extends State<Upgrade> {
         print("아이디 변경 성공: ${response.body}");
         await _updateLocalUserId(_userIdController.text);
         setState(() {
-          MyApp.user_name = _userIdController.text;
+          Login.userId = _userIdController.text;
           _userIdController.clear();
         });
         _decreasePoints(1000);
@@ -394,7 +393,7 @@ class _UpgradeState extends State<Upgrade> {
                       child: TextField(
                         controller: _userIdController,
                         decoration: InputDecoration(
-                          hintText: "${MyApp.user_name}",
+                          hintText: "${Login.userId}",
                         ),
                       ),
                     ),
