@@ -3,12 +3,10 @@ package Main;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@Configuration
-@EnableWebSocket
+@EnableScheduling // 스케줄링 활성화
 public class MainBackend {
 
 	public static void main(String[] args) {

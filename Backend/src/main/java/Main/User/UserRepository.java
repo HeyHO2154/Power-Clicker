@@ -1,13 +1,13 @@
 package Main.User;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-//UserRepository.java (레포지토리)
-public interface UserRepository extends JpaRepository<User, Long> {
- Optional<User> findByUserId(String userId);
- List<User> findAllByOrderByPointDesc();
+public interface UserRepository extends JpaRepository<User, String> {
+
+	@Query("SELECT u FROM User u WHERE u.user_name = :user_name")
+	Optional<User> isNameAvailable(@Param("user_name") String user_name);
 }

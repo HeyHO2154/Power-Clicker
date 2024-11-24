@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Login.dart';
+import '../main.dart';
 
 class Farming extends StatefulWidget {
   @override
@@ -15,15 +15,21 @@ class Farming extends StatefulWidget {
 class _FarmingState extends State<Farming> {
   Offset circlePosition = Offset(150, 400); // 원의 초기 위치
   double circleSize = 90; // 원의 크기
-  List<Map<String, dynamic>> bullets = []; // 총알 리스트, 방향 포함
+  List<Map<String, dynamic>> bullets = []; // 총알 리스트
   Timer? bulletTimer; // 총알 생성 타이머
   Timer? moveTimer; // 총알 이동 타이머
   Timer? scoreTimer; // 점수 증가 타이머
+  Timer? gameTimer; // 게임 시간 추적 타이머
   bool isGameOver = false; // 게임 종료 여부
   int totalPoints = 0; // 상단 포인트
   int localScore = 0; // 로컬에서 쌓이는 점수
   String resultMessage = ""; // 게임 상태 메시지
   String? userId;
+
+  // 증가 변수들
+  int timeElapsed = 0; // 게임 경과 시간
+  double bulletSpeedMultiplier = 1.0; // 총알 속도 증가율
+  int bulletCountMultiplier = 5; // 총알 개수 증가 기준
 
   @override
   void initState() {
@@ -32,39 +38,16 @@ class _FarmingState extends State<Farming> {
     startGame();
   }
 
-  int userRank = 0; // 사용자 등수 변수 추가
-
-  Future<void> fetchUserRank() async {
-    if (userId == null) return;
-
-    final response = await http.get(
-      Uri.parse('${Login.url}/api/users'),
-    );
-
-    if (response.statusCode == 200) {
-      final List users = jsonDecode(utf8.decode(response.bodyBytes));
-      int rank = users.indexWhere((user) => user['user_id'] == userId) + 1;
-
-      setState(() {
-        userRank = rank;
-      });
-    } else {
-      print('Failed to load user rank');
-    }
-  }
-
-
   Future<void> fetchUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('user_id');
     if (userId != null) {
       await fetchPoints();
-      await fetchUserRank(); // 등수 불러오기
     }
   }
 
   Future<void> fetchPoints() async {
-    final response = await http.get(Uri.parse("${Login.url}/api/getPoints?user_id=$userId"));
+    final response = await http.get(Uri.parse("${MyApp.url}/api/getPoints?user_id=$userId"));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
@@ -77,10 +60,20 @@ class _FarmingState extends State<Farming> {
     isGameOver = false;
     localScore = 0;
     bullets.clear();
+    timeElapsed = 0;
 
-    // 총알 생성 타이머 (초당 5~10개 랜덤 생성)
+    // 게임 시간 타이머 (1초마다 시간 증가)
+    gameTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        timeElapsed++;
+        bulletSpeedMultiplier = 1 + (timeElapsed / 20); // 총알 속도 점진적 증가
+        bulletCountMultiplier = 5 + (timeElapsed ~/ 10); // 총알 개수 점진적 증가
+      });
+    });
+
+    // 총알 생성 타이머
     bulletTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      int bulletCount = Random().nextInt(6) + 5;
+      int bulletCount = Random().nextInt(bulletCountMultiplier) + 5;
       setState(() {
         for (int i = 0; i < bulletCount; i++) {
           bullets.add(_generateBullet());
@@ -88,7 +81,7 @@ class _FarmingState extends State<Farming> {
       });
     });
 
-    // 총알 이동 타이머 (0.05초마다 업데이트)
+    // 총알 이동 타이머
     moveTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
       if (!isGameOver) {
         setState(() {
@@ -101,11 +94,11 @@ class _FarmingState extends State<Farming> {
       }
     });
 
-    // 점수 증가 타이머 (0.5초당 1P 추가)
-    scoreTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+    // 점수 증가 타이머
+    scoreTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!isGameOver) {
         setState(() {
-          localScore += 1;
+          localScore += (1 + (timeElapsed ~/ 10)); // 경과 시간에 비례한 점수 증가
         });
       }
     });
@@ -116,31 +109,31 @@ class _FarmingState extends State<Farming> {
     bulletTimer?.cancel();
     moveTimer?.cancel();
     scoreTimer?.cancel();
+    gameTimer?.cancel();
     super.dispose();
   }
 
-  // 총알 생성 위치와 방향 랜덤 설정
   Map<String, dynamic> _generateBullet() {
     final random = Random();
     double x, y;
-    double angle = random.nextDouble() * 2 * pi; // 0~360도 각도로 랜덤 방향 설정
-    Offset direction = Offset(cos(angle), sin(angle)); // 각도를 바탕으로 방향 설정
+    double angle = random.nextDouble() * 2 * pi; // 랜덤 각도
+    Offset direction = Offset(cos(angle), sin(angle));
 
-    // 랜덤한 사방의 위치에서 생성
+    // 화면 경계에서 생성
     switch (random.nextInt(4)) {
-      case 0: // 왼쪽에서 생성
+      case 0: // 왼쪽
         x = 0;
         y = random.nextDouble() * MediaQuery.of(context).size.height;
         break;
-      case 1: // 오른쪽에서 생성
+      case 1: // 오른쪽
         x = MediaQuery.of(context).size.width;
         y = random.nextDouble() * MediaQuery.of(context).size.height;
         break;
-      case 2: // 위쪽에서 생성
+      case 2: // 위쪽
         x = random.nextDouble() * MediaQuery.of(context).size.width;
         y = 0;
         break;
-      case 3: // 아래쪽에서 생성
+      case 3: // 아래쪽
         x = random.nextDouble() * MediaQuery.of(context).size.width;
         y = MediaQuery.of(context).size.height;
         break;
@@ -151,56 +144,29 @@ class _FarmingState extends State<Farming> {
     return {'position': Offset(x, y), 'direction': direction};
   }
 
-  // 총알 이동 방향 설정
   Offset _moveBullet(Map<String, dynamic> bullet) {
-    final double speed = Random().nextInt(6) + 5; //5~10 속도
+    final double speed = (Random().nextInt(3) + 5) * bulletSpeedMultiplier;
     final position = bullet['position'];
     final direction = bullet['direction'];
     return position.translate(direction.dx * speed, direction.dy * speed);
   }
 
-  // 충돌 검사
   void _checkCollision() {
     for (final bullet in bullets) {
-      if ((bullet['position'] - circlePosition).distance < circleSize / 3) { // 정확히 닿았을 때만 게임 종료
+      if ((bullet['position'] - circlePosition).distance < circleSize / 2) {
         setState(() {
           isGameOver = true;
-          resultMessage = "Total: +${localScore}P !";
+          resultMessage = "Game Over! Total Points: +$localScore P";
         });
         bulletTimer?.cancel();
         moveTimer?.cancel();
         scoreTimer?.cancel();
+        gameTimer?.cancel();
         break;
       }
     }
   }
 
-  // 원 위치 드래그로 업데이트
-// 원 위치 드래그로 업데이트
-  void _onDragUpdate(DragUpdateDetails details) {
-    if (!isGameOver) {
-      setState(() {
-        // 상단과 하단, 좌우 제한
-        final double upperBoundY = 0; // 상단 박스 아래로 내려오지 않도록 제한 (상단 박스 높이에 맞춰 조정)
-        final double lowerBoundY = MediaQuery.of(context).size.height - circleSize -200;
-        final double leftBoundX = 0;
-        final double rightBoundX = MediaQuery.of(context).size.width - circleSize;
-
-        // 새로운 위치 계산
-        double newX = circlePosition.dx + details.delta.dx;
-        double newY = circlePosition.dy + details.delta.dy;
-
-        // x와 y 범위 제한
-        newX = newX.clamp(leftBoundX, rightBoundX);
-        newY = newY.clamp(upperBoundY, lowerBoundY);
-
-        circlePosition = Offset(newX, newY);
-      });
-    }
-  }
-
-
-  // 화면 밖으로 나간 총알 제거
   bool _isOffScreen(Offset position) {
     return position.dx < 0 ||
         position.dy < 0 ||
@@ -211,12 +177,26 @@ class _FarmingState extends State<Farming> {
   Future<void> _goToMenu() async {
     if (userId != null) {
       await http.post(
-        Uri.parse("${Login.url}/api/increase"),
+        Uri.parse("${MyApp.url}/api/increase"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({"user_id": userId, "points": localScore}),
       );
     }
-    Navigator.pop(context); // 메뉴로 이동 (뒤로 가기)
+    Navigator.pop(context);
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (!isGameOver) {
+      setState(() {
+        double newX = circlePosition.dx + details.delta.dx;
+        double newY = circlePosition.dy + details.delta.dy;
+
+        newX = newX.clamp(0.0, MediaQuery.of(context).size.width - circleSize);
+        newY = newY.clamp(100.0, MediaQuery.of(context).size.height - circleSize);
+
+        circlePosition = Offset(newX, newY);
+      });
+    }
   }
 
   @override
@@ -225,77 +205,47 @@ class _FarmingState extends State<Farming> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // 상단 박스 - 처음 제공한 색상 그라데이션 복구
+          // 상단 정보 박스
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 30),
+            padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange.shade600, Colors.grey.shade400], // 그라데이션 색상 복구
+                colors: [Colors.orange.shade600, Colors.grey.shade400],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(20),
               ),
             ),
             child: Column(
               children: [
                 Text(
-                  "${totalPoints} P",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.yellow,
-                  ),
+                  "Total Points: $totalPoints P",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.yellow),
                 ),
                 Text(
-                  "Avoid and Survive!!",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  "Local Score: +$localScore P",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
-                SizedBox(height: 8),
                 Text(
-                  "( Survive long, Get More Points! )",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+                  "Bullet Speed: ${bulletSpeedMultiplier.toStringAsFixed(2)}x",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+                ),
+                Text(
+                  "Bullet Count: $bulletCountMultiplier",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
                 ),
               ],
-            ),
-          ),
-          SizedBox(height: 10),
-          // 실시간 점수 표시
-          Text(
-            "Total: +${localScore} P",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
             ),
           ),
           Expanded(
             child: Stack(
               children: [
                 // 드래그 가능한 원
-                // 드래그 가능한 원 (주황 공) 또는 ccat.png 이미지
                 Positioned(
                   left: circlePosition.dx,
                   top: circlePosition.dy,
                   child: GestureDetector(
                     onPanUpdate: _onDragUpdate,
-                    child: userRank <= 20
-                        ? Image.asset(
-                      'assets/ccat.png', // 주황 공 대신 ccat 이미지
-                      width: circleSize,
-                      height: circleSize,
-                    )
-                        : Container(
+                    child: Container(
                       width: circleSize,
                       height: circleSize,
                       decoration: BoxDecoration(
@@ -305,58 +255,28 @@ class _FarmingState extends State<Farming> {
                     ),
                   ),
                 ),
-
                 for (final bullet in bullets)
                   Positioned(
                     left: bullet['position'].dx,
                     top: bullet['position'].dy,
-                    child: userRank <= 20
-                        ? Image.asset(
-                      'assets/ddog.png', // 파란 총알 대신 ddog 이미지
-                      width: 30,
-                      height: 30,
-                    )
-                        : Container(
+                    child: Container(
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.blue, // 파란색 총알
+                        color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
                     ),
                   ),
-
-                // 게임 종료 메시지 및 메뉴로 가기 버튼
                 if (isGameOver)
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          resultMessage,
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                        SizedBox(height: 20),
+                        Text(resultMessage, style: TextStyle(fontSize: 28, color: Colors.red)),
                         ElevatedButton(
                           onPressed: _goToMenu,
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12), backgroundColor: Colors.orange,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Text(
-                            "To Menu",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: Text("Back to Menu"),
                         ),
                       ],
                     ),

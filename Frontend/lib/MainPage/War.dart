@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Login.dart';
+import '../main.dart';
 
 class War extends StatefulWidget {
   @override
@@ -16,8 +17,8 @@ class _WarState extends State<War> {
   Map<String, dynamic>? currentUser;
   ScrollController _scrollController = ScrollController();
 
-  int meDecrease = 50;
-  int otherDecrease = 100;
+  int meDecrease = -50;
+  int otherDecrease = -100;
   int userPoints = 0; // 사용자 포인트 변수 추가
 
   @override
@@ -38,39 +39,37 @@ class _WarState extends State<War> {
       userId = prefs.getString('user_id');
     });
     await _loadUsers();
-    await _loadPoints(); // 사용자 포인트 불러오기
+    await _getPointValue(0); // 사용자 포인트 불러오기
     _scrollToCurrentUser(); // 화면 들어올 때 한 번만 스크롤 위치 설정
   }
 
   Future<void> _loadUsers() async {
-    final response = await http.get(Uri.parse('${Login.url}/api/users'));
+    final response = await http.get(Uri.parse('${MyApp.url}/api/users'));
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(
           jsonDecode(utf8.decode(response.bodyBytes))); // UTF-8로 디코딩
       setState(() {
-        allUsers.sort((a, b) => b['point'].compareTo(a['point']));
+        allUsers.sort((a, b) => b['points'].compareTo(a['points']));
         users = allUsers;
         currentUser = allUsers.firstWhere(
               (user) => user['user_id'] == userId,
-          orElse: () => {'user_id': userId, 'point': 0},
+          orElse: () => {'user_id': userId, 'points': 0},
         );
       });
     }
   }
-  Future<void> _loadPoints() async {
-    if (userId == null) return;
-
-    final response = await http.get(
-      Uri.parse('${Login.url}/api/getPoints?user_id=$userId'),
+  Future<void> _getPointValue(n) async {
+    final url = Uri.parse('${MyApp.url}/user/point');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': MyApp.user_id, 'points': n}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(utf8.decode(response.bodyBytes)); // UTF-8로 디코딩
       setState(() {
-        userPoints = data['points'];
+        userPoints = int.parse(response.body);
       });
-    } else {
-      print('Failed to load points');
     }
   }
 
@@ -97,37 +96,45 @@ class _WarState extends State<War> {
   void _decreasePoints(String targetUserId) async {
     if (userId == null || currentUser == null) return;
 
-    int currentUserPoints = currentUser!['point'];
+    int currentUserPoints = currentUser!['points'];
     final targetUser = users.firstWhere((user) => user['user_id'] == targetUserId, orElse: () => {});
-    int targetUserPoints = targetUser['point'] ?? 0;
+    int targetUserPoints = targetUser['points'] ?? 0;
 
-    if (currentUserPoints < meDecrease || targetUserPoints < otherDecrease) {
+    if (currentUserPoints < meDecrease*-1 || targetUserPoints < otherDecrease*-1 ) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('You or Others have small point to War..')),
       );
       return;
     }
 
-    await http.post(
-      Uri.parse('${Login.url}/api/decrease'),
+    final url = Uri.parse('${MyApp.url}/user/point');
+    final response = await http.post(
+      url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': targetUserId,
-        'points': otherDecrease,
-      }),
+      body: jsonEncode({'user_id': userId, 'points': meDecrease}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
-    await http.post(
-      Uri.parse('${Login.url}/api/decrease'),
+    if (response.statusCode == 200) {
+      setState(() {
+        userPoints = int.parse(response.body);
+      });
+    }
+
+    final url2 = Uri.parse('${MyApp.url}/user/point');
+    final response2 = await http.post(
+      url2,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': userId,
-        'points': meDecrease,
-      }),
+      body: jsonEncode({'user_id': targetUserId, 'points': otherDecrease}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
+
+    if (response2.statusCode == 200) {
+      setState(() {
+        userPoints = int.parse(response2.body);
+      });
+    }
 
     await _loadUsers();
-    await _loadPoints(); // 포인트 다시 불러오기
+    await _getPointValue(0); // 포인트 다시 불러오기
   }
 
   @override
@@ -190,17 +197,17 @@ class _WarState extends State<War> {
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
-                  benefitBox = _buildBenefitBox("TOP 10 Player", "VIP Chat Available", Colors.yellow.shade700);
+                  benefitBox = _buildBenefitBox("TOP 10 Player", Colors.yellow.shade700);
                 } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 Player", "Dodging change to DOGE", Colors.purple.shade200);
+                  benefitBox = _buildBenefitBox("TOP 20 Player", Colors.purple.shade200);
                 } else if (index == 20) {
-                  benefitBox = _buildBenefitBox("TOP 30 Player", "Car dancing at FEVER TIME", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox("TOP 30 Player", Colors.green.shade300);
                 } else if (index == 30) {
-                  benefitBox = _buildBenefitBox("TOP 40 Player", "Mining turn into Cat", Colors.orange.shade300);
+                  benefitBox = _buildBenefitBox("TOP 40 Player", Colors.orange.shade300);
                 } else if (index == 40) {
-                  benefitBox = _buildBenefitBox("TOP 50 Player", "Cat Background Image", Colors.red.shade300);
+                  benefitBox = _buildBenefitBox("TOP 50 Player", Colors.red.shade300);
                 } else if (index == 50) {
-                  benefitBox = _buildBenefitBox("Other Player", "default option", Colors.grey);
+                  benefitBox = _buildBenefitBox("Other Player", Colors.grey);
                 }
 
                 return Column(
@@ -248,7 +255,7 @@ class _WarState extends State<War> {
                           SizedBox(width: 8),
                           // 포인트는 기존 텍스트 스타일로 표시
                           Text(
-                            '${user["point"]}P',
+                            '${user["points"]}P',
                             style: TextStyle(
                               fontWeight: FontWeight.normal,
                               fontSize: 18,
@@ -292,7 +299,7 @@ class _WarState extends State<War> {
   }
 }
 // 구간 설명 박스를 위한 메서드
-Widget _buildBenefitBox(String text1, String text2, Color color) {
+Widget _buildBenefitBox(String text1, Color color) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Stack(
@@ -318,17 +325,6 @@ Widget _buildBenefitBox(String text1, String text2, Color color) {
                   fontSize: 20,  // 첫째 줄 폰트 크기
                   fontWeight: FontWeight.bold,
                   color: Colors.black,  // 첫째 줄 글자색
-                ),
-              ),
-              SizedBox(height: 4), // 줄 간격
-              // 둘째 줄 텍스트
-              Text(
-                text2,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,  // 둘째 줄 폰트 크기
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,  // 둘째 줄 글자색
                 ),
               ),
             ],

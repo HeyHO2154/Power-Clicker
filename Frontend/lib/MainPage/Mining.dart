@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/main.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -23,7 +24,6 @@ class _MiningState extends State<Mining> {
   bool isFeverTime = false; // 피버 타임 여부
   Timer? feverTimer; // 피버 타임 타이머
   int feverProbability = 1; // 피버 타임 발생 확률
-  int userRank = 0; // 사용자 등수 저장 변수
 
   VideoPlayerController? _videoPlayerController; // 비디오 플레이어 컨트롤러 추가
 
@@ -42,7 +42,6 @@ class _MiningState extends State<Mining> {
   void initState() {
     super.initState();
     _loadUserId(); // 사용자 ID 불러오기
-    _fetchUserRank(); // 초기화 시 등수 불러오기
 
     // 비디오 플레이어 컨트롤러 초기화
     _videoPlayerController = VideoPlayerController.asset('assets/cat.mp4')
@@ -60,8 +59,7 @@ class _MiningState extends State<Mining> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('user_id'); // 저장된 userId 불러오기
     if (userId != null) {
-      await _loadPoints(); // userId를 사용하여 포인트 불러오기
-      await _fetchUserRank(); // 등수도 불러오기
+      await _getPointValue(0); // userId를 사용하여 포인트 불러오기
     }
     setState(() {
       isLoading = false; // 포인트 불러오기가 완료된 후 로딩 상태 해제
@@ -69,40 +67,18 @@ class _MiningState extends State<Mining> {
     _generateCircle(); // 원 생성 시작
   }
 
-  Future<void> _loadPoints() async {
-    if (userId == null) return;
-
-    // 서버로부터 포인트 가져오기
-    final response = await http.get(
-      Uri.parse('${Login.url}/api/getPoints?user_id=$userId'),
+  Future<void> _getPointValue(n) async {
+    final url = Uri.parse('${MyApp.url}/user/point');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': MyApp.user_id, 'points': n}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
       setState(() {
-        totalPoints = data['points']; // 포인트 업데이트
+        totalPoints = int.parse(response.body);
       });
-    } else {
-      print('Failed to load points');
-    }
-  }
-
-  Future<void> _fetchUserRank() async {
-    if (userId == null) return;
-
-    final response = await http.get(
-      Uri.parse('${Login.url}/api/users'),
-    );
-
-    if (response.statusCode == 200) {
-      final List users = jsonDecode(utf8.decode(response.bodyBytes)); // UTF-8로 디코딩
-      int rank = users.indexWhere((user) => user['user_id'] == userId) + 1;
-
-      setState(() {
-        userRank = rank;
-      });
-    } else {
-      print('Failed to load user rank');
     }
   }
 
@@ -135,7 +111,7 @@ class _MiningState extends State<Mining> {
               }
               totalPoints += points;
               _showScoreMessage(points, position); // 점수 메시지 표시
-              _updatePoints(points); // 서버에 포인트 업데이트
+              _getPointValue(points); // 서버에 포인트 업데이트
 
               // 클릭된 원만 삭제
               circles.removeWhere((circle) => circle.key == ValueKey(circleId));
@@ -150,20 +126,10 @@ class _MiningState extends State<Mining> {
               }
             });
           },
-          // userRank가 40등 이하일 경우 cat 이미지, 그렇지 않으면 원을 표시
-          child: userRank <= 40
-              ? Image.asset(
-            catImages[random.nextInt(catImages.length)],
-            width: size,
-            height: size,
-          )
-              : Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: Color((random.nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),
-              shape: BoxShape.circle,
-            ),
+          child: Image.asset(
+            catImages[random.nextInt(catImages.length)], // 고양이 이미지를 랜덤으로 선택
+            width: size, // 크기 설정
+            height: size, // 크기 설정
           ),
         ),
       ));
@@ -182,14 +148,8 @@ class _MiningState extends State<Mining> {
     setState(() {
       isFeverTime = true; // 피버 타임 시작
       feverProbability = 1; // 피버 타임 확률 초기화
-
-      // 등수가 30 이하인 경우에만 비디오 재생
-      if (userRank <= 30) {
-        // 피버 타임 시작 시 비디오 재생
-        _videoPlayerController?.play();
-      }
-
-
+      // 피버 타임 시작 시 비디오 재생
+      _videoPlayerController?.play();
     });
 
     // 피버 타임 동안 원이 0.1초마다 생성
@@ -215,23 +175,6 @@ class _MiningState extends State<Mining> {
   void dispose() {
     _videoPlayerController?.dispose(); // 화면에서 나갈 때 비디오 플레이어 해제
     super.dispose();
-  }
-
-  Future<void> _updatePoints(int points) async {
-    if (userId == null) return;
-
-    // 서버로 포인트 업데이트 요청 보내기
-    final response = await http.post(
-      Uri.parse('${Login.url}/api/increase'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': userId, 'points': points}),
-    );
-
-    if (response.statusCode == 200) {
-      print('Points updated successfully');
-    } else {
-      print('Failed to update points');
-    }
   }
 
   // 점수 메시지를 표시하고 3초 후에 사라지게 하는 함수
@@ -349,7 +292,7 @@ class _MiningState extends State<Mining> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized && userRank <= 30)  //피버타임에 고양이 영상 재생, 30등 이상 특권
+                        if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized)  //피버타임에 고양이 영상 재생, 30등 이상 특권
                           AspectRatio(
                             aspectRatio: _videoPlayerController!.value.aspectRatio,
                             child: VideoPlayer(_videoPlayerController!),

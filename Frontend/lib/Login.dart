@@ -1,219 +1,400 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:google_fonts/google_fonts.dart'; // Google Fonts 패키지 추가
-import 'MainPage.dart';
+import 'MainPage/MainPage.dart';
+import 'main.dart';
 
-class Login extends StatefulWidget {
-  static String? userId;
-  static String url = 'http://ekaf.kro.kr:25500'; // URL을 전역적으로 사용 가능하게 설정
-
+class LoginPage extends StatefulWidget {
   @override
-  _LoginState createState() => _LoginState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginState extends State<Login> {
-  final TextEditingController _controller = TextEditingController();
-  String _errorMessage = "";
-  bool _isTextFieldEnabled = true; // TextField 활성화/비활성화 상태를 위한 변수
-  bool _isErrorState = false; // 중복된 닉네임 상태를 위한 변수
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController idController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    //_clearLocalData(); // 로컬 데이터 초기화 함수 호출
-    _checkUserId();
-  }
+  Future<void> _loginOrRegister() async {
+    final userId = idController.text;
+    final password = passwordController.text;
 
-  Future<void> _clearLocalData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // 저장된 모든 데이터 삭제
-  }
-
-  Future<void> _checkUserId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedUserId = prefs.getString('user_id');
-
-    // 1. 로컬에 저장된 아이디가 있는 경우
-    if (savedUserId != null) {
-      try {
-        // 서버로 아이디를 확인 요청
-        final response = await http.post(
-          Uri.parse('${Login.url}/api/register'),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode({'user_id': savedUserId}),
-        );
-
-        // 서버에 아이디가 존재하는 경우 로그인
-        if (response.statusCode == 200) {
-          Login.userId = savedUserId;
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
-        } else if (response.statusCode == 400) {
-          // 서버에서 중복된 닉네임 메시지를 반환했으나, 로컬 저장된 아이디로 로그인
-          final result = jsonDecode(response.body);
-          if (result['message'] == "중복된 닉네임입니다.") {
-            Login.userId = savedUserId;
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
-          } else {
-            setState(() {
-              _errorMessage = 'Server error. Try again.';
-            });
-          }
-        }
-      } catch (e) {
-        setState(() {
-          _errorMessage = 'Server Closed';
-        });
-      }
+    if (userId.isEmpty || password.isEmpty) {
+      _showCustomDialog(lang('경고'), lang('아이디와 비밀번호를 모두 입력해주세요!'));
+      return;
     }
-  }
 
-  // 로컬에 아이디가 없는 경우 새로 입력된 닉네임을 등록
-  Future<void> _registerUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String newUserId = _controller.text;
-
-    try {
-      // 새 닉네임이 중복인지 확인
-      final response = await http.post(
-        Uri.parse('${Login.url}/api/register'),
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode({'user_id': newUserId}),
-      );
-
-      if (response.statusCode == 200) {
-        // 새로운 닉네임으로 회원가입 성공 시
-        prefs.setString('user_id', newUserId); // 로컬에 저장
-        Login.userId = newUserId; // static 변수에 설정
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainPage()));
-      } else if (response.statusCode == 400) {
-        // 중복 닉네임 에러 처리
-        final result = jsonDecode(response.body);
-        if (result['message'] == "중복된 닉네임입니다.") {
-          setState(() {
-            _errorMessage = "Nickname taken. Try other";
-            _isTextFieldEnabled = false;
-            _controller.clear();
-            _isErrorState = true;
-          });
-        }
-      } else {
-        setState(() {
-          _errorMessage = 'Unknown Error.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Server error. Check Internet status.';
-      });
-    }
-  }
-
-
-
-  // 입력 필드를 다시 활성화하는 함수
-  void _enableTextField() {
     setState(() {
-      _isTextFieldEnabled = true;
-      _errorMessage = ""; // 에러 메시지 제거
-      _isErrorState = false; // 에러 상태 해제
+      isLoading = true; //회원가입 요청 보내고 대기
+    });
+
+    //로그인 요청
+    final url = Uri.parse('${MyApp.url}/user/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId, 'user_pw': password}),
+    );
+    //답변에 따른 후속 처리(http 요청을 await로 보내서, 답 오고 나서야 아래가 시행)
+    if (response.body != '') {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_id', userId); //로컬저장소에 아이디 저장
+      MyApp.user_id = userId; //아이디를 메인으로 설정
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
+      );
+    } else {
+      _showCustomDialog(lang('로그인 실패'), lang('비밀번호가 틀립니다.'));
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _showCustomDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black87, // 어두운 배경
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: Colors.red.shade700, // 금색 강조
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            content,
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Color(0xFFD4AF37), // 금색 버튼 텍스트
+              ),
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _setLanguage(String languageCode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', languageCode); // 로컬 저장소에 언어 저장
+    setState(() {
+      MyApp.currentLanguage = languageCode; // 앱의 현재 언어 업데이트
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
         children: [
-          Image.asset(
-            'assets/Logo.png', // 로고 이미지 파일 경로
-            width: 600, // 로고 너비 설정
-            height: 200, // 로고 높이 설정
+          // 배경 이미지와 기본 UI
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/Theme/${MyApp.currentTheme}/MainPage.jpg'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.5), BlendMode.darken),
+              ),
+            ),
           ),
-          Text(
-            "Connect Internet to Play!!", // 문구 추가
-            style: TextStyle(fontSize: 25, color: Colors.black), // 스타일 설정
+          // 상단 좌측에 국기 아이콘 배치
+          Positioned(
+            top: 45, // 상단 여백
+            left: 25, // 좌측 여백
+            child: GestureDetector(
+              onTap: _showLanguageSelection, // 언어 선택 다이얼로그 호출
+              child: Image.asset(
+                'assets/UI/Langs/${MyApp.currentLanguage}.jpg',
+                height: 60, // 아이콘 크기
+                width: 60,
+              ),
+            ),
           ),
+          // 중앙 UI
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: () {
-                if (!_isTextFieldEnabled) {
-                  _enableTextField(); // 클릭하면 에러 메시지 제거 및 TextField 활성화
-                }
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: _isErrorState ? Colors.green.shade100 : Colors.white, // 중복 닉네임이면 바로 초록색으로 변경
-                  borderRadius: BorderRadius.circular(12), // 둥근 모서리
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2), // 그림자 색상
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: Offset(2, 5), // 그림자 위치 설정
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _controller,
-                  enabled: _isTextFieldEnabled, // TextField 활성화/비활성화 상태
-                  maxLength: 20, // 닉네임을 10글자 이하로 제한
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.person, color: Colors.grey), // 아이콘 추가 (사람 모양)
-                    hintText: 'Enter Nickname',
-                    hintStyle: TextStyle(color: Colors.grey), // 힌트 텍스트 색상
-                    filled: true,
-                    fillColor: Colors.white, // 내부 배경 하얀색
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12), // 둥근 모서리
-                      borderSide: BorderSide(color: Colors.grey.shade300), // 연한 회색 테두리
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.green.shade300), // 비활성화 상태 테두리
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blueAccent, width: 2), // 활성화 상태 테두리 (파란색)
-                    ),
-                    counterText: '', // 글자 수 카운터 없애기
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  lang('파워 클리커'),
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD4AF37), // 금색 강조
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10,
+                        color: Colors.black54,
+                        offset: Offset(3, 3),
+                      ),
+                    ],
                   ),
-                  style: TextStyle(color: Colors.black), // 입력된 텍스트 색상
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-          ),
-          if (_errorMessage.isNotEmpty) // 에러 메시지가 있는 경우만 표시
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                _errorMessage,
-                style: GoogleFonts.notoSans( // notoSans 폰트 사용
-                  color: Colors.red, // 에러 메시지를 빨간색으로 표시
-                  fontSize: 16, // 폰트 크기 설정 (필요에 맞게 수정)
+                SizedBox(height: 80),
+                Text(
+                  lang('최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.'),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey[300],
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-          SizedBox(height: 20,),
-          ElevatedButton(
-            onPressed: _registerUser,
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white, backgroundColor: Colors.green, // 텍스트 색상
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10), // 버튼 패딩 설정
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30), // 둥근 모서리
-              ),
-            ),
-            child: Text(
-              'Play',
-              style: GoogleFonts.notoSans(fontSize: 20), // 텍스트 크기 및 폰트 설정
+                SizedBox(height: 20),
+                TextField(
+                  controller: idController,
+                  decoration: InputDecoration(
+                    labelText: lang('아이디를 입력해주세요'),
+                    labelStyle: TextStyle(color: Colors.white),
+                    filled: true,
+                    fillColor: Colors.black54,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.white70),
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: lang('비밀번호를 입력해주세요'),
+                    labelStyle: TextStyle(color: Colors.white),
+                    filled: true,
+                    fillColor: Colors.black54,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.white70),
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 20),
+                isLoading
+                    ? CircularProgressIndicator(color: Color(0xFFD4AF37))
+                    : ElevatedButton(
+                  onPressed: _loginOrRegister,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black, backgroundColor: Color(0xFFD4AF37),
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    textStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(lang('입장하기')),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+
+  void _showLanguageSelection() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.grey.shade300.withOpacity(0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(22.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  lang('언어 선택'),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Container(
+                  height: 280, // 적절한 높이 설정
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3, // 3개씩 한 행에 배치
+                      crossAxisSpacing: 10, // 가로 간격
+                      mainAxisSpacing: 10, // 세로 간격
+                    ),
+                    itemCount: 9, // 9개 국기
+                    itemBuilder: (context, index) {
+                      final languages = [
+                        'KOR', 'ENG', 'CHN', 'JPN', 'GER', 'FRA', 'RUS', 'ESP', 'ARA'
+                      ];
+                      final lang = languages[index];
+                      return GestureDetector(
+                        onTap: () async {
+                          await _setLanguage(lang); // 언어 설정 저장
+                          Navigator.pop(context);
+                        },
+                        child: Image.asset(
+                          'assets/UI/Langs/$lang.jpg',
+                          height: 60,
+                          width: 60,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String lang(String textKey) {
+    final localizedTexts = {
+      'KOR': {
+        '경고': '경고',
+        '아이디와 비밀번호를 모두 입력해주세요!': '아이디와 비밀번호를 모두 입력해주세요!',
+        '로그인 실패': '로그인 실패',
+        '비밀번호가 틀립니다.': '비밀번호가 틀립니다.',
+        '혼자하는 마피아': '혼자하는 마피아',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.',
+        '아이디를 입력해주세요': '아이디를 입력해주세요',
+        '비밀번호를 입력해주세요': '비밀번호를 입력해주세요',
+        '입장하기': '입장하기',
+        '언어 선택': '언어 선택',
+        '파워 클리커': '파워 클리커',
+      },
+      'ENG': {
+        '경고': 'Warning',
+        '아이디와 비밀번호를 모두 입력해주세요!': 'Please enter both ID and password!',
+        '로그인 실패': 'Login failed',
+        '비밀번호가 틀립니다.': 'Incorrect password.',
+        '혼자하는 마피아': 'Solo Mafia',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': 'This appears on first login. Auto-login afterwards.',
+        '아이디를 입력해주세요': 'Please enter your ID',
+        '비밀번호를 입력해주세요': 'Please enter your password',
+        '입장하기': 'Enter',
+        '언어 선택': 'Language Selection',
+        '파워 클리커': 'Power Clicker',
+      },
+      'CHN': {
+        '경고': '警告',
+        '아이디와 비밀번호를 모두 입력해주세요!': '请输入账号和密码！',
+        '로그인 실패': '登录失败',
+        '비밀번호가 틀립니다.': '密码错误。',
+        '혼자하는 마피아': '单人游戏',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': '首次登录时出现。之后自动登录。',
+        '아이디를 입력해주세요': '请输入账号',
+        '비밀번호를 입력해주세요': '请输入密码',
+        '입장하기': '进入',
+        '언어 선택': '语言选择',
+        '파워 클리커': '功率点击器',
+      },
+      'JPN': {
+        '경고': '警告',
+        '아이디와 비밀번호를 모두 입력해주세요!': 'IDとパスワードを入力してください！',
+        '로그인 실패': 'ログイン失敗',
+        '비밀번호가 틀립니다.': 'パスワードが間違っています。',
+        '혼자하는 마피아': '一人マフィア',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': '初回ログイン時に表示されます。その後は自動ログインされます。',
+        '아이디를 입력해주세요': 'IDを入力してください',
+        '비밀번호를 입력해주세요': 'パスワードを入力してください',
+        '입장하기': '入場',
+        '언어 선택': '言語選択',
+        '파워 클리커': 'パワークリッカー',
+      },
+      'GER': {
+        '경고': 'Warnung',
+        '아이디와 비밀번호를 모두 입력해주세요!': 'Bitte geben Sie sowohl ID als auch Passwort ein!',
+        '로그인 실패': 'Anmeldung fehlgeschlagen',
+        '비밀번호가 틀립니다.': 'Das Passwort ist falsch.',
+        '혼자하는 마피아': 'Solo-Mafia',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': 'Dies erscheint beim ersten Login. Danach automatische Anmeldung.',
+        '아이디를 입력해주세요': 'Bitte geben Sie Ihre ID ein',
+        '비밀번호를 입력해주세요': 'Bitte geben Sie Ihr Passwort ein',
+        '입장하기': 'Eingeben',
+        '언어 선택': 'Sprachauswahl',
+        '파워 클리커': 'Leistungsklicker',
+      },
+      'FRA': {
+        '경고': 'Avertissement',
+        '아이디와 비밀번호를 모두 입력해주세요!': 'Veuillez entrer à la fois ID et mot de passe !',
+        '로그인 실패': 'Échec de connexion',
+        '비밀번호가 틀립니다.': 'Mot de passe incorrect.',
+        '혼자하는 마피아': 'Mafia Solo',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': 'Ceci apparaît lors de la première connexion. Connexion automatique ensuite.',
+        '아이디를 입력해주세요': 'Veuillez entrer votre identifiant',
+        '비밀번호를 입력해주세요': 'Veuillez entrer votre mot de passe',
+        '입장하기': 'Entrer',
+        '언어 선택': 'Sélection de langue',
+        '파워 클리커': 'Cliqueur Puissant',
+      },
+      'RUS': {
+        '경고': 'Предупреждение',
+        '아이디와 비밀번호를 모두 입력해주세요!': 'Введите ID и пароль!',
+        '로그인 실패': 'Ошибка входа',
+        '비밀번호가 틀립니다.': 'Неверный пароль.',
+        '혼자하는 마피아': 'Соло-мафия',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': 'Появляется при первом входе. Затем автоматический вход.',
+        '아이디를 입력해주세요': 'Введите ID',
+        '비밀번호를 입력해주세요': 'Введите пароль',
+        '입장하기': 'Войти',
+        '언어 선택': 'Выбор языка',
+        '파워 클리커': 'Мощный Кликер',
+      },
+      'ESP': {
+        '경고': 'Advertencia',
+        '아이디와 비밀번호를 모두 입력해주세요!': '¡Por favor, ingrese tanto el ID como la contraseña!',
+        '로그인 실패': 'Fallo de inicio de sesión',
+        '비밀번호가 틀립니다.': 'Contraseña incorrecta.',
+        '혼자하는 마피아': 'Mafia Solo',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': 'Esto aparece en el primer inicio de sesión. Luego inicio automático.',
+        '아이디를 입력해주세요': 'Por favor, ingrese su ID',
+        '비밀번호를 입력해주세요': 'Por favor, ingrese su contraseña',
+        '입장하기': 'Entrar',
+        '언어 선택': 'Selección de idioma',
+        '파워 클리커': 'Clicador Potente',
+      },
+      'ARA': {
+        '경고': 'تحذير',
+        '아이디와 비밀번호를 모두 입력해주세요!': 'يرجى إدخال كل من اسم المستخدم وكلمة المرور!',
+        '로그인 실패': 'فشل تسجيل الدخول',
+        '비밀번호가 틀립니다.': 'كلمة المرور غير صحيحة.',
+        '혼자하는 마피아': 'مافيا منفردة',
+        '최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.': 'يظهر هذا عند تسجيل الدخول لأول مرة. تسجيل الدخول التلقائي بعد ذلك.',
+        '아이디를 입력해주세요': 'يرجى إدخال اسم المستخدم',
+        '비밀번호를 입력해주세요': 'يرجى إدخال كلمة المرور',
+        '입장하기': 'الدخول',
+        '언어 선택': 'اختيار اللغة',
+        '파워 클리커': 'النقر القوي',
+      },
+    };
+    return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
   }
 }
