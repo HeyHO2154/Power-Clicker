@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'MainPage/Mining.dart';
-import 'MainPage/Upgrade.dart';
-import 'MainPage/VIP.dart';
-import 'MainPage/War.dart';
-import 'MainPage/Farming.dart';
-import 'Login.dart';
+import '../main.dart';
+import 'Mining.dart';
+import 'Upgrade.dart';
+import 'VIP.dart';
+import 'War.dart';
+import 'Farming.dart';
+import '../Login.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -35,10 +36,10 @@ class _MainPageState extends State<MainPage> {
 
 
   Future<void> _fetchUserPoints() async {
-    if (Login.userId == null) return;
+    if (MyApp.user_name == null) return;
 
     final response = await http.get(
-      Uri.parse('${Login.url}/api/getPoints?user_id=${Login.userId}'),
+      Uri.parse('${MyApp.url}/api/getPoints?user_id=${MyApp.user_name}'),
     );
 
     if (response.statusCode == 200) {
@@ -53,12 +54,12 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _fetchUserRank() async {
     final response = await http.get(
-      Uri.parse('${Login.url}/api/users'),
+      Uri.parse('${MyApp.url}/api/users'),
     );
 
     if (response.statusCode == 200) {
       final List users = jsonDecode(utf8.decode(response.bodyBytes)); // UTF-8로 디코딩
-      int rank = users.indexWhere((user) => user['user_id'] == Login.userId) + 1;
+      int rank = users.indexWhere((user) => user['user_id'] == MyApp.user_name) + 1;
 
       setState(() {
         userRank = rank;
@@ -105,7 +106,7 @@ class _MainPageState extends State<MainPage> {
                           Icon(Icons.person, color: Colors.grey.shade700, size: 30),
                           SizedBox(width: 8),
                           Text(
-                            '${Login.userId}',
+                            '${MyApp.user_name}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

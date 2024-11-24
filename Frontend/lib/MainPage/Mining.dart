@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
 
-import '../Login.dart'; // 타이머 사용을 위해 추가
+import '../Login.dart';
+import '../main.dart'; // 타이머 사용을 위해 추가
 
 class Mining extends StatefulWidget {
   @override
@@ -74,7 +75,7 @@ class _MiningState extends State<Mining> {
 
     // 서버로부터 포인트 가져오기
     final response = await http.get(
-      Uri.parse('${Login.url}/api/getPoints?user_id=$userId'),
+      Uri.parse('${MyApp.url}/api/getPoints?user_id=$userId'),
     );
 
     if (response.statusCode == 200) {
@@ -91,7 +92,7 @@ class _MiningState extends State<Mining> {
     if (userId == null) return;
 
     final response = await http.get(
-      Uri.parse('${Login.url}/api/users'),
+      Uri.parse('${MyApp.url}/api/users'),
     );
 
     if (response.statusCode == 200) {
@@ -222,7 +223,7 @@ class _MiningState extends State<Mining> {
 
     // 서버로 포인트 업데이트 요청 보내기
     final response = await http.post(
-      Uri.parse('${Login.url}/api/increase'),
+      Uri.parse('${MyApp.url}/api/increase'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'user_id': userId, 'points': points}),
     );

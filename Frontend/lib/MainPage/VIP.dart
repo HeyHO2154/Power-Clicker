@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../Login.dart';
+import '../main.dart';
 
 class Vip extends StatefulWidget {
   @override
@@ -30,7 +31,7 @@ class _VipState extends State<Vip> {
 
   Future<void> _fetchUserPoints() async {
     final response = await http.get(
-      Uri.parse('${Login.url}/api/getPoints?user_id=${Login.userId}'),
+      Uri.parse('${MyApp.url}/api/getPoints?user_id=${MyApp.user_name}'),
       headers: {"Content-Type": "application/json; charset=UTF-8"},
     );
 
@@ -46,7 +47,7 @@ class _VipState extends State<Vip> {
 
   Future<void> _fetchMessages() async {
     final response = await http.get(
-      Uri.parse("${Login.url}/api/getMessages"),
+      Uri.parse("${MyApp.url}/api/getMessages"),
       headers: {"Content-Type": "application/json; charset=UTF-8"},
     );
 
@@ -74,10 +75,10 @@ class _VipState extends State<Vip> {
   Future<void> _sendMessage() async {
     if (messageController.text.isNotEmpty) {
       final response = await http.post(
-        Uri.parse("${Login.url}/api/sendMessage"),
+        Uri.parse("${MyApp.url}/api/sendMessage"),
         headers: {"Content-Type": "application/json; charset=UTF-8"},
         body: jsonEncode({
-          "user_id": Login.userId,
+          "user_id": MyApp.user_name,
           "message": messageController.text,
         }),
       );
@@ -161,7 +162,7 @@ class _VipState extends State<Vip> {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final isMyMessage =
-                    messages[index]["userId"] == Login.userId; // 본인 메시지 확인
+                    messages[index]["userId"] == MyApp.user_name; // 본인 메시지 확인
                 return ListTile(
                   title: Align(
                     alignment:

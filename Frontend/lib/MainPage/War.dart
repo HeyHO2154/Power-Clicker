@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/main.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +44,7 @@ class _WarState extends State<War> {
   }
 
   Future<void> _loadUsers() async {
-    final response = await http.get(Uri.parse('${Login.url}/api/users'));
+    final response = await http.get(Uri.parse('${MyApp.url}/api/users'));
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(
           jsonDecode(utf8.decode(response.bodyBytes))); // UTF-8로 디코딩
@@ -61,7 +62,7 @@ class _WarState extends State<War> {
     if (userId == null) return;
 
     final response = await http.get(
-      Uri.parse('${Login.url}/api/getPoints?user_id=$userId'),
+      Uri.parse('${MyApp.url}/api/getPoints?user_id=$userId'),
     );
 
     if (response.statusCode == 200) {
@@ -109,7 +110,7 @@ class _WarState extends State<War> {
     }
 
     await http.post(
-      Uri.parse('${Login.url}/api/decrease'),
+      Uri.parse('${MyApp.url}/api/decrease'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': targetUserId,
@@ -118,7 +119,7 @@ class _WarState extends State<War> {
     );
 
     await http.post(
-      Uri.parse('${Login.url}/api/decrease'),
+      Uri.parse('${MyApp.url}/api/decrease'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'user_id': userId,

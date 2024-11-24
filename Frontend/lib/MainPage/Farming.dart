@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/main.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:http/http.dart' as http;
@@ -38,7 +39,7 @@ class _FarmingState extends State<Farming> {
     if (userId == null) return;
 
     final response = await http.get(
-      Uri.parse('${Login.url}/api/users'),
+      Uri.parse('${MyApp.url}/api/users'),
     );
 
     if (response.statusCode == 200) {
@@ -64,7 +65,7 @@ class _FarmingState extends State<Farming> {
   }
 
   Future<void> fetchPoints() async {
-    final response = await http.get(Uri.parse("${Login.url}/api/getPoints?user_id=$userId"));
+    final response = await http.get(Uri.parse("${MyApp.url}/api/getPoints?user_id=$userId"));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
@@ -211,7 +212,7 @@ class _FarmingState extends State<Farming> {
   Future<void> _goToMenu() async {
     if (userId != null) {
       await http.post(
-        Uri.parse("${Login.url}/api/increase"),
+        Uri.parse("${MyApp.url}/api/increase"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({"user_id": userId, "points": localScore}),
       );
