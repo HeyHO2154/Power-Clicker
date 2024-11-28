@@ -7,7 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
 
-import '../Login.dart'; // 타이머 사용을 위해 추가
+import '../Login.dart';
+import 'MainPage.dart';
+import 'Shop.dart'; // 타이머 사용을 위해 추가
 
 class Mining extends StatefulWidget {
   @override
@@ -52,7 +54,6 @@ class _MiningState extends State<Mining> {
       }).catchError((error) {
         print("비디오 초기화 실패: $error");
       });
-
   }
 
   Future<void> _loadUserId() async {
@@ -72,7 +73,10 @@ class _MiningState extends State<Mining> {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': MyApp.user_id, 'points': n}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
+      body: jsonEncode({
+        'user_id': MyApp.user_id,
+        'points': n
+      }), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
     if (response.statusCode == 200) {
@@ -85,9 +89,13 @@ class _MiningState extends State<Mining> {
 
   void _generateCircle() {
     double size = random.nextDouble() * 50 + 50; // 크기 랜덤
-    Color color = Color((random.nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0); // 색상 랜덤
-    Offset position = Offset(random.nextDouble() * 300, random.nextDouble() * 600); // 위치 랜덤
-    int circleId = DateTime.now().millisecondsSinceEpoch; // 고유 ID 생성
+    Color color = Color((random.nextDouble() * 0xFFFFFF).toInt()).withOpacity(
+        1.0); // 색상 랜덤
+    Offset position = Offset(
+        random.nextDouble() * 300, random.nextDouble() * 600); // 위치 랜덤
+    int circleId = DateTime
+        .now()
+        .millisecondsSinceEpoch; // 고유 ID 생성
 
     if (!mounted) return; // 위젯이 트리에 없으면 함수 중단
 
@@ -105,7 +113,8 @@ class _MiningState extends State<Mining> {
           onTap: () {
             setState(() {
               // 원의 크기에 따라 점수 증가
-              int points = ((100 - size) / 10).round() + 1; // 원의 크기가 작을수록 큰 점수 부여
+              int points = ((100 - size) / 10).round() +
+                  1; // 원의 크기가 작을수록 큰 점수 부여
               if (isFeverTime) {
                 points *= 1; // 피버 타임이면 1배로 증가 => 지금 피버타임 0.5초로 줄어서 1배가 맞음
               }
@@ -144,7 +153,6 @@ class _MiningState extends State<Mining> {
 
   // 피버 타임을 시작하는 함수
   void _startFeverTime() {
-
     setState(() {
       isFeverTime = true; // 피버 타임 시작
       feverProbability = 1; // 피버 타임 확률 초기화
@@ -179,7 +187,9 @@ class _MiningState extends State<Mining> {
 
   // 점수 메시지를 표시하고 3초 후에 사라지게 하는 함수
   void _showScoreMessage(int points, Offset position) {
-    final messageId = DateTime.now().millisecondsSinceEpoch; // 고유 ID 생성
+    final messageId = DateTime
+        .now()
+        .millisecondsSinceEpoch; // 고유 ID 생성
 
     setState(() {
       scoreMessages.add({
@@ -199,143 +209,187 @@ class _MiningState extends State<Mining> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          // 상단 박스
-          Container(
-            width: double.infinity, // 좌우로 꽉 채움
-            padding: EdgeInsets.symmetric(vertical: 30), // 상하 padding만 설정
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.green.shade600, Colors.grey.shade400], // 하늘색과 회색 그라데이션
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(20), // 아래쪽만 둥근 모서리
-              ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  "${totalPoints}P",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.yellow, // 글씨가 잘 보이도록 설정
-                  ),
+    return WillPopScope(
+      onWillPop: () async {
+        // 뒤로가기 방지
+        return false;
+      },
+      child: Scaffold(
+        body: Column(
+          children: [
+            // 상단 박스
+            Container(
+              width: double.infinity, // 좌우로 꽉 채움
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.green.shade600, Colors.grey.shade400], // 초록색과 회색 그라데이션
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                Text(
-                  "Click Target to Earn Points!",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black, // 글씨가 잘 보이도록 설정
-                  ),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20), // 아래쪽만 둥근 모서리
                 ),
-                SizedBox(height: 8), // 줄바꿈을 위한 여백
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "(  ",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white70,
+              ),
+              child: Row(
+                children: [
+                  // 뒤로가기 버튼
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white, // 버튼 색상
+                      size: 40, // 아이콘 크기
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainPage(),
                         ),
-                      ),
-                      TextSpan(
-                        text: "$feverProbability%",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.cyan.shade200, // 확률 부분만 핑크 색상
-                        ),
-                      ),
-                      TextSpan(
-                        text: " to ",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "FEVER TIME",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.pink.shade200,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "  )",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                if (isFeverTime) // 비디오 및 피버 타임 메시지를 isFeverTime 상태와 연결
+                  SizedBox(width: 20),
                   Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized)  //피버타임에 고양이 영상 재생, 30등 이상 특권
-                          AspectRatio(
-                            aspectRatio: _videoPlayerController!.value.aspectRatio,
-                            child: VideoPlayer(_videoPlayerController!),
-                          ),
-                        Text(
-                          'FEVER TIME!!',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Shop()),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                '$totalPoints',
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.amberAccent, // 금색 강조
+                                  shadows: [Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))],
+                                ),
+                              ),
+                              Image.asset(
+                                'assets/UI/coin.png',
+                                height: 50, // 아이콘 크기 설정
+                              ),
+                            ],
                           ),
                         ),
                         Text(
-                          '(x2 Points)',
+                          "클릭해서 코인을 모으세요!",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.red,
+                            color: Colors.black, // 글씨가 잘 보이도록 설정
+                          ),
+                        ),
+                        SizedBox(height: 8), // 줄바꿈을 위한 여백
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "(  ",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "$feverProbability%",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.cyan.shade200, // 확률 부분만 핑크 색상
+                                ),
+                              ),
+                              TextSpan(
+                                text: " 확률로 ",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "파티 타임",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.pink.shade200,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "  )",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                for (var message in scoreMessages)
-                  Positioned(
-                    left: message['position'].dx,
-                    top: message['position'].dy - 30,
-                    child: Text(
-                      message['message'],
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                ],
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  if (isFeverTime) // 비디오 및 피버 타임 메시지를 isFeverTime 상태와 연결
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) //피버타임에 고양이 영상 재생, 30등 이상 특권
+                            AspectRatio(
+                              aspectRatio: _videoPlayerController!.value.aspectRatio,
+                              child: VideoPlayer(_videoPlayerController!),
+                            ),
+                          Text(
+                            'FEVER TIME!!',
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                          ),
+                          Text(
+                            '(x2 Points)',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ...circles,
-              ],
+                  for (var message in scoreMessages)
+                    Positioned(
+                      left: message['position'].dx,
+                      top: message['position'].dy - 30,
+                      child: Text(
+                        message['message'],
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ...circles,
+                ],
+              ),
             ),
-          ),
-
-
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
+import 'MainPage.dart';
+import 'Shop.dart';
 
 class Farming extends StatefulWidget {
   @override
@@ -22,8 +24,7 @@ class _FarmingState extends State<Farming> {
   Timer? gameTimer; // 게임 시간 추적 타이머
   bool isGameOver = false; // 게임 종료 여부
   int totalPoints = 0; // 상단 포인트
-  int localScore = 0; // 로컬에서 쌓이는 점수
-  String resultMessage = ""; // 게임 상태 메시지
+  int score = 0;
   String? userId;
 
   // 증가 변수들
@@ -34,31 +35,38 @@ class _FarmingState extends State<Farming> {
   @override
   void initState() {
     super.initState();
-    fetchUserId();
+    _loadUserId();
     startGame();
   }
 
-  Future<void> fetchUserId() async {
+  Future<void> _loadUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId = prefs.getString('user_id');
+    userId = prefs.getString('user_id'); // 저장된 userId 불러오기
     if (userId != null) {
-      await fetchPoints();
+      await _getPointValue(0); // userId를 사용하여 포인트 불러오기
     }
   }
 
-  Future<void> fetchPoints() async {
-    final response = await http.get(Uri.parse("${MyApp.url}/api/getPoints?user_id=$userId"));
+  Future<void> _getPointValue(n) async {
+    final url = Uri.parse('${MyApp.url}/user/point');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': MyApp.user_id,
+        'points': n
+      }), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
+    );
+
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
       setState(() {
-        totalPoints = data['points'];
+        totalPoints = int.parse(response.body);
       });
     }
   }
 
   void startGame() {
     isGameOver = false;
-    localScore = 0;
     bullets.clear();
     timeElapsed = 0;
 
@@ -97,8 +105,9 @@ class _FarmingState extends State<Farming> {
     // 점수 증가 타이머
     scoreTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!isGameOver) {
+        score += (1 + (timeElapsed ~/ 10))*2;
         setState(() {
-          localScore += (1 + (timeElapsed ~/ 10)); // 경과 시간에 비례한 점수 증가
+          _getPointValue((1 + (timeElapsed ~/ 10))*2); // 경과 시간에 비례한 점수 증가
         });
       }
     });
@@ -123,19 +132,37 @@ class _FarmingState extends State<Farming> {
     switch (random.nextInt(4)) {
       case 0: // 왼쪽
         x = 0;
-        y = random.nextDouble() * MediaQuery.of(context).size.height;
+        y = random.nextDouble() * MediaQuery
+            .of(context)
+            .size
+            .height;
         break;
       case 1: // 오른쪽
-        x = MediaQuery.of(context).size.width;
-        y = random.nextDouble() * MediaQuery.of(context).size.height;
+        x = MediaQuery
+            .of(context)
+            .size
+            .width;
+        y = random.nextDouble() * MediaQuery
+            .of(context)
+            .size
+            .height;
         break;
       case 2: // 위쪽
-        x = random.nextDouble() * MediaQuery.of(context).size.width;
+        x = random.nextDouble() * MediaQuery
+            .of(context)
+            .size
+            .width;
         y = 0;
         break;
       case 3: // 아래쪽
-        x = random.nextDouble() * MediaQuery.of(context).size.width;
-        y = MediaQuery.of(context).size.height;
+        x = random.nextDouble() * MediaQuery
+            .of(context)
+            .size
+            .width;
+        y = MediaQuery
+            .of(context)
+            .size
+            .height;
         break;
       default:
         x = 0;
@@ -156,7 +183,6 @@ class _FarmingState extends State<Farming> {
       if ((bullet['position'] - circlePosition).distance < circleSize / 2) {
         setState(() {
           isGameOver = true;
-          resultMessage = "Game Over! Total Points: +$localScore P";
         });
         bulletTimer?.cancel();
         moveTimer?.cancel();
@@ -170,19 +196,14 @@ class _FarmingState extends State<Farming> {
   bool _isOffScreen(Offset position) {
     return position.dx < 0 ||
         position.dy < 0 ||
-        position.dx > MediaQuery.of(context).size.width ||
-        position.dy > MediaQuery.of(context).size.height;
-  }
-
-  Future<void> _goToMenu() async {
-    if (userId != null) {
-      await http.post(
-        Uri.parse("${MyApp.url}/api/increase"),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({"user_id": userId, "points": localScore}),
-      );
-    }
-    Navigator.pop(context);
+        position.dx > MediaQuery
+            .of(context)
+            .size
+            .width ||
+        position.dy > MediaQuery
+            .of(context)
+            .size
+            .height;
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
@@ -191,100 +212,219 @@ class _FarmingState extends State<Farming> {
         double newX = circlePosition.dx + details.delta.dx;
         double newY = circlePosition.dy + details.delta.dy;
 
-        newX = newX.clamp(0.0, MediaQuery.of(context).size.width - circleSize);
-        newY = newY.clamp(100.0, MediaQuery.of(context).size.height - circleSize);
+        // 좌우 경계 제한
+        newX = newX.clamp(
+            0.0,
+            MediaQuery.of(context).size.width - circleSize
+        );
 
+        // 상단은 0.0, 하단은 화면 높이 - circleSize - 200으로 제한
+        newY = newY.clamp(
+            0.0,
+            MediaQuery.of(context).size.height - circleSize - 200
+        );
+
+        // 위치 업데이트
         circlePosition = Offset(newX, newY);
       });
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // 상단 정보 박스
-          Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade600, Colors.grey.shade400],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return WillPopScope(
+      onWillPop: () async {
+        // 뒤로가기 방지
+        return false;
+      },
+      child: Scaffold(
+        body: Column(
+          children: [
+            // 상단 박스
+            Container(
+              width: double.infinity, // 좌우로 꽉 채움
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange.shade600, Colors.grey.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20), // 아래쪽만 둥근 모서리
+                ),
               ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  "Total Points: $totalPoints P",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.yellow),
-                ),
-                Text(
-                  "Local Score: +$localScore P",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                ),
-                Text(
-                  "Bullet Speed: ${bulletSpeedMultiplier.toStringAsFixed(2)}x",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
-                ),
-                Text(
-                  "Bullet Count: $bulletCountMultiplier",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                // 드래그 가능한 원
-                Positioned(
-                  left: circlePosition.dx,
-                  top: circlePosition.dy,
-                  child: GestureDetector(
-                    onPanUpdate: _onDragUpdate,
-                    child: Container(
-                      width: circleSize,
-                      height: circleSize,
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        shape: BoxShape.circle,
-                      ),
+              child: Row(
+                children: [
+                  // 뒤로가기 버튼
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: Colors.white, // 버튼 색상
+                      size: 40, // 아이콘 크기
                     ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainPage(),
+                        ),
+                      );
+                    },
                   ),
-                ),
-                for (final bullet in bullets)
-                  Positioned(
-                    left: bullet['position'].dx,
-                    top: bullet['position'].dy,
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                if (isGameOver)
+                  SizedBox(width:10),
                   Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(resultMessage, style: TextStyle(fontSize: 28, color: Colors.red)),
-                        ElevatedButton(
-                          onPressed: _goToMenu,
-                          child: Text("Back to Menu"),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Shop()),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                '$totalPoints',
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.amberAccent, // 금색 강조
+                                  shadows: [Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))],
+                                ),
+                              ),
+                              Image.asset(
+                                'assets/UI/coin.png',
+                                height: 50, // 아이콘 크기 설정
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          "총알을 피해 오래 살아남으세요!",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                        ),
+                        Text(
+                          "(난이도: ${bulletSpeedMultiplier.toStringAsFixed(2)}x)",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
                         ),
                       ],
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Stack(
+                children: [
+                  // 드래그 가능한 원
+                  // 드래그 가능한 원
+                  Positioned(
+                    left: circlePosition.dx,
+                    top: circlePosition.dy,
+                    child: GestureDetector(
+                      onPanUpdate: _onDragUpdate,
+                      child: Image.asset(
+                        'assets/ccat.png', // ccat 이미지 경로
+                        width: circleSize, // 이미지 크기
+                        height: circleSize, // 이미지 크기
+                      ),
+                    ),
+                  ),
+                  for (final bullet in bullets)
+                    Positioned(
+                      left: bullet['position'].dx,
+                      top: bullet['position'].dy,
+                      child: Image.asset(
+                        'assets/ddog.png', // ddog 이미지 경로
+                        width: 30, // 이미지 크기
+                        height: 30, // 이미지 크기
+                      ),
+                    ),
+                  if (isGameOver)
+                    Center(
+                      child: Container(
+                        width: 250,
+                        height: 250,
+                        padding: EdgeInsets.all(20), // 내부 여백
+                        decoration: BoxDecoration(
+                          color: Colors.white, // 박스 배경색
+                          borderRadius: BorderRadius.circular(15), // 둥근 모서리
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26, // 그림자 색상
+                              blurRadius: 10, // 그림자 흐림 정도
+                              offset: Offset(0, 5), // 그림자 위치
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              "게임 오버!",
+                              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.red),
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("보상 코인: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+                                Text(
+                                  '$score',
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.amberAccent, // 금색 강조
+                                    shadows: [Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))],
+                                  ),
+                                ),
+                                Image.asset(
+                                  'assets/UI/coin.png',
+                                  height: 50, // 아이콘 크기 설정
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                // 현재 페이지를 다시 시작
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Farming(), // 현재 페이지 위젯을 다시 로드
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.orange, // 텍스트 색상
+                                shadowColor: Colors.black, // 그림자 색상
+                                elevation: 8, // 그림자 높이
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15), // 버튼 둥근 모서리
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 13), // 버튼 내부 여백
+                              ),
+                              child: Text(
+                                "다시 하기",
+                                style: TextStyle(
+                                  fontSize: 18, // 텍스트 크기
+                                  fontWeight: FontWeight.bold, // 텍스트 두께
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
