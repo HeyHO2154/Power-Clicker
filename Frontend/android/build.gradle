@@ -5,6 +5,18 @@ allprojects {
     }
 }
 
+buildscript {
+    ext.kotlin_version = '2.1.0' // 최신 Kotlin 버전으로 설정
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

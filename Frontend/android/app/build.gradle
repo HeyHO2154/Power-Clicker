@@ -1,15 +1,12 @@
-
-
 plugins {
-    id "com.android.application"
+    id "com.android.application"// Android Gradle Plugin 버전을 7.3.1로 설정
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
+    compileSdkVersion 34
     namespace = "com.example.frontend"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -17,17 +14,15 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "1.8"  // 문자열로 지정
     }
 
     defaultConfig {
-        applicationId "com.hsj.powerclicker"  // 따옴표를 사용해야 합니다.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-
-        // Flutter의 동적 값 대신 직접 지정한 정적 값으로 변경
-        versionCode 1001  // 고유한 정수 값으로 변경
-        versionName "1.0.1"  // 선택 사항으로, 원하는 버전 이름으로 변경
+        applicationId "com.hsj.powerclicker"
+        minSdkVersion 21  // Flutter 프로젝트에 맞게 적절한 값을 사용하세요
+        targetSdkVersion 33  // Flutter 프로젝트에 맞게 적절한 값을 사용하세요
+        versionCode 200
+        versionName "2.0"
     }
 
     def keystorePropertiesFile = file("C:/Users/PRO/Desktop/GitDesktop/Power-Clicker/Frontend/android/app/key.properties")
@@ -47,24 +42,15 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
 
-            // 디버그 메시지 추가: storeFile 경로 출력
             println("Keystore storeFile path: " + keystoreProperties['storeFile'])
 
-            // storeFile 경로가 null인지 또는 빈 문자열인지 확인
             if (keystoreProperties['storeFile'] != null && !keystoreProperties['storeFile'].trim().isEmpty()) {
                 storeFile file(keystoreProperties['storeFile'])
-            } else {
-                error("Keystore file path is missing or invalid in key.properties.")
             }
 
             storePassword keystoreProperties['storePassword']
         }
     }
-
-
-
-
-
 
     buildTypes {
         release {
@@ -79,4 +65,11 @@ flutter {
     source = "../.."
 }
 
+repositories {
+    google()
+    mavenCentral()
+}
 
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.3"  // Kotlin 표준 라이브러리 버전을 1.7.3으로 설정
+}

@@ -317,110 +317,120 @@ class _FarmingState extends State<Farming> {
               ),
             ),
             Expanded(
-              child: Stack(
-                children: [
-                  // 드래그 가능한 원
-                  // 드래그 가능한 원
-                  Positioned(
-                    left: circlePosition.dx,
-                    top: circlePosition.dy,
-                    child: GestureDetector(
-                      onPanUpdate: _onDragUpdate,
-                      child: Image.asset(
-                        'assets/ccat.png', // ccat 이미지 경로
-                        width: circleSize, // 이미지 크기
-                        height: circleSize, // 이미지 크기
-                      ),
-                    ),
-                  ),
-                  for (final bullet in bullets)
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque, // 빈 화면도 터치 이벤트 감지
+                onPanUpdate: (details) {
+                  // 화면 전체에서 드래그로 고양이 움직이기
+                  _onDragUpdate(details);
+                },
+                child: Stack(
+                  children: [
+                    // 드래그 가능한 원 (고양이)
                     Positioned(
-                      left: bullet['position'].dx,
-                      top: bullet['position'].dy,
-                      child: Image.asset(
-                        'assets/ddog.png', // ddog 이미지 경로
-                        width: 30, // 이미지 크기
-                        height: 30, // 이미지 크기
+                      left: circlePosition.dx,
+                      top: circlePosition.dy,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          // 고양이를 직접 드래그로 움직이기
+                          _onDragUpdate(details);
+                        },
+                        child: Image.asset(
+                          'assets/ccat.png', // ccat 이미지 경로
+                          width: circleSize, // 이미지 크기
+                          height: circleSize, // 이미지 크기
+                        ),
                       ),
                     ),
-                  if (isGameOver)
-                    Center(
-                      child: Container(
-                        width: 250,
-                        height: 250,
-                        padding: EdgeInsets.all(20), // 내부 여백
-                        decoration: BoxDecoration(
-                          color: Colors.white, // 박스 배경색
-                          borderRadius: BorderRadius.circular(15), // 둥근 모서리
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26, // 그림자 색상
-                              blurRadius: 10, // 그림자 흐림 정도
-                              offset: Offset(0, 5), // 그림자 위치
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "게임 오버!",
-                              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.red),
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("보상 코인: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
-                                Text(
-                                  '$score',
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.amberAccent, // 금색 강조
-                                    shadows: [Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))],
-                                  ),
-                                ),
-                                Image.asset(
-                                  'assets/UI/coin.png',
-                                  height: 50, // 아이콘 크기 설정
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
-                                // 현재 페이지를 다시 시작
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Farming(), // 현재 페이지 위젯을 다시 로드
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                backgroundColor: Colors.orange, // 텍스트 색상
-                                shadowColor: Colors.black, // 그림자 색상
-                                elevation: 8, // 그림자 높이
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15), // 버튼 둥근 모서리
-                                ),
-                                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 13), // 버튼 내부 여백
-                              ),
-                              child: Text(
-                                "다시 하기",
-                                style: TextStyle(
-                                  fontSize: 18, // 텍스트 크기
-                                  fontWeight: FontWeight.bold, // 텍스트 두께
-                                ),
-                              ),
-                            ),
-                          ],
+                    // 강아지 (기존 동작 유지)
+                    for (final bullet in bullets)
+                      Positioned(
+                        left: bullet['position'].dx,
+                        top: bullet['position'].dy,
+                        child: Image.asset(
+                          'assets/ddog.png', // ddog 이미지 경로
+                          width: 30, // 이미지 크기
+                          height: 30, // 이미지 크기
                         ),
                       ),
-                    )
-                ],
+                    if (isGameOver)
+                      Center(
+                        child: Container(
+                          width: 250,
+                          height: 250,
+                          padding: EdgeInsets.all(20), // 내부 여백
+                          decoration: BoxDecoration(
+                            color: Colors.white, // 박스 배경색
+                            borderRadius: BorderRadius.circular(15), // 둥근 모서리
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26, // 그림자 색상
+                                blurRadius: 10, // 그림자 흐림 정도
+                                offset: Offset(0, 5), // 그림자 위치
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "게임 오버!",
+                                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.red),
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("보상 코인: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+                                  Text(
+                                    '$score',
+                                    style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.amberAccent, // 금색 강조
+                                      shadows: [Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))],
+                                    ),
+                                  ),
+                                  Image.asset(
+                                    'assets/UI/coin.png',
+                                    height: 50, // 아이콘 크기 설정
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () {
+                                  // 현재 페이지를 다시 시작
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Farming(), // 현재 페이지 위젯을 다시 로드
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.orange, // 텍스트 색상
+                                  shadowColor: Colors.black, // 그림자 색상
+                                  elevation: 8, // 그림자 높이
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15), // 버튼 둥근 모서리
+                                  ),
+                                  padding: EdgeInsets.symmetric(horizontal: 25, vertical: 13), // 버튼 내부 여백
+                                ),
+                                child: Text(
+                                  "다시 하기",
+                                  style: TextStyle(
+                                    fontSize: 18, // 텍스트 크기
+                                    fontWeight: FontWeight.bold, // 텍스트 두께
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                  ],
+                ),
               ),
             ),
           ],
