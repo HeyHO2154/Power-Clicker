@@ -425,7 +425,7 @@ class _MainPageState extends State<MainPage> {
         '파워 클리커': 'Clicador Potente',
         '광질하기': 'Minería',
         '살아남기': 'Sobrevivir',
-        '순위표': 'Tabla de clasificación',
+        '순위표': 'clasificación',
       },
       'ARA': {
         '혼자하는 마피아': 'مافيا منفردة',

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -20,26 +21,29 @@ class _ShopPageState extends State<Shop> {
   final List<String> _productIds = ['point_1000', 'point_6000', 'point_12000'];
   Map<String, ProductDetails> _products = {};
   StreamSubscription<List<PurchaseDetails>>? _subscription;
+  final Set<String> _processedPurchases = {};
+  bool _isPurchaseStreamActive = false;
+
+  // 초기화 시도 횟수 제한
+  int _billingClientRetryCount = 0;
+  final int _maxRetryCount = 3;
 
   @override
   void initState() {
     super.initState();
-    _subscription = _inAppPurchase.purchaseStream.listen(
-          (List<PurchaseDetails> purchases) {
-        for (var purchase in purchases) {
-          if (purchase.status == PurchaseStatus.purchased) {
-            _handlePurchaseSuccess(purchase);
-          } else if (purchase.status == PurchaseStatus.error) {
-            _handlePurchaseError(purchase);
-          }
-        }
-      },
-    );
+    _initializeProducts();
+    _getPointValue();
   }
 
   @override
   void dispose() {
-    _subscription?.cancel(); // 구독 해제
+    // 스트림 구독 해제
+    if (_subscription != null) {
+      _subscription!.cancel();
+      _subscription = null;
+    }
+    // 연결 상태를 명확히 표시
+    _isPurchaseStreamActive = false;
     super.dispose();
   }
 
@@ -49,10 +53,7 @@ class _ShopPageState extends State<Shop> {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': MyApp.user_id,
-        'points': 0
-      }), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
+      body: jsonEncode({'user_id': MyApp.user_id, 'points': 0}),
     );
 
     if (response.statusCode == 200) {
@@ -63,7 +64,10 @@ class _ShopPageState extends State<Shop> {
   }
 
   Future<void> _initializeProducts() async {
-    final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(_productIds.toSet());
+    if (_products.isNotEmpty) return;
+
+    final ProductDetailsResponse response =
+    await _inAppPurchase.queryProductDetails(_productIds.toSet());
     if (response.notFoundIDs.isNotEmpty) {
       print('Some products were not found: ${response.notFoundIDs}');
     }
@@ -75,33 +79,12 @@ class _ShopPageState extends State<Shop> {
   Future<void> _purchaseProduct(String productId) async {
     final ProductDetails? productDetails = _products[productId];
     if (productDetails != null) {
-      final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
+      final PurchaseParam purchaseParam = PurchaseParam(
+          productDetails: productDetails);
       _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
     } else {
       print('Product not found: $productId');
     }
-  }
-
-  void _handlePurchaseSuccess(PurchaseDetails purchase) {
-    // 포인트 추가 로직
-    print('Purchase successful: ${purchase.productID}');
-    if (purchase.productID == 'point_1000') {
-      setState(() {
-        points += 1000;
-      });
-    } else if (purchase.productID == 'point_5500') {
-      setState(() {
-        points += 6000;
-      });
-    } else if (purchase.productID == 'point_12000') {
-      setState(() {
-        points += 12000;
-      });
-    }
-  }
-
-  void _handlePurchaseError(PurchaseDetails purchase) {
-    print('Purchase error: ${purchase.error?.message}');
   }
 
   @override

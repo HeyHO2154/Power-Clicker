@@ -554,7 +554,7 @@ String lang(String textKey) {
     'ESP': {
       '공격 기록': 'Historial de ataques',
       '상대를 클릭해서 공격하세요!': '¡Haz clic para atacar!',
-      '(50% 확률로 승리 또는 패배)': '(50% de posibilidades de ganar)',
+      '(50% 확률로 승리 또는 패배)': '(50% de ganar)',
       '플레이어': 'Jugador',
       '공격 성공!': '¡Ataque exitoso!',
       '상대의 100 코인을 파괴했습니다!': '¡Has destruido 100 monedas del oponente!',

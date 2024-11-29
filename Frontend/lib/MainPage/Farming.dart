@@ -398,8 +398,8 @@ class _FarmingState extends State<Farming> {
                     if (isGameOver)
                       Center(
                         child: Container(
-                          width: 250,
-                          height: 250,
+                          width: 300,
+                          height: 260,
                           padding: EdgeInsets.all(20), // 내부 여백
                           decoration: BoxDecoration(
                             color: Colors.white, // 박스 배경색

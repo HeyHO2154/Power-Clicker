@@ -309,7 +309,7 @@ class _MiningState extends State<Mining> {
                               TextSpan(
                                 text: " "+lang("확률")+" ",
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white70,
                                 ),
@@ -317,7 +317,7 @@ class _MiningState extends State<Mining> {
                               TextSpan(
                                 text: " "+lang("파티타임")+" ",
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.pink.shade200,
                                 ),
@@ -433,14 +433,14 @@ String lang(String textKey) {
       '파티타임': 'Время вечеринки',
     },
     'FRA': {
-      '클릭해서 코인을 모으세요!': 'Cliquez pour collecter des pièces!',
+      '클릭해서 코인을 모으세요!': 'Cliquez pour profiter !',
       '확률': 'Probabilité',
       '파티타임': 'Temps de fête',
     },
     'ESP': {
-      '클릭해서 코인을 모으세요!': '¡Haz clic para recolectar monedas!',
+      '클릭해서 코인을 모으세요!': '¡Gana haciendo clic!',
       '확률': 'Probabilidad',
-      '파티타임': 'Tiempo de fiesta',
+      '파티타임': 'Fiesta',
     },
   };
 
