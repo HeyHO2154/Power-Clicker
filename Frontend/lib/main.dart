@@ -4,6 +4,9 @@ import 'MainPage/MainPage.dart';
 import 'Login.dart';
 
 void main() {
+  // 아래꺼 주석 해제하면 전체화면됨
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(MyApp());
 }
 
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       //home: MainPage(),
-      home: LoginPage(), // 홈 페이지를 초기 화면으로 설정
+      home: HomePage(), // 홈 페이지를 초기 화면으로 설정
     );
   }
 }

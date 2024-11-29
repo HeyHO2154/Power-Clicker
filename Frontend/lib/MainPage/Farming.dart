@@ -17,7 +17,7 @@ class Farming extends StatefulWidget {
 
 class _FarmingState extends State<Farming> {
   Offset circlePosition = Offset(150, 400); // 원의 초기 위치
-  double circleSize = 90; // 원의 크기
+  double circleSize = 80; // 원의 크기
   List<Map<String, dynamic>> bullets = []; // 총알 리스트
   Timer? bulletTimer; // 총알 생성 타이머
   Timer? moveTimer; // 총알 이동 타이머
@@ -276,7 +276,7 @@ class _FarmingState extends State<Farming> {
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.orange.shade600, Colors.grey.shade400],
+                  colors: [Colors.blue.shade600, Colors.grey.shade400],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -306,6 +306,7 @@ class _FarmingState extends State<Farming> {
                   Center(
                     child: Column(
                       children: [
+                        SizedBox(height: 5),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(

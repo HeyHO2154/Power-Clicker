@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Login.dart';
 import '../main.dart';
+import 'MainPage.dart';
+import 'Shop.dart';
 
 class War extends StatefulWidget {
   @override
@@ -139,13 +141,18 @@ class _WarState extends State<War> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+      // 뒤로가기 방지
+      return false;
+    },
+    child: Scaffold(
       body: Column(
         children: [
-          // 상단 설명 박스
+          // 상단 박스
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 30),
+            width: double.infinity, // 좌우로 꽉 채움
+            padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [Colors.pink.shade900, Colors.red],
@@ -153,34 +160,66 @@ class _WarState extends State<War> {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(20),
+                bottom: Radius.circular(20), // 아래쪽만 둥근 모서리
               ),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Text(
-                  "$userPoints P", // 사용자 포인트 표시
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.yellow,
+                // 뒤로가기 버튼
+                IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white, // 버튼 색상
+                    size: 40, // 아이콘 크기
                   ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MainPage(),
+                      ),
+                    );
+                  },
                 ),
-                Text(
-                  "Click Other Player to WAR!!",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "(Use ${meDecrease}P to reduce(-) other's ${otherDecrease}P)",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade100,
+                SizedBox(width:15),
+                Center(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 5),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Shop()),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              '$userPoints',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.amberAccent, // 금색 강조
+                                shadows: [Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))],
+                              ),
+                            ),
+                            Image.asset(
+                              'assets/UI/coin.png',
+                              height: 50, // 아이콘 크기 설정
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "상대를 클릭해서 공격하세요!",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      Text(
+                        "(최소 공격 100 코인 이상)",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -277,6 +316,7 @@ class _WarState extends State<War> {
           ),
         ],
       ),
+    )
     );
   }
 

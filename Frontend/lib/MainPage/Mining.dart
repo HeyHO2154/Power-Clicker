@@ -144,9 +144,9 @@ class _MiningState extends State<Mining> {
       ));
     });
 
-    // 피버 타임이 아닌 경우 1~3초 간격으로 새로운 원 생성
+    // 피버 타임이 아닌 경우 0~2초 간격으로 새로운 원 생성
     if (!isFeverTime) {
-      Future.delayed(Duration(seconds: random.nextInt(2) + 1), _generateCircle);
+      Future.delayed(Duration(seconds: random.nextInt(3) + 0), _generateCircle);
     }
   }
 
@@ -253,6 +253,7 @@ class _MiningState extends State<Mining> {
                   Center(
                     child: Column(
                       children: [
+                        SizedBox(height: 5),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../main.dart';
 import 'package:http/http.dart' as http;
@@ -14,14 +15,24 @@ class Shop extends StatefulWidget {
 
 class _ShopPageState extends State<Shop> {
   int points = 0;
-  String remainingTimeTheme = "02:30:15"; // 테마 재입고 시간
-  String remainingTimeItem = "00:45:10"; // 아이템 재입고 시간
-  String remainingTimeFreePoints = "01:20:35"; // 무료 포인트 재충전 시간
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  final List<String> _productIds = ['point_1000', 'point_6000', 'point_12000'];
+  Map<String, ProductDetails> _products = {};
 
   @override
   void initState() {
     super.initState();
     _getPointValue();
+    _initializeProducts();
+    _inAppPurchase.purchaseStream.listen((List<PurchaseDetails> purchases) {
+      for (var purchase in purchases) {
+        if (purchase.status == PurchaseStatus.purchased) {
+          _handlePurchaseSuccess(purchase);
+        } else if (purchase.status == PurchaseStatus.error) {
+          _handlePurchaseError(purchase);
+        }
+      }
+    });
   }
 
   Future<void> _getPointValue() async {
@@ -40,6 +51,53 @@ class _ShopPageState extends State<Shop> {
         points = int.parse(response.body);
       });
     }
+  }
+
+  Future<void> _initializeProducts() async {
+    final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(_productIds.toSet());
+    if (response.notFoundIDs.isNotEmpty) {
+      print('Some products were not found: ${response.notFoundIDs}');
+    }
+    setState(() {
+      _products = {for (var product in response.productDetails) product.id: product};
+    });
+  }
+
+  Future<void> _purchaseProduct(String productId) async {
+    final ProductDetails? productDetails = _products[productId];
+    if (productDetails != null) {
+      final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
+      _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+    } else {
+      print('Product not found: $productId');
+    }
+  }
+
+  void _handlePurchaseSuccess(PurchaseDetails purchase) {
+    // 포인트 추가 로직
+    print('Purchase successful: ${purchase.productID}');
+    if (purchase.productID == 'point_1000') {
+      setState(() {
+        points += 1000;
+      });
+    } else if (purchase.productID == 'point_5500') {
+      setState(() {
+        points += 6000;
+      });
+    } else if (purchase.productID == 'point_12000') {
+      setState(() {
+        points += 12000;
+      });
+    }
+  }
+
+  void _handlePurchaseError(PurchaseDetails purchase) {
+    print('Purchase error: ${purchase.error?.message}');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -137,27 +195,28 @@ class _ShopPageState extends State<Shop> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        SizedBox(height: 150), //임시로 아이템, 테마상점 생기기 전까지 중앙배치
                         SizedBox(height: 20),
                         _buildSection(
-                          title: '포인트 유료 구매',
+                          title: '코인 구매',
                           child: _buildPaidPointsSection(),
                         ),
                         SizedBox(height: 20),
                         _buildSection(
-                          title: '포인트 무료 충전(광고)',
+                          title: '코인 무료 충전',
                           child: _buildFreePointsSection(),
                         ),
-                        SizedBox(height: 20),
-                        _buildSection(
-                          title: '테마 구매',
-                          child: _buildThemePurchaseSection(),
-                        ),
-                        SizedBox(height: 20),
-                        _buildSection(
-                          title: '아이템 구매',
-                          child: _buildItemPurchaseSection(),
-                        ),
-                        SizedBox(height: 50),
+                        // SizedBox(height: 20),
+                        // _buildSection(
+                        //   title: '테마 구매',
+                        //   child: _buildThemePurchaseSection(),
+                        // ),
+                        // SizedBox(height: 20),
+                        // _buildSection(
+                        //   title: '아이템 구매',
+                        //   child: _buildItemPurchaseSection(),
+                        // ),
+                        // SizedBox(height: 50),
                       ],
                     ),
                   ),
@@ -205,44 +264,46 @@ class _ShopPageState extends State<Shop> {
       ),
     );
   }
-
   // 1. 포인트 유료 구매
   Widget _buildPaidPointsSection() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildPointPurchaseButton("1000포인트", "1000원"),
-        _buildPointPurchaseButton("6000포인트", "5000원", label: "+10%"),
-        _buildPointPurchaseButton("12000포인트", "10000원", label: "+20%"),
+        _buildPointPurchaseButton("+1,000", 'point_1000', imagePath: 'assets/UI/Cash/money1.png'),
+        _buildPointPurchaseButton("+6,000", 'point_6000', label: "+10%", imagePath: 'assets/UI/Cash/money2.png'),
+        _buildPointPurchaseButton("+12,000", 'point_12000', label: "+20%", imagePath: 'assets/UI/Cash/money3.png'),
       ],
     );
   }
-
-  Widget _buildPointPurchaseButton(String points, String price, {String? label}) {
+  Widget _buildPointPurchaseButton(String points, String productId, {String? label, required String imagePath}) {
     return Stack(
       alignment: Alignment.topRight,
       children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Color(0xFFD4AF37), width: 1.5), // 금색 테두리
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                points,
-                style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 5),
-              Text(
-                price,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ],
+        GestureDetector(
+          onTap: () {
+            _purchaseProduct(productId); // 결제 함수 호출
+          },
+          child: Container(
+            width: 110,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Color(0xFFD4AF37), width: 1.5), // 금색 테두리
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  imagePath, // 이미지 경로 추가
+                  width: 80, // 이미지 너비
+                ),
+                Text(
+                  points,
+                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
         ),
         if (label != null)
@@ -254,24 +315,26 @@ class _ShopPageState extends State<Shop> {
             ),
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: Colors.white),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
       ],
     );
   }
 
+
+
   // 2. 포인트 무료 충전
   Widget _buildFreePointsSection() {
     return Row(
       children: [
         Text(
-          '남은 시간: $remainingTimeFreePoints',
+          '남은 시간: 00:00:00',
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
         Spacer(),
         ElevatedButton(
-          onPressed: remainingTimeFreePoints == "00:00:00" ? () {} : null,
+          onPressed: "123" == "00:00:00" ? () {} : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.amberAccent,
             disabledBackgroundColor: Colors.grey,
@@ -315,7 +378,7 @@ class _ShopPageState extends State<Shop> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '구매 $remainingTimeTheme',
+                    '구매 00:00:00',
                     style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   ElevatedButton(

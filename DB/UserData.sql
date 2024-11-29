@@ -14,6 +14,18 @@ CREATE TABLE users (
     login_recent TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE attack (
+    victim_id VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
+    attacker VARCHAR(255) NOT NULL,
+    points INT DEFAULT 0,
+    message VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+#이거 밑에 아이템이랑 테마, 각각 별도의 테이블 만들어서 각 테마와 아이템 종류마다 고유 아이디 부여하고
+#중간 테이블로 유저와 해당 테마 또는 아이템 테이블을 이어줘야 테마나 아이템 중에 하나 지워질때 ON DELETE CASCADE로
+#한꺼번에 보유자들의 해당 아이템 또는 테마 데이터 삭제 가능
+
 #매주 랜덤하게 테마 1개 판매
 CREATE TABLE theme (
     user_id VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
