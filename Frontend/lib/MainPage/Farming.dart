@@ -273,7 +273,7 @@ class _FarmingState extends State<Farming> {
             // 상단 박스
             Container(
               width: double.infinity, // 좌우로 꽉 채움
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Colors.blue.shade600, Colors.grey.shade400],
@@ -302,7 +302,6 @@ class _FarmingState extends State<Farming> {
                       );
                     },
                   ),
-                  SizedBox(width:10),
                   Center(
                     child: Column(
                       children: [
@@ -333,11 +332,11 @@ class _FarmingState extends State<Farming> {
                           ),
                         ),
                         Text(
-                          "총알을 피해 오래 살아남으세요!",
+                          lang("총알을 피하세요!"),
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                         Text(
-                          "(난이도: ${bulletSpeedMultiplier.toStringAsFixed(2)}x)",
+                          "(${lang("난이도")}: ${bulletSpeedMultiplier.toStringAsFixed(2)}x)",
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
                         ),
                       ],
@@ -417,14 +416,14 @@ class _FarmingState extends State<Farming> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                "게임 오버!",
+                                lang("게임 오버!"),
                                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.red),
                               ),
                               SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text("보상 코인: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+                                  Text(lang("보상")+": ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
                                   Text(
                                     '$score',
                                     style: TextStyle(
@@ -462,7 +461,7 @@ class _FarmingState extends State<Farming> {
                                   padding: EdgeInsets.symmetric(horizontal: 25, vertical: 13), // 버튼 내부 여백
                                 ),
                                 child: Text(
-                                  "다시 하기",
+                                  lang("다시 하기"),
                                   style: TextStyle(
                                     fontSize: 18, // 텍스트 크기
                                     fontWeight: FontWeight.bold, // 텍스트 두께
@@ -482,4 +481,74 @@ class _FarmingState extends State<Farming> {
       ),
     );
   }
+}
+
+String lang(String textKey) {
+  final localizedTexts = {
+    'KOR': {
+      '총알을 피하세요!': '총알을 피하세요!',
+      '난이도': '난이도',
+      '게임 오버!': '게임 오버!',
+      '다시 하기': '다시 하기',
+      '보상': '보상',
+    },
+    'ENG': {
+      '총알을 피하세요!': 'Avoid the bullets!',
+      '난이도': 'Difficulty',
+      '게임 오버!': 'Game Over!',
+      '다시 하기': 'Retry',
+      '보상': 'Reward',
+    },
+    'ARA': {
+      '총알을 피하세요!': 'تجنب الرصاص!',
+      '난이도': 'الصعوبة',
+      '게임 오버!': 'انتهت اللعبة!',
+      '다시 하기': 'إعادة المحاولة',
+      '보상': 'المكافأة',
+    },
+    'CHN': {
+      '총알을 피하세요!': '躲避子弹！',
+      '난이도': '难度',
+      '게임 오버!': '游戏结束！',
+      '다시 하기': '重试',
+      '보상': '奖励',
+    },
+    'JPA': {
+      '총알을 피하세요!': '弾を避けてください！',
+      '난이도': '難易度',
+      '게임 오버!': 'ゲームオーバー！',
+      '다시 하기': 'リトライ',
+      '보상': '報酬',
+    },
+    'GER': {
+      '총알을 피하세요!': 'Weiche den Kugeln aus!',
+      '난이도': 'Schwierigkeit',
+      '게임 오버!': 'Spiel vorbei!',
+      '다시 하기': 'Erneut versuchen',
+      '보상': 'Belohnung',
+    },
+    'RUS': {
+      '총알을 피하세요!': 'Уклоняйтесь от пуль!',
+      '난이도': 'Сложность',
+      '게임 오버!': 'Игра окончена!',
+      '다시 하기': 'Повторить',
+      '보상': 'Награда',
+    },
+    'FRA': {
+      '총알을 피하세요!': 'Évitez les balles !',
+      '난이도': 'Difficulté',
+      '게임 오버!': 'Fin du jeu!',
+      '다시 하기': 'Recommencer',
+      '보상': 'Récompense',
+    },
+    'ESP': {
+      '총알을 피하세요!': '¡Esquiva las balas!',
+      '난이도': 'Dificultad',
+      '게임 오버!': '¡Juego terminado!',
+      '다시 하기': 'Reintentar',
+      '보상': 'Recompensa',
+    },
+  };
+
+  return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
 }

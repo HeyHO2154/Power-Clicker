@@ -220,7 +220,7 @@ class _MiningState extends State<Mining> {
             // 상단 박스
             Container(
               width: double.infinity, // 좌우로 꽉 채움
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Colors.green.shade600, Colors.grey.shade400], // 초록색과 회색 그라데이션
@@ -249,7 +249,6 @@ class _MiningState extends State<Mining> {
                       );
                     },
                   ),
-                  SizedBox(width: 20),
                   Center(
                     child: Column(
                       children: [
@@ -280,7 +279,7 @@ class _MiningState extends State<Mining> {
                           ),
                         ),
                         Text(
-                          "클릭해서 코인을 모으세요!",
+                          lang("클릭해서 코인을 모으세요!"),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -308,7 +307,7 @@ class _MiningState extends State<Mining> {
                                 ),
                               ),
                               TextSpan(
-                                text: " 확률로 ",
+                                text: " "+lang("확률")+" ",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -316,7 +315,7 @@ class _MiningState extends State<Mining> {
                                 ),
                               ),
                               TextSpan(
-                                text: "파티 타임",
+                                text: " "+lang("파티타임")+" ",
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -354,17 +353,17 @@ class _MiningState extends State<Mining> {
                               child: VideoPlayer(_videoPlayerController!),
                             ),
                           Text(
-                            'FEVER TIME!!',
+                            lang('파티타임'),
                             style: TextStyle(
-                              fontSize: 30,
+                              fontSize: 40,
                               fontWeight: FontWeight.bold,
                               color: Colors.red,
                             ),
                           ),
                           Text(
-                            '(x2 Points)',
+                            'x2',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 30,
                               fontWeight: FontWeight.bold,
                               color: Colors.red,
                             ),
@@ -394,4 +393,56 @@ class _MiningState extends State<Mining> {
       ),
     );
   }
+}
+
+String lang(String textKey) {
+  final localizedTexts = {
+    'KOR': {
+      '클릭해서 코인을 모으세요!': '클릭해서 코인을 모으세요!',
+      '확률': '확률',
+      '파티타임': '파티타임',
+    },
+    'ENG': {
+      '클릭해서 코인을 모으세요!': 'Click to collect coins!',
+      '확률': 'Probability',
+      '파티타임': 'Party Time',
+    },
+    'ARA': {
+      '클릭해서 코인을 모으세요!': 'اضغط لجمع العملات!',
+      '확률': 'احتمال',
+      '파티타임': 'وقت الحفلة',
+    },
+    'CHN': {
+      '클릭해서 코인을 모으세요!': '点击收集金币!',
+      '확률': '概率',
+      '파티타임': '派对时间',
+    },
+    'JPA': {
+      '클릭해서 코인을 모으세요!': 'クリックしてコインを集めましょう！',
+      '확률': '確率',
+      '파티타임': 'パーティタイム',
+    },
+    'GER': {
+      '클릭해서 코인을 모으세요!': 'Klicken, um Münzen zu sammeln!',
+      '확률': 'Wahrscheinlichkeit',
+      '파티타임': 'Partyzeit',
+    },
+    'RUS': {
+      '클릭해서 코인을 모으세요!': 'Нажмите, чтобы собрать монеты!',
+      '확률': 'Вероятность',
+      '파티타임': 'Время вечеринки',
+    },
+    'FRA': {
+      '클릭해서 코인을 모으세요!': 'Cliquez pour collecter des pièces!',
+      '확률': 'Probabilité',
+      '파티타임': 'Temps de fête',
+    },
+    'ESP': {
+      '클릭해서 코인을 모으세요!': '¡Haz clic para recolectar monedas!',
+      '확률': 'Probabilidad',
+      '파티타임': 'Tiempo de fiesta',
+    },
+  };
+
+  return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
 }

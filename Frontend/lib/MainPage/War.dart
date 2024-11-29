@@ -3,9 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../Login.dart';
 import '../main.dart';
 import 'MainPage.dart';
 import 'Shop.dart';
@@ -107,35 +104,17 @@ class _WarState extends State<War> {
   }
 
   void _showWarRecordsDialog(List<String> attackers) {
-    showDialog(
+    String content = attackers.map((attacker) => attackers).join("\n");
+
+    _showCustomDialog(
       context: context,
-      barrierDismissible: false, // 다이얼로그 밖을 눌러 닫는 것을 방지
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("공격 기록"),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: attackers.map((attacker) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text("$attacker님이 공격하셨습니다."),
-                );
-              }).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text("확인"),
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-              },
-            ),
-          ],
-        );
+      title: lang("공격 기록"),
+      content: content,
+      onConfirm: () {
       },
     );
   }
+
 
   void _decreasePoints(String targetUserId) async {
     final url = Uri.parse('${MyApp.url}/api/war');
@@ -192,7 +171,6 @@ class _WarState extends State<War> {
                     );
                   },
                 ),
-                SizedBox(width:15),
                 Center(
                   child: Column(
                     children: [
@@ -223,11 +201,11 @@ class _WarState extends State<War> {
                         ),
                       ),
                       Text(
-                        "상대를 클릭해서 공격하세요!",
+                        lang("상대를 클릭해서 공격하세요!"),
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       Text(
-                        "(최소 ${minAttack} 코인 이상)",
+                        lang("(50% 확률로 승리 또는 패배)"),
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
                       ),
                     ],
@@ -247,17 +225,17 @@ class _WarState extends State<War> {
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
-                  benefitBox = _buildBenefitBox("TOP 10 Player", Colors.yellow.shade700);
+                  benefitBox = _buildBenefitBox("TOP 10 ${lang("플레이어")}", Colors.yellow.shade700);
                 } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 Player", Colors.purple.shade200);
+                  benefitBox = _buildBenefitBox("TOP 20 ${lang("플레이어")}", Colors.purple.shade200);
                 } else if (index == 20) {
-                  benefitBox = _buildBenefitBox("TOP 30 Player", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox("TOP 30 ${lang("플레이어")}", Colors.green.shade300);
                 } else if (index == 30) {
-                  benefitBox = _buildBenefitBox("TOP 40 Player", Colors.orange.shade300);
+                  benefitBox = _buildBenefitBox("TOP 40 ${lang("플레이어")}", Colors.orange.shade300);
                 } else if (index == 40) {
-                  benefitBox = _buildBenefitBox("TOP 50 Player", Colors.red.shade300);
+                  benefitBox = _buildBenefitBox("TOP 50 ${lang("플레이어")}", Colors.red.shade300);
                 } else if (index == 50) {
-                  benefitBox = _buildBenefitBox("Other Player", Colors.grey);
+                  benefitBox = _buildBenefitBox("${lang("플레이어")}", Colors.grey);
                 }
 
                 return Column(
@@ -315,66 +293,42 @@ class _WarState extends State<War> {
                         ],
                       ),
                       // 클릭 시 포인트 감소 기능을 호출
-                      // 클릭 시 포인트 감소 기능을 호출
                       onTap: isCurrentUser
                           ? null
                           : () async {
-                        // 클릭한 플레이어의 포인트 불러오기
-                        if (userPoints >= minAttack) {
+                        final int targetPoints = user['points']; // 상대방의 포인트
+                        if (userPoints >= minAttack && targetPoints >= 100) {
                           final random = Random().nextBool(); // 50% 확률
                           if (random) {
                             // 공격 성공
-                            showDialog(
+                            _showCustomDialog(
                               context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("공격 성공!"),
-                                content: Text("상대를 성공적으로 공격했습니다."),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(); // 다이얼로그 닫기
-                                      _decreasePoints(user['user_id']); // 포인트 감소 호출
-                                    },
-                                    child: Text("확인"),
-                                  ),
-                                ],
-                              ),
+                              title: lang("공격 성공!"),
+                              content: lang("상대의 100 코인을 파괴했습니다!"),
+                              onConfirm: () {
+                                _decreasePoints(user['user_id']); // 포인트 감소 호출
+                              },
                             );
                           } else {
                             // 공격 실패
-                            showDialog(
+                            _showCustomDialog(
                               context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("공격 실패..."),
-                                content: Text("공격에 실패했습니다."),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(); // 다이얼로그 닫기
-                                      _getPointValue(-50); // 자신의 포인트 감소
-                                    },
-                                    child: Text("확인"),
-                                  ),
-                                ],
-                              ),
+                              title: lang("공격 실패.."),
+                              content: lang("당신의 50 코인이 사라졌습니다.."),
+                              onConfirm: () {
+                                _getPointValue(-50); // 자신의 포인트 감소
+                              },
                             );
                           }
                         } else {
                           // 포인트가 부족한 경우
-                          showDialog(
+                          _showCustomDialog(
                             context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text("포인트 부족"),
-                              content: Text("${user['user_id']}님은 포인트가 부족하여 공격할 수 없습니다."),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // 다이얼로그 닫기
-                                  },
-                                  child: Text("확인"),
-                                ),
-                              ],
-                            ),
+                            title: lang("포인트 부족"),
+                            content: lang("당신 또는 상대 포인트가 부족하여 공격할 수 없습니다."),
+                            onConfirm: () {
+                              // 포인트 부족 시 특별한 동작이 없으면 비워둡니다.
+                            },
                           );
                         }
                       },
@@ -408,14 +362,30 @@ class _WarState extends State<War> {
     }
   }
 }
+
 // 구간 설명 박스를 위한 메서드
 Widget _buildBenefitBox(String text1, Color color) {
+  // 이미지 파일명을 TOP 순위에 따라 결정
+  String imagePath;
+  if (text1.contains("TOP 10")) {
+    imagePath = 'assets/UI/Ranks/마스터.png';
+  } else if (text1.contains("TOP 20")) {
+    imagePath = 'assets/UI/Ranks/플레티넘.png';
+  } else if (text1.contains("TOP 30")) {
+    imagePath = 'assets/UI/Ranks/다이아.png';
+  } else if (text1.contains("TOP 40")) {
+    imagePath = 'assets/UI/Ranks/골드.png';
+  } else if (text1.contains("TOP 50")) {
+    imagePath = 'assets/UI/Ranks/실버.png';
+  } else {
+    imagePath = 'assets/UI/Ranks/브론즈.png'; // 기본 이미지
+  }
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Stack(
       alignment: Alignment.center,
       children: [
-        Divider(thickness: 2, color: color), // 구간별 선 색상
+        Divider(thickness: 10, color: color), // 구간별 선 색상
         Container(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
           alignment: Alignment.center,
@@ -424,10 +394,14 @@ Widget _buildBenefitBox(String text1, Color color) {
             color: color,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 첫째 줄 텍스트
+              // 순위 아이콘
+              Image.asset(
+                imagePath,
+                width: 50,
+              ),
               Text(
                 text1,
                 textAlign: TextAlign.center,
@@ -445,4 +419,153 @@ Widget _buildBenefitBox(String text1, Color color) {
   );
 }
 
+void _showCustomDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required VoidCallback onConfirm,
+}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // 다이얼로그 닫기
+              onConfirm(); // 확인 버튼 클릭 시 실행될 콜백
+            },
+            child: Text(lang("확인")),
+          ),
+        ],
+      );
+    },
+  );
+}
 
+String lang(String textKey) {
+  final localizedTexts = {
+    'KOR': {
+      '공격 기록': '공격 기록',
+      '상대를 클릭해서 공격하세요!': '상대를 클릭해서 공격하세요!',
+      '(50% 확률로 승리 또는 패배)': '(50% 확률로 승리 또는 패배)',
+      '플레이어': '플레이어',
+      '공격 성공!': '공격 성공!',
+      '상대의 100 코인을 파괴했습니다!': '상대의 100 코인을 파괴했습니다!',
+      '공격 실패..': '공격 실패..',
+      '당신의 50 코인이 사라졌습니다..': '당신의 50 코인이 사라졌습니다..',
+      '포인트 부족': '포인트 부족',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.',
+      '확인': '확인',
+    },
+    'ENG': {
+      '공격 기록': 'Attack History',
+      '상대를 클릭해서 공격하세요!': 'Click on a player to attack!',
+      '(50% 확률로 승리 또는 패배)': '(50% chance of victory or defeat)',
+      '플레이어': 'Player',
+      '공격 성공!': 'Attack Successful!',
+      '상대의 100 코인을 파괴했습니다!': 'Destroyed 100 of your opponent\'s coins!',
+      '공격 실패..': 'Attack Failed..',
+      '당신의 50 코인이 사라졌습니다..': 'You lost 50 coins..',
+      '포인트 부족': 'Insufficient Points',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'You or your opponent have insufficient points to attack.',
+      '확인': 'OK',
+    },
+    'ARA': {
+      '공격 기록': 'سجل الهجوم',
+      '상대를 클릭해서 공격하세요!': 'اضغط على لاعب للهجوم!',
+      '(50% 확률로 승리 또는 패배)': '(فرصة 50٪ للفوز أو الهزيمة)',
+      '플레이어': 'لاعب',
+      '공격 성공!': 'الهجوم ناجح!',
+      '상대의 100 코인을 파괴했습니다!': 'دمرت 100 قطعة نقدية من خصمك!',
+      '공격 실패..': 'فشل الهجوم..',
+      '당신의 50 코인이 사라졌습니다..': 'لقد فقدت 50 قطعة نقدية..',
+      '포인트 부족': 'نقاط غير كافية',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'أنت أو خصمك لديكما نقاط غير كافية للهجوم.',
+      '확인': 'تأكيد',
+    },
+    'CHN': {
+      '공격 기록': '攻击记录',
+      '상대를 클릭해서 공격하세요!': '点击玩家进行攻击！',
+      '(50% 확률로 승리 또는 패배)': '(50% 胜负几率)',
+      '플레이어': '玩家',
+      '공격 성공!': '攻击成功！',
+      '상대의 100 코인을 파괴했습니다!': '摧毁了对方的100金币！',
+      '공격 실패..': '攻击失败..',
+      '당신의 50 코인이 사라졌습니다..': '你失去了50金币..',
+      '포인트 부족': '积分不足',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': '您或对方积分不足，无法进行攻击。',
+      '확인': '确认',
+    },
+    'JPN': {
+      '공격 기록': 'هجوم السجل',
+      '상대를 클릭해서 공격하세요!': 'クリックして攻撃してください！',
+      '(50% 확률로 승리 또는 패배)': '（50％の確率で勝利または敗北）',
+      '플레이어': 'プレイヤー',
+      '공격 성공!': '攻撃成功！',
+      '상대의 100 코인을 파괴했습니다!': '相手の100コインを破壊しました！',
+      '공격 실패..': '攻撃失敗..',
+      '당신의 50 코인이 사라졌습니다..': 'あなたの50コインが失われました..',
+      '포인트 부족': 'ポイント不足',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'あなたまたは相手のポイントが不足しており、攻撃できません。',
+      '확인': '確認',
+    },
+    'GER': {
+      '공격 기록': 'Angriffsprotokoll',
+      '상대를 클릭해서 공격하세요!': 'Klicken Sie, um anzugreifen!',
+      '(50% 확률로 승리 또는 패배)': '(50 % gewinnen oder verlieren)',
+      '플레이어': 'Spieler',
+      '공격 성공!': 'Angriff erfolgreich!',
+      '상대의 100 코인을 파괴했습니다!': 'Sie haben 100 Münzen des Gegners zerstört!',
+      '공격 실패..': 'Angriff fehlgeschlagen..',
+      '당신의 50 코인이 사라졌습니다..': 'Ihre 50 Münzen sind verschwunden..',
+      '포인트 부족': 'Nicht genügend Punkte',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'Sie oder der Gegner haben nicht genügend Punkte, um anzugreifen.',
+      '확인': 'Bestätigen',
+    },
+    'FRA': {
+      '공격 기록': 'Historique des attaques',
+      '상대를 클릭해서 공격하세요!': 'Cliquez pour attaquer !',
+      '(50% 확률로 승리 또는 패배)': '(50 % de victoire ou de défaite)',
+      '플레이어': 'Joueur',
+      '공격 성공!': 'Attaque réussie !',
+      '상대의 100 코인을 파괴했습니다!': 'Vous avez détruit 100 pièces de votre adversaire !',
+      '공격 실패..': 'Échec de l\'attaque..',
+      '당신의 50 코인이 사라졌습니다..': 'Vous avez perdu 50 pièces..',
+      '포인트 부족': 'Points insuffisants',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'Vous ou votre adversaire n\'avez pas assez de points pour attaquer.',
+      '확인': 'Confirmer',
+    },
+    'RUS': {
+      '공격 기록': 'Запись атак',
+      '상대를 클릭해서 공격하세요!': 'Нажмите, чтобы атаковать!',
+      '(50% 확률로 승리 또는 패배)': '(50% шанс на победу)',
+      '플레이어': 'Игрок',
+      '공격 성공!': 'Атака успешна!',
+      '상대의 100 코인을 파괴했습니다!': 'Вы уничтожили 100 монет соперника!',
+      '공격 실패..': 'Атака не удалась..',
+      '당신의 50 코인이 사라졌습니다..': 'Ваши 50 монет исчезли..',
+      '포인트 부족': 'Недостаточно очков',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'У вас или у соперника недостаточно очков для атаки.',
+      '확인': 'Подтвердить',
+    },
+    'ESP': {
+      '공격 기록': 'Historial de ataques',
+      '상대를 클릭해서 공격하세요!': '¡Haz clic para atacar!',
+      '(50% 확률로 승리 또는 패배)': '(50% de posibilidades de ganar)',
+      '플레이어': 'Jugador',
+      '공격 성공!': '¡Ataque exitoso!',
+      '상대의 100 코인을 파괴했습니다!': '¡Has destruido 100 monedas del oponente!',
+      '공격 실패..': 'Ataque fallido..',
+      '당신의 50 코인이 사라졌습니다..': 'Has perdido 50 monedas..',
+      '포인트 부족': 'Puntos insuficientes',
+      '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'Tú o tu oponente no tenéis suficientes puntos para atacar.',
+      '확인': 'Confirmar',
+    },
+
+  };
+
+  return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
+}

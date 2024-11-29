@@ -6,7 +6,6 @@ import 'dart:convert';
 import '../main.dart';
 import 'Farming.dart';
 import 'Mining.dart';
-import 'MyInfo.dart';
 import 'Shop.dart';
 import 'War.dart';
 

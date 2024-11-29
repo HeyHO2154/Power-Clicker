@@ -58,6 +58,6 @@ INSERT INTO item (user_id) VALUES ('test');
 SELECT * FROM users
 LEFT JOIN theme ON users.user_id = theme.user_id
 LEFT JOIN item ON users.user_id = item.user_id;
-UPDATE users SET points = 899 WHERE user_id = 'adad';
+UPDATE users SET points = 899 WHERE user_id = 'sa';
 
 
