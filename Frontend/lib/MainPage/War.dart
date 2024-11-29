@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -18,9 +20,7 @@ class _WarState extends State<War> {
   String? userId;
   Map<String, dynamic>? currentUser;
   ScrollController _scrollController = ScrollController();
-
-  int meDecrease = -50;
-  int otherDecrease = -100;
+  int minAttack = 100;
   int userPoints = 0; // 사용자 포인트 변수 추가
 
   @override
@@ -73,8 +73,9 @@ class _WarState extends State<War> {
         userPoints = int.parse(response.body);
       });
     }
-  }
 
+    await _loadUsers(); //순위페이지라는 특수성 때문에 추가함
+  }
 
   void _scrollToCurrentUser() {
     if (currentUser != null) {
@@ -96,47 +97,16 @@ class _WarState extends State<War> {
   }
 
   void _decreasePoints(String targetUserId) async {
-    if (userId == null || currentUser == null) return;
-
-    int currentUserPoints = currentUser!['points'];
-    final targetUser = users.firstWhere((user) => user['user_id'] == targetUserId, orElse: () => {});
-    int targetUserPoints = targetUser['points'] ?? 0;
-
-    if (currentUserPoints < meDecrease*-1 || targetUserPoints < otherDecrease*-1 ) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You or Others have small point to War..')),
-      );
-      return;
-    }
-
-    final url = Uri.parse('${MyApp.url}/user/point');
+    final url = Uri.parse('${MyApp.url}/api/war');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': userId, 'points': meDecrease}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
+      body: jsonEncode({'attacker': userId, 'defender': targetUserId}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
     if (response.statusCode == 200) {
-      setState(() {
-        userPoints = int.parse(response.body);
-      });
+      await _getPointValue(0); // 포인트 다시 불러오기
     }
-
-    final url2 = Uri.parse('${MyApp.url}/user/point');
-    final response2 = await http.post(
-      url2,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': targetUserId, 'points': otherDecrease}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
-    );
-
-    if (response2.statusCode == 200) {
-      setState(() {
-        userPoints = int.parse(response2.body);
-      });
-    }
-
-    await _loadUsers();
-    await _getPointValue(0); // 포인트 다시 불러오기
   }
 
   @override
@@ -216,7 +186,7 @@ class _WarState extends State<War> {
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       Text(
-                        "(최소 공격 100 코인 이상)",
+                        "(최소 ${minAttack} 코인 이상)",
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
                       ),
                     ],
@@ -303,11 +273,48 @@ class _WarState extends State<War> {
                           ),
                         ],
                       ),
-// 클릭 시 포인트 감소 기능을 호출
+                      // 클릭 시 포인트 감소 기능을 호출
+                      // 클릭 시 포인트 감소 기능을 호출
                       onTap: isCurrentUser ? null : () {
-                        _decreasePoints(user['user_id']);
+                        final random = Random().nextBool(); // 50% 확률
+                        if (random) {
+                          // 공격 성공
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("공격 성공!"),
+                              content: Text("상대를 성공적으로 공격했습니다."),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    _decreasePoints(user['user_id']); // 포인트 감소 호출
+                                  },
+                                  child: Text("확인"),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          // 공격 실패
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("공격 실패..."),
+                              content: Text("공격에 실패했습니다."),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    _getPointValue(-50);
+                                  },
+                                  child: Text("확인"),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
                       },
-
                     ),
                   ],
                 );

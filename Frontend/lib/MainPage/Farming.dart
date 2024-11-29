@@ -132,9 +132,9 @@ class _FarmingState extends State<Farming> {
     // 점수 증가 타이머
     scoreTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!isGameOver) {
-        score += (1 + (timeElapsed ~/ 10))*2;
+        score += (1 + (timeElapsed ~/ 10))*1;
         setState(() {
-          _getPointValue((1 + (timeElapsed ~/ 10))*2); // 경과 시간에 비례한 점수 증가
+          _getPointValue((1 + (timeElapsed ~/ 10))*1); // 경과 시간에 비례한 점수 증가
         });
       }
     });
