@@ -17,16 +17,16 @@ class War extends StatefulWidget {
 
 class _WarState extends State<War> {
   List<Map<String, dynamic>> users = [];
-  String? userId;
   Map<String, dynamic>? currentUser;
   ScrollController _scrollController = ScrollController();
-  int minAttack = 100;
+  int minAttack = 50;
   int userPoints = 0; // 사용자 포인트 변수 추가
 
   @override
   void initState() {
     super.initState();
-    _loadUserId();
+    _getPointValue(0);
+    _getWarRecords(MyApp.user_id);
   }
 
   @override
@@ -35,31 +35,6 @@ class _WarState extends State<War> {
     super.dispose();
   }
 
-  Future<void> _loadUserId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userId = prefs.getString('user_id');
-    });
-    await _loadUsers();
-    await _getPointValue(0); // 사용자 포인트 불러오기
-    _scrollToCurrentUser(); // 화면 들어올 때 한 번만 스크롤 위치 설정
-  }
-
-  Future<void> _loadUsers() async {
-    final response = await http.get(Uri.parse('${MyApp.url}/api/users'));
-    if (response.statusCode == 200) {
-      List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(
-          jsonDecode(utf8.decode(response.bodyBytes))); // UTF-8로 디코딩
-      setState(() {
-        allUsers.sort((a, b) => b['points'].compareTo(a['points']));
-        users = allUsers;
-        currentUser = allUsers.firstWhere(
-              (user) => user['user_id'] == userId,
-          orElse: () => {'user_id': userId, 'points': 0},
-        );
-      });
-    }
-  }
   Future<void> _getPointValue(n) async {
     final url = Uri.parse('${MyApp.url}/user/point');
     final response = await http.post(
@@ -77,9 +52,26 @@ class _WarState extends State<War> {
     await _loadUsers(); //순위페이지라는 특수성 때문에 추가함
   }
 
+  Future<void> _loadUsers() async {
+    final response = await http.get(Uri.parse('${MyApp.url}/api/users'));
+    if (response.statusCode == 200) {
+      List<Map<String, dynamic>> allUsers = List<Map<String, dynamic>>.from(
+          jsonDecode(utf8.decode(response.bodyBytes))); // UTF-8로 디코딩
+      setState(() {
+        allUsers.sort((a, b) => b['points'].compareTo(a['points']));
+        users = allUsers;
+        currentUser = allUsers.firstWhere(
+              (user) => user['user_id'] == MyApp.user_id,
+          orElse: () => {'user_id': MyApp.user_id, 'points': 0},
+        );
+      });
+    }
+    _scrollToCurrentUser();
+  }
+
   void _scrollToCurrentUser() {
     if (currentUser != null) {
-      int userIndex = users.indexWhere((user) => user['user_id'] == userId);
+      int userIndex = users.indexWhere((user) => user['user_id'] == MyApp.user_id);
       if (userIndex != -1) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           double scrollPosition = userIndex * 70.0;
@@ -96,12 +88,61 @@ class _WarState extends State<War> {
     }
   }
 
+  void _getWarRecords(String userId) async {
+    final url = Uri.parse('${MyApp.url}/api/warRecord');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId}), // 유저 ID 전달
+    );
+
+    if (response.statusCode == 200) {
+      // JSON 데이터 파싱
+      List<String> attackers = List<String>.from(jsonDecode(response.body));
+
+      if (attackers.isNotEmpty) {
+        _showWarRecordsDialog(attackers);
+      }
+    }
+  }
+
+  void _showWarRecordsDialog(List<String> attackers) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // 다이얼로그 밖을 눌러 닫는 것을 방지
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("공격 기록"),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: attackers.map((attacker) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Text("$attacker님이 공격하셨습니다."),
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("확인"),
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _decreasePoints(String targetUserId) async {
     final url = Uri.parse('${MyApp.url}/api/war');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'attacker': userId, 'defender': targetUserId}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
+      body: jsonEncode({'attacker': MyApp.user_id, 'defender': targetUserId}), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
     if (response.statusCode == 200) {
@@ -201,7 +242,7 @@ class _WarState extends State<War> {
               itemCount: users.length,
               itemBuilder: (context, index) {
                 final user = users[index];
-                bool isCurrentUser = user['user_id'] == userId;
+                bool isCurrentUser = user['user_id'] == MyApp.user_id;
 
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
@@ -275,38 +316,60 @@ class _WarState extends State<War> {
                       ),
                       // 클릭 시 포인트 감소 기능을 호출
                       // 클릭 시 포인트 감소 기능을 호출
-                      onTap: isCurrentUser ? null : () {
-                        final random = Random().nextBool(); // 50% 확률
-                        if (random) {
-                          // 공격 성공
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text("공격 성공!"),
-                              content: Text("상대를 성공적으로 공격했습니다."),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // 다이얼로그 닫기
-                                    _decreasePoints(user['user_id']); // 포인트 감소 호출
-                                  },
-                                  child: Text("확인"),
-                                ),
-                              ],
-                            ),
-                          );
+                      onTap: isCurrentUser
+                          ? null
+                          : () async {
+                        // 클릭한 플레이어의 포인트 불러오기
+                        if (userPoints >= minAttack) {
+                          final random = Random().nextBool(); // 50% 확률
+                          if (random) {
+                            // 공격 성공
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("공격 성공!"),
+                                content: Text("상대를 성공적으로 공격했습니다."),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                      _decreasePoints(user['user_id']); // 포인트 감소 호출
+                                    },
+                                    child: Text("확인"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            // 공격 실패
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("공격 실패..."),
+                                content: Text("공격에 실패했습니다."),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                      _getPointValue(-50); // 자신의 포인트 감소
+                                    },
+                                    child: Text("확인"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
                         } else {
-                          // 공격 실패
+                          // 포인트가 부족한 경우
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: Text("공격 실패..."),
-                              content: Text("공격에 실패했습니다."),
+                              title: Text("포인트 부족"),
+                              content: Text("${user['user_id']}님은 포인트가 부족하여 공격할 수 없습니다."),
                               actions: [
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).pop(); // 다이얼로그 닫기
-                                    _getPointValue(-50);
                                   },
                                   child: Text("확인"),
                                 ),
