@@ -249,13 +249,13 @@ class _MainPageState extends State<MainPage> {
                 ),
                 SizedBox(height: 5),
                 Container(
-                  height: 280, // 적절한 높이 설정
+                  height: 310, // 적절한 높이 설정
                   child: GridView.builder(
                     shrinkWrap: true,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3, // 3개씩 한 행에 배치
                       crossAxisSpacing: 10, // 가로 간격
-                      mainAxisSpacing: 10, // 세로 간격
+                      mainAxisSpacing: 0, // 세로 간격
                     ),
                     itemCount: 9, // 9개 국기
                     itemBuilder: (context, index) {

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/video_player.dart';
 
 import '../main.dart';
 import 'MainPage.dart';
@@ -26,6 +27,9 @@ class _FarmingState extends State<Farming> {
   int totalPoints = 0; // 상단 포인트
   int score = 0;
   String? userId;
+  VideoPlayerController? _videoPlayerController;
+  bool isVideoPlaying = false;
+
 
   // 증가 변수들
   int timeElapsed = 0; // 게임 경과 시간
@@ -37,6 +41,18 @@ class _FarmingState extends State<Farming> {
     super.initState();
     _loadUserId();
     startGame();
+
+    // 비디오 플레이어 초기화
+    _videoPlayerController = VideoPlayerController.asset('assets/Farming.mp4')
+      ..initialize().then((_) {
+        _videoPlayerController?.setLooping(true); // 무한반복 활성화
+        setState(() {
+          print("비디오 초기화 성공");
+        });
+      }).catchError((error) {
+        print("비디오 초기화 실패: $error");
+      });
+
   }
 
   Future<void> _loadUserId() async {
@@ -74,10 +90,21 @@ class _FarmingState extends State<Farming> {
     gameTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         timeElapsed++;
-        bulletSpeedMultiplier = 1 + (timeElapsed / 20); // 총알 속도 점진적 증가
+        bulletSpeedMultiplier = 1 + (timeElapsed / 40); // 총알 속도 점진적 증가
         bulletCountMultiplier = 5 + (timeElapsed ~/ 10); // 총알 개수 점진적 증가
+
+        // 난이도를 넘었을 때 비디오 재생
+        if (bulletSpeedMultiplier > 1.5 && !isVideoPlaying) {
+          isVideoPlaying = true;
+          _videoPlayerController?.play();
+        } else if (bulletSpeedMultiplier <= 1.5 && isVideoPlaying) {
+          isVideoPlaying = false;
+          _videoPlayerController?.pause();
+          _videoPlayerController?.seekTo(Duration.zero); // 비디오 처음으로 되돌림
+        }
       });
     });
+
 
     // 총알 생성 타이머
     bulletTimer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -119,6 +146,7 @@ class _FarmingState extends State<Farming> {
     moveTimer?.cancel();
     scoreTimer?.cancel();
     gameTimer?.cancel();
+    _videoPlayerController?.dispose(); // 비디오 플레이어 해제
     super.dispose();
   }
 
@@ -183,6 +211,7 @@ class _FarmingState extends State<Farming> {
       if ((bullet['position'] - circlePosition).distance < circleSize / 2) {
         setState(() {
           isGameOver = true;
+          _videoPlayerController?.pause(); // 게임 오버 시 영상 멈춤
         });
         bulletTimer?.cancel();
         moveTimer?.cancel();
@@ -325,6 +354,20 @@ class _FarmingState extends State<Farming> {
                 },
                 child: Stack(
                   children: [
+                    // 비디오가 재생 중일 때 화면에 표시
+                    if (isVideoPlaying && _videoPlayerController != null && _videoPlayerController!.value.isInitialized)
+                      Positioned(
+                        bottom: 300,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 1, // 명시적인 너비 제공
+                          height: MediaQuery.of(context).size.width * 1 / _videoPlayerController!.value.aspectRatio, // 높이는 비율에 맞게
+                          child: AspectRatio(
+                            aspectRatio: _videoPlayerController!.value.aspectRatio,
+                            child: VideoPlayer(_videoPlayerController!),
+                          ),
+                        ),
+                      ),
+
                     // 드래그 가능한 원 (고양이)
                     Positioned(
                       left: circlePosition.dx,

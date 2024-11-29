@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       //home: MainPage(),
-      home: HomePage(), // 홈 페이지를 초기 화면으로 설정
+      home: LoginPage(), // 홈 페이지를 초기 화면으로 설정
     );
   }
 }
