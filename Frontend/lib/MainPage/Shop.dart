@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -18,22 +19,30 @@ class _ShopPageState extends State<Shop> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   final List<String> _productIds = ['point_1000', 'point_6000', 'point_12000'];
   Map<String, ProductDetails> _products = {};
+  StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   @override
   void initState() {
     super.initState();
-    _getPointValue();
-    _initializeProducts();
-    _inAppPurchase.purchaseStream.listen((List<PurchaseDetails> purchases) {
-      for (var purchase in purchases) {
-        if (purchase.status == PurchaseStatus.purchased) {
-          _handlePurchaseSuccess(purchase);
-        } else if (purchase.status == PurchaseStatus.error) {
-          _handlePurchaseError(purchase);
+    _subscription = _inAppPurchase.purchaseStream.listen(
+          (List<PurchaseDetails> purchases) {
+        for (var purchase in purchases) {
+          if (purchase.status == PurchaseStatus.purchased) {
+            _handlePurchaseSuccess(purchase);
+          } else if (purchase.status == PurchaseStatus.error) {
+            _handlePurchaseError(purchase);
+          }
         }
-      }
-    });
+      },
+    );
   }
+
+  @override
+  void dispose() {
+    _subscription?.cancel(); // 구독 해제
+    super.dispose();
+  }
+
 
   Future<void> _getPointValue() async {
     final url = Uri.parse('${MyApp.url}/user/point');
@@ -93,11 +102,6 @@ class _ShopPageState extends State<Shop> {
 
   void _handlePurchaseError(PurchaseDetails purchase) {
     print('Purchase error: ${purchase.error?.message}');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
