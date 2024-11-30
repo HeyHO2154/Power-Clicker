@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../main.dart';
@@ -21,18 +22,17 @@ class _ShopPageState extends State<Shop> {
   final List<String> _productIds = ['point_1000', 'point_6000', 'point_12000'];
   Map<String, ProductDetails> _products = {};
   StreamSubscription<List<PurchaseDetails>>? _subscription;
-  final Set<String> _processedPurchases = {};
-  bool _isPurchaseStreamActive = false;
+  RewardedAd? _rewardedAd;
+  bool _isAdLoaded = false;
 
-  // 초기화 시도 횟수 제한
-  int _billingClientRetryCount = 0;
-  final int _maxRetryCount = 3;
+
 
   @override
   void initState() {
     super.initState();
     _initializeProducts();
-    _getPointValue();
+    _getPointValue(0);
+    _loadRewardedAd(); // 광고 로드
   }
 
   @override
@@ -42,18 +42,20 @@ class _ShopPageState extends State<Shop> {
       _subscription!.cancel();
       _subscription = null;
     }
-    // 연결 상태를 명확히 표시
-    _isPurchaseStreamActive = false;
+    _rewardedAd?.dispose();
     super.dispose();
   }
 
 
-  Future<void> _getPointValue() async {
+  Future<void> _getPointValue(n) async {
     final url = Uri.parse('${MyApp.url}/user/point');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': MyApp.user_id, 'points': 0}),
+      body: jsonEncode({
+        'user_id': MyApp.user_id,
+        'points': n
+      }), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
 
     if (response.statusCode == 200) {
@@ -84,6 +86,43 @@ class _ShopPageState extends State<Shop> {
       _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
     } else {
       print('Product not found: $productId');
+    }
+  }
+
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/5224354917', // 보상형 광고 ID (테스트 ID)
+      //adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 광고 ID
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _rewardedAd = ad;
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (error) {
+          print('Failed to load rewarded ad: ${error.message}');
+        },
+      ),
+    );
+  }
+
+  void _showRewardedAd() {
+    if (_rewardedAd != null && _isAdLoaded) {
+      _rewardedAd!.show(
+        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+          setState(() {
+            points += reward.amount.toInt(); // 포인트 지급
+          });
+          _getPointValue(1000);
+        },
+      );
+      _rewardedAd = null;
+      _isAdLoaded = false;
+      _loadRewardedAd(); // 광고 재로드
+    } else {
+      print('Rewarded ad is not ready yet');
     }
   }
 
@@ -321,7 +360,7 @@ class _ShopPageState extends State<Shop> {
         ),
         Spacer(),
         ElevatedButton(
-          onPressed: "123" == "00:00:00" ? () {} : null,
+          onPressed: _isAdLoaded ? _showRewardedAd : null, // 광고 표시 메서드 호출
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.amberAccent,
             disabledBackgroundColor: Colors.grey,
