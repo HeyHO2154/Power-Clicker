@@ -28,7 +28,7 @@ class _ShopPageState extends State<Shop> {
   bool _isButtonActive = true;
   String remainingTime = "00:00:00";
   Timer? _timer;
-  int time_second = 10;
+  int time_second = 20;
 
 
 
@@ -428,40 +428,50 @@ class _ShopPageState extends State<Shop> {
   }
 
 
-
-  // 2. 포인트 무료 충전
+// 2. 포인트 무료 충전
   Widget _buildFreePointsSection() {
-    return Row(
-      children: [
-        Text(
-          lang('시간')+': $remainingTime',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        Spacer(),
-        ElevatedButton(
+    return Center(
+      child: SizedBox(
+        width: 160, // 버튼의 고정 너비
+        height: 50, // 버튼의 고정 높이
+        child: ElevatedButton(
           onPressed: _isButtonActive ? _onFreePointsClicked : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amberAccent,
+            backgroundColor: Colors.yellow.shade800,
             disabledBackgroundColor: Colors.grey,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // 모서리 반경 조정 (20은 적당히 둥근 모양)
+              borderRadius: BorderRadius.circular(10), // 모서리 반경 조정
             ),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // 내용에 맞게 크기를 최소화
+          child: _isButtonActive
+              ? Row(
+            mainAxisSize: MainAxisSize.min, // 내용 크기에 맞춤
             children: [
               Text(
                 '+1,000 ',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               Image.asset(
                 'assets/UI/coin.png', // 코인 이미지 경로
                 height: 40, // 이미지 크기
               ),
             ],
+          )
+              : Text(
+            remainingTime, // 버튼 비활성화 시 남은 시간 표시
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 
