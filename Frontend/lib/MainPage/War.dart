@@ -428,22 +428,80 @@ void _showCustomDialog({
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // 다이얼로그 닫기
-              onConfirm(); // 확인 버튼 클릭 시 실행될 콜백
-            },
-            child: Text(lang("확인")),
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15), // 다이얼로그의 모서리를 둥글게 설정
+        ),
+        backgroundColor: Colors.black87, // 다이얼로그 배경색
+        child: Padding(
+          padding: const EdgeInsets.all(20.0), // 내부 여백
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // 내용에 맞게 크기를 최소화
+            children: [
+              // 제목
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFD4AF37), // 금색
+                  shadows: [
+                    Shadow(
+                      color: Colors.black45,
+                      offset: Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 15),
+              // 내용
+              Text(
+                content,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              // 버튼
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // 확인 버튼
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                      onConfirm(); // 확인 버튼 클릭 시 실행될 콜백
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFD4AF37), // 금색 배경
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    ),
+                    child: Text(
+                      lang("확인"),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       );
     },
   );
 }
+
 
 String lang(String textKey) {
   final localizedTexts = {

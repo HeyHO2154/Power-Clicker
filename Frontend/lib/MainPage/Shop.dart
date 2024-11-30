@@ -98,8 +98,8 @@ class _ShopPageState extends State<Shop> {
 
   void _loadRewardedInterstitialAd() {
     RewardedInterstitialAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
-      //adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
+      //adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
+      adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
       request: const AdRequest(),
       rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
         onAdLoaded: (ad) {
