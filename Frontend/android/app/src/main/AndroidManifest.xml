@@ -3,11 +3,13 @@
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-
     <application
         android:label="파워 클리커"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4725119578294745~3589507244"/> <!-- AdMob App ID -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
