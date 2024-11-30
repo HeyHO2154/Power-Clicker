@@ -16,8 +16,8 @@ void main() {
 class MyApp extends StatelessWidget {
 
   //매번 아이피 가져오기 귀찮아서, 이리 설정
-  static const String url = 'http://ekaf.kro.kr:8080';
-  static const String url2 = 'ws://ekaf.kro.kr:8080';
+  static const String url = 'http://ekaf.kro.kr:25500';
+  static const String url2 = 'ws://ekaf.kro.kr:25500';
   static String user_id = ''; //향후 본인 아이디는 모두 이걸로 통일
   static String currentLanguage = 'ENG'; // 기본 언어 설정
   static String currentTheme = 'cat';
