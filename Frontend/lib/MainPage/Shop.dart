@@ -23,12 +23,12 @@ class _ShopPageState extends State<Shop> {
   final List<String> _productIds = ['point_1000', 'point_6000', 'point_12000'];
   Map<String, ProductDetails> _products = {};
   StreamSubscription<List<PurchaseDetails>>? _subscription;
-  RewardedAd? _rewardedAd;
+  RewardedInterstitialAd? _rewardedInterstitialAd; // 보상형 전면 광고
   bool _isAdLoaded = false;
   bool _isButtonActive = true;
   String remainingTime = "00:00:00";
   Timer? _timer;
-  int time_second = 1800;
+  int time_second = 10;
 
 
 
@@ -37,7 +37,7 @@ class _ShopPageState extends State<Shop> {
     super.initState();
     _initializeProducts();
     _getPointValue(0);
-    _loadRewardedAd(); // 광고 로드
+    _loadRewardedInterstitialAd(); // 보상형 전면 광고 로드
     _checkCooltime(); // 쿨타임 확인
   }
 
@@ -49,7 +49,7 @@ class _ShopPageState extends State<Shop> {
       _subscription = null;
     }
     _timer?.cancel();
-    _rewardedAd?.dispose();
+    _rewardedInterstitialAd?.dispose();
     super.dispose();
   }
 
@@ -96,28 +96,29 @@ class _ShopPageState extends State<Shop> {
     }
   }
 
-  void _loadRewardedAd() {
-    RewardedAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/5224354917', // 보상형 광고 ID (테스트 ID)
-      //adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 광고 ID
+  void _loadRewardedInterstitialAd() {
+    RewardedInterstitialAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
+      //adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
       request: const AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
+      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           setState(() {
-            _rewardedAd = ad;
+            _rewardedInterstitialAd = ad;
             _isAdLoaded = true;
           });
+          print('Rewarded Interstitial Ad loaded.');
         },
         onAdFailedToLoad: (error) {
-          print('Failed to load rewarded ad: ${error.message}');
+          print('Failed to load rewarded interstitial ad: ${error.message}');
         },
       ),
     );
   }
 
-  void _showRewardedAd() {
-    if (_rewardedAd != null && _isAdLoaded) {
-      _rewardedAd!.show(
+  void _showRewardedInterstitialAd() {
+    if (_rewardedInterstitialAd != null && _isAdLoaded) {
+      _rewardedInterstitialAd!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
           setState(() {
             points += reward.amount.toInt(); // 포인트 지급
@@ -125,13 +126,28 @@ class _ShopPageState extends State<Shop> {
           _getPointValue(1000);
         },
       );
-      _rewardedAd = null;
+      // 광고 재로드
+      _rewardedInterstitialAd = null;
       _isAdLoaded = false;
-      _loadRewardedAd(); // 광고 재로드
+      _loadRewardedInterstitialAd();
     } else {
-      print('Rewarded ad is not ready yet');
+      print('Rewarded interstitial ad is not ready yet');
     }
   }
+
+  Future<void> _onFreePointsClicked() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 30분 후
+    await prefs.setInt('cooltime', newCooltime);
+
+    _showRewardedInterstitialAd(); // 보상형 전면 광고 표시
+    setState(() {
+      _isButtonActive = false;
+    });
+
+    _startTimer(time_second * 1000); // 30분 타이머 시작
+  }
+
 
   // 쿨타임 확인 및 버튼 상태 관리
   Future<void> _checkCooltime() async {
@@ -189,20 +205,6 @@ class _ShopPageState extends State<Shop> {
     });
   }
 
-  // 버튼 클릭 시 포인트 추가 및 쿨타임 저장
-  Future<void> _onFreePointsClicked() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 30분 후
-    await prefs.setInt('cooltime', newCooltime);
-
-    _showRewardedAd();
-    setState(() {
-      _isButtonActive = false;
-    });
-
-    _startTimer(time_second * 1000); // 30분 타이머 시작
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -248,7 +250,7 @@ class _ShopPageState extends State<Shop> {
                       ),
                       // 내 정보 제목
                       Text(
-                        '상점',
+                        lang('상점'),
                         style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
@@ -301,12 +303,12 @@ class _ShopPageState extends State<Shop> {
                         SizedBox(height: 150), //임시로 아이템, 테마상점 생기기 전까지 중앙배치
                         SizedBox(height: 20),
                         _buildSection(
-                          title: '코인 구매',
+                          title: lang('코인 구매'),
                           child: _buildPaidPointsSection(),
                         ),
                         SizedBox(height: 20),
                         _buildSection(
-                          title: '코인 무료 충전',
+                          title: lang('코인 무료 충전'),
                           child: _buildFreePointsSection(),
                         ),
                         // SizedBox(height: 20),
@@ -432,7 +434,7 @@ class _ShopPageState extends State<Shop> {
     return Row(
       children: [
         Text(
-          '남은 시간: $remainingTime',
+          lang('시간')+': $remainingTime',
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
         Spacer(),
@@ -441,8 +443,23 @@ class _ShopPageState extends State<Shop> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.amberAccent,
             disabledBackgroundColor: Colors.grey,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10), // 모서리 반경 조정 (20은 적당히 둥근 모양)
+            ),
           ),
-          child: Text('포인트 받기!'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min, // 내용에 맞게 크기를 최소화
+            children: [
+              Text(
+                '+1,000 ',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+              ),
+              Image.asset(
+                'assets/UI/coin.png', // 코인 이미지 경로
+                height: 40, // 이미지 크기
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -532,4 +549,65 @@ class _ShopPageState extends State<Shop> {
     );
   }
 
+}
+
+String lang(String textKey) {
+  final localizedTexts = {
+    'KOR': {
+      '상점': '상점',
+      '코인 구매': '코인 구매',
+      '코인 무료 충전': '코인 무료 충전',
+      '시간': '시간',
+    },
+    'ENG': {
+      '상점': 'Shop',
+      '코인 구매': 'Buy Coins',
+      '코인 무료 충전': 'Free Coin Charge',
+      '시간': 'Time',
+    },
+    'ARA': {
+      '상점': 'متجر',
+      '코인 구매': 'شراء العملات',
+      '코인 무료 충전': 'شحن العملات المجاني',
+      '시간': 'الوقت',
+    },
+    'CHN': {
+      '상점': '商店',
+      '코인 구매': '购买金币',
+      '코인 무료 충전': '免费金币充电',
+      '시간': '时间',
+    },
+    'JPA': {
+      '상점': 'ショップ',
+      '코인 구매': 'コイン購入',
+      '코인 무료 충전': 'コイン無料チャージ',
+      '시간': '時間',
+    },
+    'GER': {
+      '상점': 'Laden',
+      '코인 구매': 'Münzen kaufen',
+      '코인 무료 충전': 'Kostenlose Münzaufladung',
+      '시간': 'Zeit',
+    },
+    'RUS': {
+      '상점': 'Магазин',
+      '코인 구매': 'Покупка монет',
+      '코인 무료 충전': 'Бесплатная зарядка монет',
+      '시간': 'Время',
+    },
+    'FRA': {
+      '상점': 'Magasin',
+      '코인 구매': 'Acheter des pièces',
+      '코인 무료 충전': 'Recharge gratuite de pièces',
+      '시간': 'Temps',
+    },
+    'ESP': {
+      '상점': 'Tienda',
+      '코인 구매': 'Comprar monedas',
+      '코인 무료 충전': 'Recarga gratuita de monedas',
+      '시간': 'Tiempo',
+    },
+  };
+
+  return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
 }

@@ -25,8 +25,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      //home: MainPage(),
-      home: HomePage(), // 홈 페이지를 초기 화면으로 설정
+      //home: HomePage(),
+      home: MainPage(), // 홈 페이지를 초기 화면으로 설정
     );
   }
 }
@@ -42,8 +42,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _initializeLanguageSetting(); // 언어 설정 불러오기
     _initializeThemeSetting(); // 테마 설정 불러오기
-    _checkLoginStatus();
     _resetPreferences(); //디버그용 초기화
+    _checkLoginStatus();
   }
 
   // SharedPreferences 초기화 함수 - 디버깅용
@@ -74,8 +74,6 @@ class _HomePageState extends State<HomePage> {
       MyApp.currentLanguage = 'defaults'; // 기본 언어 설정
     }
   }
-
-
 
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

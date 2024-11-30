@@ -370,9 +370,9 @@ Widget _buildBenefitBox(String text1, Color color) {
   if (text1.contains("TOP 10")) {
     imagePath = 'assets/UI/Ranks/마스터.png';
   } else if (text1.contains("TOP 20")) {
-    imagePath = 'assets/UI/Ranks/플레티넘.png';
-  } else if (text1.contains("TOP 30")) {
     imagePath = 'assets/UI/Ranks/다이아.png';
+  } else if (text1.contains("TOP 30")) {
+    imagePath = 'assets/UI/Ranks/플레티넘.png';
   } else if (text1.contains("TOP 40")) {
     imagePath = 'assets/UI/Ranks/골드.png';
   } else if (text1.contains("TOP 50")) {
