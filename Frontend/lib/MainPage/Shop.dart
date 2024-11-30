@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
 import 'package:http/http.dart' as http;
@@ -24,6 +25,10 @@ class _ShopPageState extends State<Shop> {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   RewardedAd? _rewardedAd;
   bool _isAdLoaded = false;
+  bool _isButtonActive = true;
+  String remainingTime = "00:00:00";
+  Timer? _timer;
+  int time_second = 1800;
 
 
 
@@ -33,6 +38,7 @@ class _ShopPageState extends State<Shop> {
     _initializeProducts();
     _getPointValue(0);
     _loadRewardedAd(); // 광고 로드
+    _checkCooltime(); // 쿨타임 확인
   }
 
   @override
@@ -42,6 +48,7 @@ class _ShopPageState extends State<Shop> {
       _subscription!.cancel();
       _subscription = null;
     }
+    _timer?.cancel();
     _rewardedAd?.dispose();
     super.dispose();
   }
@@ -124,6 +131,76 @@ class _ShopPageState extends State<Shop> {
     } else {
       print('Rewarded ad is not ready yet');
     }
+  }
+
+  // 쿨타임 확인 및 버튼 상태 관리
+  Future<void> _checkCooltime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? cooltime = prefs.getInt('cooltime');
+
+    if (cooltime == null) {
+      // 쿨타임이 없으면 버튼 활성화
+      setState(() {
+        _isButtonActive = true;
+        remainingTime = "00:00:00";
+      });
+    } else {
+      // 현재 시간과 쿨타임의 차이 계산
+      int currentTime = DateTime.now().millisecondsSinceEpoch;
+      int diff = (cooltime - currentTime);
+
+      if (diff > 0) {
+        // 쿨타임이 남아 있으면 버튼 비활성화
+        setState(() {
+          _isButtonActive = false;
+        });
+        _startTimer(diff);
+      } else {
+        // 쿨타임이 끝났으면 버튼 활성화
+        prefs.remove('cooltime');
+        setState(() {
+          _isButtonActive = true;
+          remainingTime = "00:00:00";
+        });
+      }
+    }
+  }
+
+  // 타이머 시작 (1초 단위로 남은 시간 업데이트)
+  void _startTimer(int diff) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      int remainingMillis = diff - timer.tick * 1000;
+      if (remainingMillis <= 0) {
+        timer.cancel();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.remove('cooltime');
+        setState(() {
+          _isButtonActive = true;
+          remainingTime = "00:00:00";
+        });
+      } else {
+        setState(() {
+          int seconds = (remainingMillis ~/ 1000) % 60;
+          int minutes = (remainingMillis ~/ 60000) % 60;
+          int hours = (remainingMillis ~/ 3600000);
+          remainingTime = "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+        });
+      }
+    });
+  }
+
+  // 버튼 클릭 시 포인트 추가 및 쿨타임 저장
+  Future<void> _onFreePointsClicked() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 30분 후
+    await prefs.setInt('cooltime', newCooltime);
+
+    _showRewardedAd();
+    setState(() {
+      _isButtonActive = false;
+    });
+
+    _startTimer(time_second * 1000); // 30분 타이머 시작
   }
 
   @override
@@ -355,12 +432,12 @@ class _ShopPageState extends State<Shop> {
     return Row(
       children: [
         Text(
-          '남은 시간: 00:00:00',
+          '남은 시간: $remainingTime',
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
         Spacer(),
         ElevatedButton(
-          onPressed: _isAdLoaded ? _showRewardedAd : null, // 광고 표시 메서드 호출
+          onPressed: _isButtonActive ? _onFreePointsClicked : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.amberAccent,
             disabledBackgroundColor: Colors.grey,
@@ -370,6 +447,7 @@ class _ShopPageState extends State<Shop> {
       ],
     );
   }
+
 
   // 3. 테마 구매
   Widget _buildThemePurchaseSection() {
