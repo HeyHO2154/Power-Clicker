@@ -28,7 +28,7 @@ class _ShopPageState extends State<Shop> {
   bool _isButtonActive = true;
   String remainingTime = "00:00:00";
   Timer? _timer;
-  int time_second = 1800;
+  int time_second = 20;
 
 
 
