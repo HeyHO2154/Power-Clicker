@@ -310,7 +310,7 @@ class _MainPageState extends State<MainPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 45, color: Color(0xFFD4AF37)), // 금색 아이콘
+          Icon(icon, size: 50, color: Color(0xFFD4AF37)), // 금색 아이콘
           SizedBox(height: 8),
           Text(
             text,

@@ -39,6 +39,7 @@ class _ShopPageState extends State<Shop> {
     _getPointValue(0);
     _loadRewardedInterstitialAd(); // 보상형 전면 광고 로드
     _checkCooltime(); // 쿨타임 확인
+    _consumeUnprocessedPurchases(); // 미처리된 구매 소비
   }
 
   @override
@@ -111,10 +112,46 @@ class _ShopPageState extends State<Shop> {
   }
 
   Future<void> _consumePurchase(PurchaseDetails purchaseDetails) async {
-    // 소비 처리
-    await _inAppPurchase.completePurchase(purchaseDetails);
-    print('Purchase consumed: ${purchaseDetails.productID}');
+    try {
+      await _inAppPurchase.completePurchase(purchaseDetails); // 구매 소비
+      print('소비 완료: ${purchaseDetails.productID}');
+
+      // 상품 ID에 따라 포인트 또는 아이템 지급
+      switch (purchaseDetails.productID) {
+        case 'point_1000':
+          await _getPointValue(1000);
+          break;
+        case 'point_6000':
+          await _getPointValue(6000);
+          break;
+        case 'point_12000':
+          await _getPointValue(12000);
+          break;
+        default:
+          print('알 수 없는 제품 ID: ${purchaseDetails.productID}');
+      }
+    } catch (e) {
+      print('소비 중 오류 발생: $e');
+    }
   }
+  Future<void> _consumeUnprocessedPurchases() async {
+    final Stream<List<PurchaseDetails>> purchaseStream = _inAppPurchase.purchaseStream;
+    final completer = Completer<void>();
+
+    _subscription = purchaseStream.listen((purchaseDetailsList) async {
+      for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
+        if (purchaseDetails.status == PurchaseStatus.purchased) {
+          await _consumePurchase(purchaseDetails); // 소비 처리
+        } else if (purchaseDetails.status == PurchaseStatus.error) {
+          print('구매 처리 중 오류 발생: ${purchaseDetails.error}');
+        }
+      }
+      completer.complete();
+    });
+
+    await completer.future; // 모든 처리 완료를 기다림
+  }
+
 
   void _loadRewardedInterstitialAd() {
     RewardedInterstitialAd.load(
@@ -130,13 +167,17 @@ class _ShopPageState extends State<Shop> {
           print('Rewarded Interstitial Ad loaded.');
         },
         onAdFailedToLoad: (error) {
-          print('Failed to load rewarded interstitial ad: ${error.message}');
+          print('보상형 전면 광고 로드 실패: ${error.message}');
+          // 일정 시간 후 다시 로드 시도
+          Future.delayed(Duration(seconds: 5), () {
+            _loadRewardedInterstitialAd();
+          });
         },
       ),
     );
   }
 
-  void _showRewardedInterstitialAd() {
+  Future<void> _showRewardedInterstitialAd() async {
     if (_rewardedInterstitialAd != null && _isAdLoaded) {
       _rewardedInterstitialAd!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
@@ -146,12 +187,19 @@ class _ShopPageState extends State<Shop> {
           _getPointValue(1000);
         },
       );
+
       // 광고 재로드
       _rewardedInterstitialAd = null;
       _isAdLoaded = false;
       _loadRewardedInterstitialAd();
     } else {
-      print('Rewarded interstitial ad is not ready yet');
+      print('광고가 아직 로드되지 않았습니다.');
+      _loadRewardedInterstitialAd(); // 광고 재로드 시도
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.remove('cooltime');
+      setState(() {
+        _isButtonActive = true;
+      });
     }
   }
 
