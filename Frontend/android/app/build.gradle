@@ -20,9 +20,9 @@ android {
     defaultConfig {
         applicationId "com.hsj.powerclicker"
         minSdkVersion 21  // Flutter 프로젝트에 맞게 적절한 값을 사용하세요
-        targetSdkVersion 33  // Flutter 프로젝트에 맞게 적절한 값을 사용하세요
-        versionCode 200
-        versionName "2.0"
+        targetSdkVersion 34  // Flutter 프로젝트에 맞게 적절한 값을 사용하세요
+        versionCode 2010
+        versionName "2.0.1"
     }
 
     def keystorePropertiesFile = file("C:/Users/PRO/Desktop/GitDesktop/Power-Clicker/Frontend/android/app/key.properties")

@@ -89,11 +89,31 @@ class _ShopPageState extends State<Shop> {
     final ProductDetails? productDetails = _products[productId];
     if (productDetails != null) {
       final PurchaseParam purchaseParam = PurchaseParam(
-          productDetails: productDetails);
-      _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+        productDetails: productDetails,
+      );
+      // 구매 처리
+      _inAppPurchase.buyConsumable(
+        purchaseParam: purchaseParam,
+        autoConsume: false, // 수동 소비 처리
+      );
+
+      // 구매 완료 후 소비 처리
+      _subscription = _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
+        for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
+          if (purchaseDetails.status == PurchaseStatus.purchased) {
+            _consumePurchase(purchaseDetails);
+          }
+        }
+      });
     } else {
       print('Product not found: $productId');
     }
+  }
+
+  Future<void> _consumePurchase(PurchaseDetails purchaseDetails) async {
+    // 소비 처리
+    await _inAppPurchase.completePurchase(purchaseDetails);
+    print('Purchase consumed: ${purchaseDetails.productID}');
   }
 
   void _loadRewardedInterstitialAd() {
