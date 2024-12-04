@@ -36,7 +36,7 @@ class _MiningState extends State<Mining> {
     'assets/cat4.png',
     'assets/cat5.png',
     'assets/cat6.png',
-    'assets/cat7.png',
+    'assets/cat1.png',
   ];
 
   @override

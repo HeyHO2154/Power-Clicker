@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
+import '../Game/Card.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
@@ -13,12 +15,18 @@ class LobbyPage extends StatefulWidget {
 class _LobbyPageState extends State<LobbyPage> {
   bool isLoading = true;
   int points = 0;
+  WebSocketChannel? channel;
 
   @override
   void initState() {
     super.initState();
-    _connectToLobby();
+    _connectToWebSocket();
     _getPointValue(0);
+  }
+  @override
+  void dispose() {
+    channel?.sink.close(); // WebSocket 닫기
+    super.dispose();
   }
 
   Future<void> _getPointValue(n) async {
@@ -31,7 +39,6 @@ class _LobbyPageState extends State<LobbyPage> {
         'points': n
       }), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
     );
-
     if (response.statusCode == 200) {
       setState(() {
         points = int.parse(response.body);
@@ -40,17 +47,24 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   // 백엔드 서버와 소켓 연결을 초기화하는 메서드
-  Future<void> _connectToLobby() async {
-    try {
-      // 여기에 소켓 연결 코드 추가 (스프링 부트 서버와 통신)
-      await Future.delayed(Duration(seconds: 3)); // 예시: 대기 시간
-      setState(() {
-        isLoading = false;
-      });
-    } catch (e) {
-      // 예외 처리
-      print("Error connecting to lobby: $e");
-    }
+  void _connectToWebSocket() {
+    channel = WebSocketChannel.connect(
+      Uri.parse('${MyApp.url2}/game?user_id=${MyApp.user_id}'),
+    );
+
+    channel!.stream.listen((message) {
+      print('Received message: $message');
+      if (message == 'START_GAME') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => CardPage()),
+        );
+      }
+    }, onError: (error) {
+      print('WebSocket error: $error');
+    }, onDone: () {
+      print('WebSocket closed');
+    });
   }
 
   @override

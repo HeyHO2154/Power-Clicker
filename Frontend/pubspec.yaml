@@ -67,6 +67,8 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
+    - assets/Game/
+    - assets/Game/Cards/
     - assets/Item/
     - assets/Theme/
     - assets/Theme/cat/
