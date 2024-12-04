@@ -225,17 +225,21 @@ class _WarState extends State<War> {
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
-                  benefitBox = _buildBenefitBox("TOP 10 ${lang("플레이어")}", Colors.yellow.shade700);
-                } else if (index == 10) {
-                  benefitBox = _buildBenefitBox("TOP 20 ${lang("플레이어")}", Colors.purple.shade200);
-                } else if (index == 20) {
-                  benefitBox = _buildBenefitBox("TOP 30 ${lang("플레이어")}", Colors.green.shade300);
+                  benefitBox = _buildBenefitBox(0, "${lang("최상위")}", Colors.blueGrey.shade100);
+                } else if (index == 5) {
+                  benefitBox = _buildBenefitBox(1, "${lang("그랜드마스터")}", Colors.yellowAccent.shade400);
+                } else if (index == 15) {
+                  benefitBox = _buildBenefitBox(2, "${lang("마스터")}", Colors.green.shade300);
                 } else if (index == 30) {
-                  benefitBox = _buildBenefitBox("TOP 40 ${lang("플레이어")}", Colors.orange.shade300);
-                } else if (index == 40) {
-                  benefitBox = _buildBenefitBox("TOP 50 ${lang("플레이어")}", Colors.red.shade300);
+                  benefitBox = _buildBenefitBox(3, "${lang("다이아몬드")}", Colors.cyan.shade200);
                 } else if (index == 50) {
-                  benefitBox = _buildBenefitBox("${lang("플레이어")}", Colors.grey);
+                  benefitBox = _buildBenefitBox(4, "${lang("플레티넘")}", Colors.purple.shade200);
+                } else if (index == 75) {
+                  benefitBox = _buildBenefitBox(5, "${lang("골드")}", Colors.yellow.shade700);
+                } else if (index == 105) {
+                  benefitBox = _buildBenefitBox(6, "${lang("실버")}", Colors.grey);
+                } else if (index == 140) {
+                  benefitBox = _buildBenefitBox(7, "${lang("브론즈")}", Colors.brown.shade300);
                 }
 
                 return Column(
@@ -254,10 +258,10 @@ class _WarState extends State<War> {
                             ),
                           ),
                           SizedBox(width: 10),
-                          Icon(
-                            Icons.person,
-                            size: 40,
-                            color: _getUserColor(index, isCurrentUser),
+                          Image.asset(
+                            _getImagePath(index), // 특정 구간별 이미지 경로 가져오기
+                            width: 40,
+                            height: 40,
                           ),
                         ],
                       ),
@@ -347,35 +351,43 @@ class _WarState extends State<War> {
   Color _getUserColor(int index, bool isCurrentUser) {
     if (isCurrentUser) {
       return Colors.blue;
-    } else if (index <= 9) {
-      return Colors.yellow.shade700;
-    } else if (index <= 19) {
-      return Colors.purple;
+    } else if (index <= 4) {
+      return Colors.blueGrey.shade100;
+    } else if (index <= 14) {
+      return Colors.yellowAccent.shade400;
     } else if (index <= 29) {
       return Colors.green;
-    } else if (index <= 39) {
-      return Colors.orange;
     } else if (index <= 49) {
-      return Colors.red;
-    } else {
+      return Colors.cyan.shade200;
+    } else if (index <= 74) {
+      return Colors.purple.shade200;
+    } else if (index <= 104) {
+      return Colors.yellow.shade700;
+    } else if (index <= 139) {
       return Colors.grey;
+    } else {
+      return Colors.brown.shade500;
     }
   }
 }
 
 // 구간 설명 박스를 위한 메서드
-Widget _buildBenefitBox(String text1, Color color) {
+Widget _buildBenefitBox(int teer, String text1, Color color) {
   // 이미지 파일명을 TOP 순위에 따라 결정
   String imagePath;
-  if (text1.contains("TOP 10")) {
+  if (teer == 0) {
+    imagePath = 'assets/UI/Ranks/최상위.png';
+  } else if (teer == 1) {
+    imagePath = 'assets/UI/Ranks/그마.png';
+  } else if (teer == 2) {
     imagePath = 'assets/UI/Ranks/마스터.png';
-  } else if (text1.contains("TOP 20")) {
+  } else if (teer == 3) {
     imagePath = 'assets/UI/Ranks/다이아.png';
-  } else if (text1.contains("TOP 30")) {
+  } else if (teer == 4) {
     imagePath = 'assets/UI/Ranks/플레티넘.png';
-  } else if (text1.contains("TOP 40")) {
+  } else if (teer == 5) {
     imagePath = 'assets/UI/Ranks/골드.png';
-  } else if (text1.contains("TOP 50")) {
+  } else if (teer == 6) {
     imagePath = 'assets/UI/Ranks/실버.png';
   } else {
     imagePath = 'assets/UI/Ranks/브론즈.png'; // 기본 이미지
@@ -418,6 +430,27 @@ Widget _buildBenefitBox(String text1, Color color) {
     ),
   );
 }
+
+String _getImagePath(int index) {
+  if (index <= 4) {
+    return 'assets/UI/Ranks/최상위.png'; // 최상위
+  } else if (index <= 14) {
+    return 'assets/UI/Ranks/그마.png'; // 그랜드마스터
+  } else if (index <= 29) {
+    return 'assets/UI/Ranks/마스터.png'; // 마스터
+  } else if (index <= 49) {
+    return 'assets/UI/Ranks/다이아.png'; // 다이아몬드
+  } else if (index <= 74) {
+    return 'assets/UI/Ranks/플레티넘.png'; // 플레티넘
+  } else if (index <= 104) {
+    return 'assets/UI/Ranks/골드.png'; // 골드
+  } else if (index <= 139) {
+    return 'assets/UI/Ranks/실버.png'; // 실버
+  } else {
+    return 'assets/UI/Ranks/브론즈.png'; // 브론즈
+  }
+}
+
 
 void _showCustomDialog({
   required BuildContext context,
@@ -517,6 +550,14 @@ String lang(String textKey) {
       '포인트 부족': '포인트 부족',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.',
       '확인': '확인',
+      '최상위': '최상위',
+      '그랜드마스터': '그랜드마스터',
+      '마스터': '마스터',
+      '다이아몬드': '다이아몬드',
+      '플레티넘': '플레티넘',
+      '골드': '골드',
+      '실버': '실버',
+      '브론즈': '브론즈',
     },
     'ENG': {
       '공격 기록': 'Attack History',
@@ -530,6 +571,14 @@ String lang(String textKey) {
       '포인트 부족': 'Insufficient Points',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'You or your opponent have insufficient points to attack.',
       '확인': 'OK',
+      '최상위': 'Top Tier',
+      '그랜드마스터': 'Grandmaster',
+      '마스터': 'Master',
+      '다이아몬드': 'Diamond',
+      '플레티넘': 'Platinum',
+      '골드': 'Gold',
+      '실버': 'Silver',
+      '브론즈': 'Bronze',
     },
     'ARA': {
       '공격 기록': 'سجل الهجوم',
@@ -543,6 +592,14 @@ String lang(String textKey) {
       '포인트 부족': 'نقاط غير كافية',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'أنت أو خصمك لديكما نقاط غير كافية للهجوم.',
       '확인': 'تأكيد',
+      '최상위': 'القمة',
+      '그랜드마스터': 'جراند ماستر',
+      '마스터': 'ماستر',
+      '다이아몬드': 'ألماس',
+      '플레티넘': 'بلاتينيوم',
+      '골드': 'ذهبي',
+      '실버': 'فضي',
+      '브론즈': 'برونزي',
     },
     'CHN': {
       '공격 기록': '攻击记录',
@@ -556,6 +613,14 @@ String lang(String textKey) {
       '포인트 부족': '积分不足',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': '您或对方积分不足，无法进行攻击。',
       '확인': '确认',
+      '최상위': '顶级',
+      '그랜드마스터': '宗师',
+      '마스터': '大师',
+      '다이아몬드': '钻石',
+      '플레티넘': '铂金',
+      '골드': '黄金',
+      '실버': '白银',
+      '브론즈': '青铜',
     },
     'JPN': {
       '공격 기록': 'هجوم السجل',
@@ -569,6 +634,14 @@ String lang(String textKey) {
       '포인트 부족': 'ポイント不足',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'あなたまたは相手のポイントが不足しており、攻撃できません。',
       '확인': '確認',
+      '최상위': '最上位',
+      '그랜드마스터': 'グランドマスター',
+      '마스터': 'マスター',
+      '다이아몬드': 'ダイヤモンド',
+      '플레티넘': 'プラチナ',
+      '골드': 'ゴールド',
+      '실버': 'シルバー',
+      '브론즈': 'ブロンズ',
     },
     'GER': {
       '공격 기록': 'Angriffsprotokoll',
@@ -582,6 +655,14 @@ String lang(String textKey) {
       '포인트 부족': 'Nicht genügend Punkte',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'Sie oder der Gegner haben nicht genügend Punkte, um anzugreifen.',
       '확인': 'Bestätigen',
+      '최상위': 'Oberste Ebene',
+      '그랜드마스터': 'Großmeister',
+      '마스터': 'Meister',
+      '다이아몬드': 'Diamant',
+      '플레티넘': 'Platin',
+      '골드': 'Gold',
+      '실버': 'Silber',
+      '브론즈': 'Bronze',
     },
     'FRA': {
       '공격 기록': 'Historique des attaques',
@@ -595,6 +676,14 @@ String lang(String textKey) {
       '포인트 부족': 'Points insuffisants',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'Vous ou votre adversaire n\'avez pas assez de points pour attaquer.',
       '확인': 'Confirmer',
+      '최상위': 'Niveau supérieur',
+      '그랜드마스터': 'Grand maître',
+      '마스터': 'Maître',
+      '다이아몬드': 'Diamant',
+      '플레티넘': 'Platine',
+      '골드': 'Or',
+      '실버': 'Argent',
+      '브론즈': 'Bronze',
     },
     'RUS': {
       '공격 기록': 'Запись атак',
@@ -608,6 +697,14 @@ String lang(String textKey) {
       '포인트 부족': 'Недостаточно очков',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'У вас или у соперника недостаточно очков для атаки.',
       '확인': 'Подтвердить',
+      '최상위': 'Высший уровень',
+      '그랜드마스터': 'Грандмастер',
+      '마스터': 'Мастер',
+      '다이아몬드': 'Алмаз',
+      '플레티넘': 'Платина',
+      '골드': 'Золото',
+      '실버': 'Серебро',
+      '브론즈': 'Бронза',
     },
     'ESP': {
       '공격 기록': 'Historial de ataques',
@@ -621,6 +718,14 @@ String lang(String textKey) {
       '포인트 부족': 'Puntos insuficientes',
       '당신 또는 상대 포인트가 부족하여 공격할 수 없습니다.': 'Tú o tu oponente no tenéis suficientes puntos para atacar.',
       '확인': 'Confirmar',
+      '최상위': 'Nivel superior',
+      '그랜드마스터': 'Gran maestro',
+      '마스터': 'Maestro',
+      '다이아몬드': 'Diamante',
+      '플레티넘': 'Platino',
+      '골드': 'Oro',
+      '실버': 'Plata',
+      '브론즈': 'Bronce',
     },
 
   };
