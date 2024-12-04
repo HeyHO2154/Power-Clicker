@@ -35,11 +35,19 @@ class _ShopPageState extends State<Shop> {
   @override
   void initState() {
     super.initState();
-    _initializeProducts();
-    _getPointValue(0);
-    _loadRewardedInterstitialAd(); // 보상형 전면 광고 로드
-    _checkCooltime(); // 쿨타임 확인
-    _consumeUnprocessedPurchases(); // 미처리된 구매 소비
+    _initializePage(); // 순차적으로 실행하도록 별도 메서드 호출
+  }
+
+  Future<void> _initializePage() async {
+    try {
+      await _initializeProducts(); // 상품 초기화
+      await _getPointValue(0); // 포인트 조회
+      await _loadRewardedInterstitialAd(); // 보상형 전면 광고 로드
+      await _checkCooltime(); // 쿨타임 확인
+      await _consumeUnprocessedPurchases(); // 미처리된 구매 소비
+    } catch (e) {
+      print("초기화 중 오류 발생: $e");
+    }
   }
 
   @override
@@ -153,8 +161,8 @@ class _ShopPageState extends State<Shop> {
   }
 
 
-  void _loadRewardedInterstitialAd() {
-    RewardedInterstitialAd.load(
+  Future<void> _loadRewardedInterstitialAd() async {
+    await RewardedInterstitialAd.load(
       //adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
       adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
       request: const AdRequest(),
