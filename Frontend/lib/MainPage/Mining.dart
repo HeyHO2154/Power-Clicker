@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
 
-import '../Login.dart';
 import 'MainPage.dart';
 import 'Shop.dart'; // 타이머 사용을 위해 추가
 

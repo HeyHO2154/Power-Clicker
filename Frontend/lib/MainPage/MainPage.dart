@@ -5,7 +5,7 @@ import 'dart:convert';
 
 import '../main.dart';
 import 'Farming.dart';
-import 'Mining.dart';
+import 'Lobby.dart';
 import 'Shop.dart';
 import 'War.dart';
 
@@ -152,9 +152,9 @@ class _MainPageState extends State<MainPage> {
                                       aspectRatio: 1.0,
                                       child: _buildMenuButton(
                                         context,
-                                        lang('광질하기'),
-                                        Icons.construction,
-                                        Mining(),
+                                        lang('카드게임'),
+                                        Icons.book,
+                                        LobbyPage(),
                                       ),
                                     ),
                                   ),
