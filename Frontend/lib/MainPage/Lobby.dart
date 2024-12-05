@@ -54,10 +54,11 @@ class _LobbyPageState extends State<LobbyPage> {
 
     channel!.stream.listen((message) {
       print('Received message: $message');
-      if (message == 'START_GAME') {
+      if (message.startsWith('START_GAME:')) {
+        String sessionId = message.split(':')[1]; // 세션 ID 추출
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CardPage()),
+          MaterialPageRoute(builder: (context) => CardPage(sessionId: sessionId)),
         );
       }
     }, onError: (error) {
