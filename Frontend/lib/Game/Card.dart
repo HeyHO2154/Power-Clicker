@@ -175,7 +175,7 @@ class _CardPageState extends State<CardPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "플레이어를 찾고 있습니다...",
+                        "곧 게임을 시작합니다!",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -190,14 +190,6 @@ class _CardPageState extends State<CardPage> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 20),
-                      isLoading
-                          ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.amberAccent),
-                      )
-                          : Icon(Icons.check_circle,
-                          color: Colors.green, size: 50),
                     ],
                   ),
                 ),
