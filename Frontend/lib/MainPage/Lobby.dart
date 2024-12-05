@@ -129,7 +129,7 @@ class _LobbyPageState extends State<LobbyPage> {
                       },
                     ),
                     Text(
-                      '상점',
+                      '로비',
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
