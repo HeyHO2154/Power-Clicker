@@ -14,6 +14,7 @@ class CardPage extends StatefulWidget {
 class _CardPageState extends State<CardPage> {
   bool isLoading = true;
   int points = 0;
+  String opponentId = ""; // 상대방 ID 저장
   WebSocketChannel? channel;
 
   @override
@@ -58,14 +59,13 @@ class _CardPageState extends State<CardPage> {
     channel!.stream.listen(
           (message) {
         print('Received message: $message');
-        if (message.startsWith('START_GAME')) {
-          // CardPage로 이동하며 WebSocketChannel 전달
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CardPage(),
-            ),
-          );
+        if (message.startsWith('OPPONENT:')) {
+          // OPPONENT 메시지에서 상대방 ID 추출
+          String opponent = message.split(':')[1];
+          setState(() {
+            opponentId = opponent;
+          });
+          print('Your opponent is: $opponent');
         }
       },
       onError: (error) {
@@ -175,7 +175,7 @@ class _CardPageState extends State<CardPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "곧 게임을 시작합니다!",
+                        "곧 게임을 시작합니다!\n당신의 상대: $opponentId",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
