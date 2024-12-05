@@ -55,9 +55,9 @@ INSERT INTO theme (user_id) VALUES ('test');
 INSERT INTO item (user_id) VALUES ('test');
 
 #전체 조회(JOIN 사용)
-SELECT * FROM users
-LEFT JOIN theme ON users.user_id = theme.user_id
-LEFT JOIN item ON users.user_id = item.user_id;
-UPDATE users SET points = 899 WHERE user_id = 'sa';
+SELECT * FROM users;
+-- LEFT JOIN theme ON users.user_id = theme.user_id
+-- LEFT JOIN item ON users.user_id = item.user_id;
+-- UPDATE users SET points = 899 WHERE user_id = 'sa';
 
 

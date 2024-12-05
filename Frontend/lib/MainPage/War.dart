@@ -222,6 +222,16 @@ class _WarState extends State<War> {
                 final user = users[index];
                 bool isCurrentUser = user['user_id'] == MyApp.user_id;
 
+                // 닉네임의 픽셀 너비를 제한 (예: 최대 200px)
+                String truncatedNickname = getTruncatedText(
+                  user["user_id"],
+                  190.0, // 최대 너비 (픽셀 단위)
+                  TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                );
+
                 // 구간 설명 박스 위젯
                 Widget benefitBox = Container(); // 기본적으로 빈 컨테이너
                 if (index == 0) {
@@ -276,7 +286,7 @@ class _WarState extends State<War> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '${user["user_id"]}',
+                              truncatedNickname, // 여기서 20자 제한된 닉네임 사용
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
@@ -370,6 +380,31 @@ class _WarState extends State<War> {
     }
   }
 }
+
+//글자수 생략
+String getTruncatedText(String text, double maxWidth, TextStyle textStyle) {
+  final TextPainter textPainter = TextPainter(
+    text: TextSpan(text: text, style: textStyle),
+    maxLines: 1,
+    textDirection: TextDirection.ltr,
+  )..layout(maxWidth: maxWidth);
+
+  if (textPainter.didExceedMaxLines) {
+    for (int i = text.length - 1; i >= 0; i--) {
+      final TextPainter truncatedTextPainter = TextPainter(
+        text: TextSpan(text: text.substring(0, i) + '...', style: textStyle),
+        maxLines: 1,
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: maxWidth);
+
+      if (!truncatedTextPainter.didExceedMaxLines) {
+        return text.substring(0, i) + '...';
+      }
+    }
+  }
+  return text; // 제한에 걸리지 않으면 원래 텍스트 반환
+}
+
 
 // 구간 설명 박스를 위한 메서드
 Widget _buildBenefitBox(int teer, String text1, Color color) {

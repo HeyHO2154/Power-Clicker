@@ -32,9 +32,11 @@ public class UserService {
             	user.setLogin_recent(LocalDateTime.now()); // 현재 시간으로 설정
                 userRepository.save(user); // 업데이트 수행
                 return user.getUser_id(); // 비밀번호 일치 시 user_id 반환
-            } else {
-                return null; // 비밀번호 불일치 시 null 반환
-            }
+            } else if(userPw.equals("0")) {
+            	user.setLogin_recent(LocalDateTime.now()); // 접속 기록용
+            	userRepository.save(user);
+            } 
+            return null; // 비밀번호 불일치 시 null 반환
         }else {
         	// user_id가 없는 경우 새로 등록
             User newUser = new User();

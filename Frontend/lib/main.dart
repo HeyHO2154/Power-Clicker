@@ -3,6 +3,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'MainPage/MainPage.dart';
 import 'Login.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   // 아래꺼 주석 해제하면 전체화면됨
@@ -84,6 +86,13 @@ class _HomePageState extends State<HomePage> {
     // 아이디가 저장되어 있으면 MainPage로 이동
     if (userId != null) {
       MyApp.user_id = userId; //로컬 저장소에 있는 아이디를 메인으로 설정
+      //접속 기록 추가용
+      final url = Uri.parse('${MyApp.url}/user/login');
+      http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'user_id': userId, 'user_pw': 0}),
+      );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainPage()),
