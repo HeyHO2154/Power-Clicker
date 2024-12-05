@@ -23,58 +23,76 @@ class _LobbyPageState extends State<LobbyPage> {
     _connectToWebSocket();
     _getPointValue(0);
   }
+
   @override
   void dispose() {
     channel?.sink.close(); // WebSocket 닫기
     super.dispose();
   }
 
-  Future<void> _getPointValue(n) async {
+  Future<void> _getPointValue(int n) async {
     final url = Uri.parse('${MyApp.url}/user/point');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': MyApp.user_id,
-        'points': n
-      }), //여기서의 points는 더해줄 값을 의미(0은 단순 포인트 조회)
-    );
-    if (response.statusCode == 200) {
-      setState(() {
-        points = int.parse(response.body);
-      });
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'user_id': MyApp.user_id, 'points': n}),
+      );
+
+      if (response.statusCode == 200 && mounted) {
+        setState(() {
+          points = int.parse(response.body);
+        });
+      }
+    } catch (e) {
+      print('Error fetching points: $e');
     }
   }
 
-  // 백엔드 서버와 소켓 연결을 초기화하는 메서드
   void _connectToWebSocket() {
+    // 기존 사용자별 WebSocket 채널 생성
     channel = WebSocketChannel.connect(
-      Uri.parse('${MyApp.url2}/game?user_id=${MyApp.user_id}'),
+      Uri.parse('${MyApp.url2}/lobby?user_id=${MyApp.user_id}'),
     );
 
-    channel!.stream.listen((message) {
-      print('Received message: $message');
-      if (message.startsWith('START_GAME:')) {
-        String sessionId = message.split(':')[1]; // 세션 ID 추출
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => CardPage(sessionId: sessionId)),
-        );
-      }
-    }, onError: (error) {
-      print('WebSocket error: $error');
-    }, onDone: () {
-      print('WebSocket closed');
-    });
+    // 사용자별 구독 관리
+    channel!.stream.listen(
+          (message) {
+        print('Received message: $message');
+        if (message.startsWith('START_GAME')) {
+          // CardPage로 이동하며 WebSocketChannel 전달
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CardPage(),
+            ),
+          );
+        }
+      },
+      onError: (error) {
+        print('WebSocket error: $error');
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      },
+      onDone: () {
+        print('WebSocket closed');
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      },
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        // 뒤로 가기 키 막기
-        return false;
-      },
+      onWillPop: () async => false,
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
@@ -90,17 +108,16 @@ class _LobbyPageState extends State<LobbyPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                    top: 40.0, bottom: 0, right: 10),
+                padding:
+                const EdgeInsets.only(top: 40.0, bottom: 0, right: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 뒤로 가기 버튼
                     IconButton(
                       icon: Icon(
                         Icons.arrow_back,
-                        color: Color(0xFFB8860B), // 어두운 황금색
-                        size: 40, // 아이콘 크기
+                        color: Color(0xFFB8860B),
+                        size: 40,
                       ),
                       onPressed: () {
                         Navigator.pushReplacement(
@@ -111,7 +128,6 @@ class _LobbyPageState extends State<LobbyPage> {
                         );
                       },
                     ),
-                    // 내 정보 제목
                     Text(
                       '상점',
                       style: TextStyle(
@@ -127,12 +143,11 @@ class _LobbyPageState extends State<LobbyPage> {
                         ],
                       ),
                     ),
-                    // 코인 아이콘과 포인트 표시
                     Row(
                       children: [
                         Image.asset(
                           'assets/UI/coin.png',
-                          height: 50, // 코인 아이콘 크기
+                          height: 50,
                         ),
                         SizedBox(width: 5),
                         Text(

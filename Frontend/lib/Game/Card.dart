@@ -1,28 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:convert';
 
-class CardPage extends StatelessWidget {
-  final String sessionId;
+class CardPage extends StatefulWidget {
+  @override
+  _CardPageState createState() => _CardPageState();
+}
 
-  CardPage({required this.sessionId});
+class _CardPageState extends State<CardPage> {
+  List<int> cards = [];
+  String resultMessage = "";
+  WebSocketChannel? channel;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-        ),
-        child: Center(
-          child: Text(
-            "카드 게임 세션: $sessionId",
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
+      appBar: AppBar(
+        title: Text("Card Game"),
+      ),
+      body: cards.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Your Cards: ${cards.join(', ')}"),
+          if (resultMessage.isNotEmpty) Text(resultMessage),
+        ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
