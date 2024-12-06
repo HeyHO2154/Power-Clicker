@@ -20,15 +20,17 @@ public class GameWebSocketLobby extends TextWebSocketHandler {
         String userId = Objects.requireNonNull(session.getUri()).getQuery().split("=")[1];
         Lobby.put(userId, session);
         System.out.println("로비 연결됨 : "+userId+" , "+Lobby);
-        if(ActiveGame.isEmpty() || ActiveGame.get(ActiveGame.size()-1).size()==2) {
-    		ConcurrentHashMap<String, WebSocketSession> Game = new ConcurrentHashMap<>();
+		if(Lobby.size()==2) {
+			ConcurrentHashMap<String, WebSocketSession> Game = new ConcurrentHashMap<>();  		
+			for (String user_id : Lobby.keySet()) {
+			    Game.put(user_id, Lobby.get(user_id));
+			    Lobby.get(user_id).sendMessage(new TextMessage("START_GAME"));
+			}
+			// 게임에 추가된 플레이어를 로비에서 제거
+            for (String user_id : Game.keySet()) {
+                Lobby.remove(user_id);
+            }
     		ActiveGame.add(Game);
-    	}
-		ActiveGame.get(ActiveGame.size()-1).put(userId, session);
-		if(ActiveGame.get(ActiveGame.size()-1).size()==2) {
-	        for (WebSocketSession playerSession : ActiveGame.get(ActiveGame.size()-1).values()) {
-	            playerSession.sendMessage(new TextMessage("START_GAME"));
-	        }
 		}
     }
 
