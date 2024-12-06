@@ -15,7 +15,7 @@ class CardPage extends StatefulWidget {
 class _CardPageState extends State<CardPage> {
   bool isLoading = true;
   bool isWaitingForResult = false; // 결과 대기 상태
-  int countdown = 11;
+  int countdown = 12;
   int myPoints = 0;
   int opponentPoints = 0;
   String opponentId = "";
@@ -208,7 +208,7 @@ class _CardPageState extends State<CardPage> {
 
     // 결과 메시지 업데이트
     setState(() {
-      countdown = 11;
+      countdown = 12;
       opponentCards = opponentCards2;
       serverMessage = resultMessage;
       _getPointValue(MyApp.user_id, 0); // 점수 차감
