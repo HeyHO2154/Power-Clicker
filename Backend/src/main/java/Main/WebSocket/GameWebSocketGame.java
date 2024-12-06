@@ -56,12 +56,8 @@ public class GameWebSocketGame extends TextWebSocketHandler {
                 break;
             }
         }
-
-        if (userGame == null) {
-            session.sendMessage(new TextMessage("ERROR:게임 세션을 찾을 수 없습니다."));
-            return;
-        }
-
+        if (userGame == null) return;
+        
         if (payload.startsWith("CARDS:")) {
             String cardData = payload.split(":")[1];
 
@@ -77,11 +73,44 @@ public class GameWebSocketGame extends TextWebSocketHandler {
                 }
             }
         }
+        if (payload.startsWith("TIMEOUT:")) {
+            // 상대방 연결 해제
+            for (String opponentId : userGame.keySet()) {
+                if (!opponentId.equals(userId)) {
+                    WebSocketSession opponentSession = sessions.get(opponentId);
+                    if (opponentSession != null && opponentSession.isOpen()) {
+                        opponentSession.sendMessage(new TextMessage("KICK:"+opponentId));
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, org.springframework.web.socket.CloseStatus status) throws Exception {
-        String userId = getUserId(session);
+    	String userId = getUserId(session);
+  
+        ConcurrentHashMap<String, WebSocketSession> userGame = null;
+        for (ConcurrentHashMap<String, WebSocketSession> game : lobby.ActiveGame) {
+            if (game.containsKey(userId)) {
+                userGame = game;
+                break;
+            }
+        }
+        if (userGame != null) {
+            for (String opponentId : userGame.keySet()) {
+                if (!opponentId.equals(userId)) {
+                	WebSocketSession opponentSession = sessions.get(opponentId);
+                	opponentSession.sendMessage(new TextMessage("QUIT:" + userId));
+                    System.out.println("게임 종료: " + userId + " vs " + opponentId);
+                    break;
+                }
+            }
+        } else {
+            System.out.println("ActiveGame에서 사용자를 찾을 수 없습니다: " + userId);
+        }
+        
         sessions.remove(userId);
         System.out.println("게임 해제됨 : " + userId);
     }

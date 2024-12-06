@@ -84,6 +84,7 @@ class _CardPageState extends State<CardPage> {
           if (isWaitingForResult) {
             // 내가 이미 카드를 전송한 상태면 상대 카드를 즉시 공개
             setState(() {
+              serverMessage = "제한시간: 10초";
               opponentCards = receivedCards;
             });
             _Result();
@@ -91,6 +92,18 @@ class _CardPageState extends State<CardPage> {
             // 내가 아직 카드를 전송하지 않은 경우, 데이터만 저장
             opponentCards2 = receivedCards;
           }
+        } else if (message.startsWith('QUIT:')) {
+          setState(() {
+            isWaitingForResult = true;
+            serverMessage = "상대가 게임을 나갔습니다";
+            myCards = [0, 0, 0, 0, 0];
+          });
+        } else if (message.startsWith('KICK:')) {
+          setState(() {
+            isWaitingForResult = true;
+            serverMessage = "10초를 초과하였습니다..";
+            myCards = [0, 0, 0, 0, 0];
+          });
         }
           },
       onError: (error) {
@@ -145,13 +158,28 @@ class _CardPageState extends State<CardPage> {
       channel!.sink.add(cardData);
       print('Sent cards to server: $cardData');
     }
-
+    print(opponentCards2);
     // 상대 카드가 이미 도착했으면 즉시 공개
-    if (opponentCards != [0,0,0,0,0]) {
+    if (!opponentCards.every((card) => card == 0)) {
       setState(() {
         opponentCards = opponentCards2;
       });
       _Result();
+    }else{
+      setState(() {
+        serverMessage = "상대를 기다리는 중..";
+      });
+      Future.delayed(Duration(seconds: 10), () {
+        if (opponentCards.every((card) => card == 0)) { // 모든 값이 0인지 확인
+          setState(() {
+            isWaitingForResult = true;
+            serverMessage = "상대의 접속이 끊겼습니다..";
+            myCards = [0, 0, 0, 0, 0];
+          });
+          String socket = "TIMEOUT:${opponentId}";
+          channel!.sink.add(socket);
+        }
+      });
     }
   }
 
@@ -182,14 +210,15 @@ class _CardPageState extends State<CardPage> {
       _getPointValue(opponentId, 0);
     });
 
-    print("hi");
-    // 확인 버튼을 눌렀을 때 상태 초기화
-    Future.delayed(Duration(seconds: 3), () {
-      myCards = [1, 1, 1, 1, 1];
-      opponentCards = [0,0,0,0,0];
-      opponentCards2 = [0,0,0,0,0];
-      selectedCards = [false, false, false, false, false];
-      isWaitingForResult = false; // 결과 대기 상태
+    Future.delayed(Duration(seconds: 5), () {
+      setState(() {
+        serverMessage = "교환할 카드를 골라주세요";
+        _shuffleMyCards();
+        opponentCards = [0,0,0,0,0];
+        opponentCards2 = [0,0,0,0,0];
+        selectedCards = [false, false, false, false, false];
+        isWaitingForResult = false; // 결과 대기 상태
+      });
     });
   }
 
