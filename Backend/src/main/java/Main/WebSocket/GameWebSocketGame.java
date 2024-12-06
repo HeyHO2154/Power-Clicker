@@ -80,6 +80,9 @@ public class GameWebSocketGame extends TextWebSocketHandler {
                     WebSocketSession opponentSession = sessions.get(opponentId);
                     if (opponentSession != null && opponentSession.isOpen()) {
                         opponentSession.sendMessage(new TextMessage("KICK:"+opponentId));
+                        sessions.remove(userId);
+                        sessions.remove(opponentId);
+                        lobby.ActiveGame.remove(userGame);
                     }
                     break;
                 }
@@ -103,6 +106,7 @@ public class GameWebSocketGame extends TextWebSocketHandler {
                 if (!opponentId.equals(userId)) {
                 	WebSocketSession opponentSession = sessions.get(opponentId);
                 	opponentSession.sendMessage(new TextMessage("QUIT:" + userId));
+                	sessions.remove(opponentId);
                     System.out.println("게임 종료: " + userId + " vs " + opponentId);
                     break;
                 }
@@ -112,6 +116,7 @@ public class GameWebSocketGame extends TextWebSocketHandler {
         }
         
         sessions.remove(userId);
+        lobby.ActiveGame.remove(userGame);
         System.out.println("게임 해제됨 : " + userId);
     }
 

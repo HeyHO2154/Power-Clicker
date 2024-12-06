@@ -84,13 +84,13 @@ class _CardPageState extends State<CardPage> {
           if (isWaitingForResult) {
             // 내가 이미 카드를 전송한 상태면 상대 카드를 즉시 공개
             setState(() {
-              serverMessage = "제한시간: 10초";
               opponentCards = receivedCards;
             });
             _Result();
           } else {
             // 내가 아직 카드를 전송하지 않은 경우, 데이터만 저장
             opponentCards2 = receivedCards;
+            _startCountdown(); // 제한시간 카운트다운 시작
           }
         } else if (message.startsWith('QUIT:')) {
           setState(() {
@@ -101,7 +101,7 @@ class _CardPageState extends State<CardPage> {
         } else if (message.startsWith('KICK:')) {
           setState(() {
             isWaitingForResult = true;
-            serverMessage = "10초를 초과하였습니다..";
+            serverMessage = "제한시간 초과!";
             myCards = [0, 0, 0, 0, 0];
           });
         }
@@ -124,6 +124,18 @@ class _CardPageState extends State<CardPage> {
       },
     );
   }
+
+  void _startCountdown() {
+    int countdown = 9; // 제한시간 10초
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (countdown > 0 && mounted && !isWaitingForResult) {
+        setState(() {
+          serverMessage = "제한시간: ${countdown--}초";
+        });
+      }
+    });
+  }
+
 
   void _shuffleMyCards() {
     final random = Random();
@@ -446,16 +458,33 @@ class _CardPageState extends State<CardPage> {
                             }),
                           ),
                           SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: isWaitingForResult
-                                ? null
-                                : () {
-                              _updateSelectedCards();
-                            },
-                            child: Text(
-                              '카드 변경',
-                              style: TextStyle(fontSize: 20),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center, // 버튼을 가운데 정렬
+                            children: [
+                              ElevatedButton(
+                                onPressed: isWaitingForResult
+                                    ? null
+                                    : () {
+                                  _updateSelectedCards();
+                                },
+                                child: Text(
+                                  '추가 베팅',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                              SizedBox(width: 20), // 버튼 사이 간격
+                              ElevatedButton(
+                                onPressed: isWaitingForResult
+                                    ? null
+                                    : () {
+                                  _updateSelectedCards();
+                                },
+                                child: Text(
+                                  '카드 변경',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
