@@ -130,7 +130,7 @@ class _LobbyPageState extends State<LobbyPage> {
                       },
                     ),
                     Text(
-                      lang('로비'),
+                      lang("로비") ,
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
@@ -283,7 +283,7 @@ String lang(String textKey) {
       '기다리는 동안 게임하기': '等待时玩游戏',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': '游戏中找到对手会自动开始。',
     },
-    'JPA': {
+    'JPN': {
       '로비': 'ロビー',
       '상대를 찾고 있습니다...': '対戦相手を探しています...',
       '기다리는 동안 게임하기': '待っている間にゲームをプレイする',
