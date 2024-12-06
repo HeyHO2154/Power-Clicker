@@ -153,7 +153,8 @@ class _MainPageState extends State<MainPage> {
                                       child: _buildMenuButton(
                                         context,
                                         lang('카드게임'),
-                                        Icons.book,
+                                        'assets/Game/Cards/back.png',
+                                        50,
                                         LobbyPage(),
                                       ),
                                     ),
@@ -167,7 +168,8 @@ class _MainPageState extends State<MainPage> {
                                       child: _buildMenuButton(
                                         context,
                                         lang('살아남기'),
-                                        Icons.directions_run,
+                                        'assets/ddog.png',
+                                        45,
                                         Farming(),
                                       ),
                                     ),
@@ -186,7 +188,8 @@ class _MainPageState extends State<MainPage> {
                                       child: _buildMenuButton(
                                         context,
                                         lang('순위표'),
-                                        Icons.leaderboard,
+                                        'assets/UI/Ranks/최상위.png',
+                                        50,
                                         War(),
                                       ),
                                     ),
@@ -200,7 +203,8 @@ class _MainPageState extends State<MainPage> {
                                       child: _buildMenuButton(
                                         context,
                                         lang('상점'),
-                                        Icons.shopping_cart_outlined,
+                                        'assets/UI/coin.png',
+                                        60,
                                         Shop(),
                                       ),
                                     ),
@@ -287,7 +291,8 @@ class _MainPageState extends State<MainPage> {
   Widget _buildMenuButton(
       BuildContext context,
       String text,
-      IconData icon,
+      String icon,
+      double icon_size,
       Widget nextPage,
       ) {
     return OutlinedButton(
@@ -310,7 +315,10 @@ class _MainPageState extends State<MainPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 50, color: Color(0xFFD4AF37)), // 금색 아이콘
+          Image.asset(
+            icon,
+            height: icon_size,
+          ),
           SizedBox(height: 8),
           Text(
             text,
