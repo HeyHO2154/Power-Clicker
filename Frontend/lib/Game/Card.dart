@@ -422,7 +422,7 @@ class _CardPageState extends State<CardPage> {
                       children: [
                         Image.asset(
                           'assets/Game/rule.png',
-                          width: 150,
+                          width: 100,
                         ),
                         SizedBox(height: 10),
                         Text(
