@@ -21,6 +21,7 @@ class _CardPageState extends State<CardPage> {
   String serverMessage = "";
   List<int> myCards = [1, 1, 1, 1, 1];
   List<int> opponentCards = [0,0,0,0,0];
+  List<int> opponentCards2 = [0,0,0,0,0];
   List<bool> selectedCards = [false, false, false, false, false];
   WebSocketChannel? channel;
 
@@ -85,9 +86,10 @@ class _CardPageState extends State<CardPage> {
             setState(() {
               opponentCards = receivedCards;
             });
+            _Result();
           } else {
             // 내가 아직 카드를 전송하지 않은 경우, 데이터만 저장
-            opponentCards = receivedCards;
+            opponentCards2 = receivedCards;
           }
         }
           },
@@ -147,10 +149,50 @@ class _CardPageState extends State<CardPage> {
     // 상대 카드가 이미 도착했으면 즉시 공개
     if (opponentCards != [0,0,0,0,0]) {
       setState(() {
-        opponentCards;
+        opponentCards = opponentCards2;
       });
+      _Result();
     }
   }
+
+  void _Result() {
+    // 점수 계산
+    int myScore = checkCard(myCards); // 내 카드 점수 계산
+    int opponentScore = checkCard(opponentCards); // 상대 카드 점수 계산
+
+    String resultMessage;
+
+    if (myScore > opponentScore) {
+      // 내가 이겼을 때
+      resultMessage = "이겼습니다! +100점";
+      _getPointValue(MyApp.user_id, 100); // 점수 추가
+    } else if (myScore < opponentScore) {
+      // 내가 졌을 때
+      resultMessage = "졌습니다. -50점";
+      _getPointValue(MyApp.user_id, -50); // 점수 차감
+    } else {
+      // 무승부
+      resultMessage = "무승부입니다!";
+    }
+
+    // 결과 메시지 업데이트
+    setState(() {
+      serverMessage = resultMessage;
+      _getPointValue(MyApp.user_id, 0); // 점수 차감
+      _getPointValue(opponentId, 0);
+    });
+
+    print("hi");
+    // 확인 버튼을 눌렀을 때 상태 초기화
+    Future.delayed(Duration(seconds: 3), () {
+      myCards = [1, 1, 1, 1, 1];
+      opponentCards = [0,0,0,0,0];
+      opponentCards2 = [0,0,0,0,0];
+      selectedCards = [false, false, false, false, false];
+      isWaitingForResult = false; // 결과 대기 상태
+    });
+  }
+
 
 
   // 카드 번호에 따라 카드 이미지 경로 반환
@@ -287,11 +329,7 @@ class _CardPageState extends State<CardPage> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          isWaitingForResult
-                              ? '상대를 기다리는 중...'
-                              : serverMessage.isEmpty
-                              ? '...'
-                              : serverMessage,
+                          serverMessage,
                           style: TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
@@ -402,4 +440,43 @@ class _CardPageState extends State<CardPage> {
       ),
     );
   }
+}
+
+int checkCard(List<int> cards) {
+  List<int> num = List.filled(6, 0);
+
+  // 각 숫자의 개수를 카운트
+  for (int card in cards) {
+    num[card - 1]++;
+  }
+
+  int max = -1;
+  int min = -1;
+  int maxIndex = -1;
+  int minIndex = -1;
+
+  for (int i = 0; i < num.length; i++) {
+    if (num[i] > max) {
+      max = num[i];
+      maxIndex = i + 1;
+    } else if (num[i] >= min && num[i] != 0) {
+      min = num[i];
+      minIndex = i + 1;
+    }
+  }
+
+  print("$maxIndex가 $max장");
+  print("$minIndex가 $min장");
+
+  if (max == 5) return 600 + maxIndex * 10;
+  if (max == 4) return 500 + maxIndex * 10 + minIndex;
+  if (max == 3) {
+    if (min == 2) return 400 + maxIndex * 10 + minIndex;
+    return 300 + maxIndex * 10 + minIndex;
+  }
+  if (max == 2) {
+    if (min == 2) return 200 + maxIndex * 10 + minIndex;
+    return 100 + maxIndex * 10 + minIndex;
+  }
+  return minIndex;
 }
