@@ -15,6 +15,7 @@ class CardPage extends StatefulWidget {
 class _CardPageState extends State<CardPage> {
   bool isLoading = true;
   bool isWaitingForResult = false; // 결과 대기 상태
+  int countdown = 11;
   int myPoints = 0;
   int opponentPoints = 0;
   String opponentId = "";
@@ -74,23 +75,16 @@ class _CardPageState extends State<CardPage> {
           String opponent = message.split(':')[1];
           setState(() {
             opponentId = opponent;
-            serverMessage = "교환할 카드를 골라주세요";
           });
+          _startCountdown(); // 내가 아직 카드를 전송하지 않은 경우,  카운트다운 시작
           _getPointValue(opponent, 0);
           _shuffleMyCards(); // 상대방 ID를 받은 후 내 카드 섞기
         } else if (message.startsWith('RESULT:')) {
           // 상대방 카드 데이터 수신
           List<int> receivedCards = List<int>.from(jsonDecode(message.split(':')[1]));
+          opponentCards2 = receivedCards;
           if (isWaitingForResult) {
-            // 내가 이미 카드를 전송한 상태면 상대 카드를 즉시 공개
-            setState(() {
-              opponentCards = receivedCards;
-            });
-            _Result();
-          } else {
-            // 내가 아직 카드를 전송하지 않은 경우, 데이터만 저장
-            opponentCards2 = receivedCards;
-            _startCountdown(); // 제한시간 카운트다운 시작
+            _Result(); // 내가 이미 카드를 전송한 상태면 상대 카드를 즉시 공개
           }
         } else if (message.startsWith('QUIT:')) {
           setState(() {
@@ -101,7 +95,7 @@ class _CardPageState extends State<CardPage> {
         } else if (message.startsWith('KICK:')) {
           setState(() {
             isWaitingForResult = true;
-            serverMessage = "제한시간 초과!";
+            serverMessage = "상대가 제한시간 초과되었습니다!";
             myCards = [0, 0, 0, 0, 0];
           });
         }
@@ -126,12 +120,20 @@ class _CardPageState extends State<CardPage> {
   }
 
   void _startCountdown() {
-    int countdown = 9; // 제한시간 10초
     Timer.periodic(Duration(seconds: 1), (timer) {
-      if (countdown > 0 && mounted && !isWaitingForResult) {
+      if (countdown >= 0 && mounted && !isWaitingForResult) {
+        countdown--;
         setState(() {
-          serverMessage = "제한시간: ${countdown--}초";
+          serverMessage = "교환할 카드를 골라주세요 (${countdown-1})";
         });
+        if(countdown<=0){
+          channel!.sink.add("TIMEOUT:${MyApp.user_id}");
+          setState(() {
+            isWaitingForResult = true;
+            serverMessage = "제한시간 초과!";
+            myCards = [0, 0, 0, 0, 0];
+          });
+        }
       }
     });
   }
@@ -172,7 +174,7 @@ class _CardPageState extends State<CardPage> {
     }
     print(opponentCards2);
     // 상대 카드가 이미 도착했으면 즉시 공개
-    if (!opponentCards.every((card) => card == 0)) {
+    if (!opponentCards2.every((card) => card == 0)) {
       setState(() {
         opponentCards = opponentCards2;
       });
@@ -181,24 +183,13 @@ class _CardPageState extends State<CardPage> {
       setState(() {
         serverMessage = "상대를 기다리는 중..";
       });
-      Future.delayed(Duration(seconds: 10), () {
-        if (opponentCards.every((card) => card == 0)) { // 모든 값이 0인지 확인
-          setState(() {
-            isWaitingForResult = true;
-            serverMessage = "상대의 접속이 끊겼습니다..";
-            myCards = [0, 0, 0, 0, 0];
-          });
-          String socket = "TIMEOUT:${opponentId}";
-          channel!.sink.add(socket);
-        }
-      });
     }
   }
 
   void _Result() {
     // 점수 계산
     int myScore = checkCard(myCards); // 내 카드 점수 계산
-    int opponentScore = checkCard(opponentCards); // 상대 카드 점수 계산
+    int opponentScore = checkCard(opponentCards2); // 상대 카드 점수 계산
 
     String resultMessage;
 
@@ -217,13 +208,17 @@ class _CardPageState extends State<CardPage> {
 
     // 결과 메시지 업데이트
     setState(() {
+      countdown = 11;
+      opponentCards = opponentCards2;
       serverMessage = resultMessage;
       _getPointValue(MyApp.user_id, 0); // 점수 차감
       _getPointValue(opponentId, 0);
     });
 
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 7), () {
       setState(() {
+        _getPointValue(MyApp.user_id, 0); // 점수 차감
+        _getPointValue(opponentId, 0);
         serverMessage = "교환할 카드를 골라주세요";
         _shuffleMyCards();
         opponentCards = [0,0,0,0,0];
@@ -252,7 +247,7 @@ class _CardPageState extends State<CardPage> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/Theme/${MyApp.currentTheme}/MainPage.jpg'),
+              image: AssetImage('assets/Game/table.jpg'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 Colors.black.withOpacity(0.5),
@@ -459,30 +454,15 @@ class _CardPageState extends State<CardPage> {
                           ),
                           SizedBox(height: 20),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center, // 버튼을 가운데 정렬
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 버튼 사이 동일한 간격
                             children: [
-                              ElevatedButton(
-                                onPressed: isWaitingForResult
-                                    ? null
-                                    : () {
-                                  _updateSelectedCards();
-                                },
-                                child: Text(
-                                  '추가 베팅',
-                                  style: TextStyle(fontSize: 20),
-                                ),
+                              _buildActionButton(
+                                text: '추가 베팅',
+                                onTap: isWaitingForResult ? null : () => _updateSelectedCards(),
                               ),
-                              SizedBox(width: 20), // 버튼 사이 간격
-                              ElevatedButton(
-                                onPressed: isWaitingForResult
-                                    ? null
-                                    : () {
-                                  _updateSelectedCards();
-                                },
-                                child: Text(
-                                  '카드 변경',
-                                  style: TextStyle(fontSize: 20),
-                                ),
+                              _buildActionButton(
+                                text: '카드 변경',
+                                onTap: isWaitingForResult ? null : () => _updateSelectedCards(),
                               ),
                             ],
                           ),
@@ -537,4 +517,39 @@ int checkCard(List<int> cards) {
     return 100 + maxIndex * 10 + minIndex;
   }
   return minIndex;
+}
+
+Widget _buildActionButton({required String text, VoidCallback? onTap}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: 160, // 버튼 너비
+      height: 50, // 버튼 높이
+      decoration: BoxDecoration(
+        color: onTap == null ? Colors.grey : Colors.black54, // 비활성화 시 회색
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: Color(0xFFD4AF37), // 금색 테두리
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 6,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: onTap == null ? Colors.black54 : Colors.white,
+          ),
+        ),
+      ),
+    ),
+  );
 }
