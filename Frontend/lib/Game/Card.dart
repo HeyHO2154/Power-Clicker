@@ -16,7 +16,7 @@ class CardPage extends StatefulWidget {
 class _CardPageState extends State<CardPage> {
   bool isLoading = true;
   bool isWaitingForResult = false; // 결과 대기 상태
-  int countdown = 12;
+  int countdown = 17;
   int betting = 50;
   int myPoints = 0;
   int opponentPoints = 0;
@@ -237,6 +237,7 @@ class _CardPageState extends State<CardPage> {
 
     if (myScore > opponentScore) {
       // 내가 이겼을 때
+      _Chaching();
       resultMessage = "${lang("승리!")} +${betting}";
       _getPointValue(MyApp.user_id, betting); // 점수 추가
     } else if (myScore < opponentScore) {
@@ -250,8 +251,10 @@ class _CardPageState extends State<CardPage> {
 
     // 결과 메시지 업데이트
     setState(() {
-      countdown = 12;
-      opponentCards = opponentCards2;
+      countdown = 17;
+      myCards.sort();
+      opponentCards2.sort();
+      opponentCards = List.from(opponentCards2);
       serverMessage = resultMessage;
       _getPointValue(MyApp.user_id, 0);
       _getPointValue(opponentId, 0);

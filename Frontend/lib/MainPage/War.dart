@@ -225,7 +225,7 @@ class _WarState extends State<War> {
                 // 닉네임의 픽셀 너비를 제한 (예: 최대 200px)
                 String truncatedNickname = getTruncatedText(
                   user["user_id"],
-                  190.0, // 최대 너비 (픽셀 단위)
+                  MediaQuery.of(context).size.width * 0.4,
                   TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
