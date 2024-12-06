@@ -8,7 +8,7 @@ import 'package:video_player/video_player.dart';
 import 'dart:async';
 
 import '../MainPage/MainPage.dart';
-import '../MainPage/Shop.dart'; // 타이머 사용을 위해 추가
+import '../MainPage/Lobby.dart';
 
 class Mining extends StatefulWidget {
   @override
@@ -256,7 +256,7 @@ class _MiningState extends State<Mining> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => Shop()),
+                              MaterialPageRoute(builder: (context) => LobbyPage()),
                             );
                           },
                           child: Row(

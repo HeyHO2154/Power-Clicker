@@ -350,6 +350,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': '광질하기',
         '살아남기': '살아남기',
         '순위표': '순위표',
+        '카드게임': '카드게임',
       },
       'ENG': {
         '혼자하는 마피아': 'Solo Mafia',
@@ -362,6 +363,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': 'Mining',
         '살아남기': 'Survive',
         '순위표': 'Leaderboard',
+        '카드게임': 'Card Game',
       },
       'CHN': {
         '혼자하는 마피아': '单人游戏',
@@ -374,6 +376,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': '挖矿',
         '살아남기': '生存',
         '순위표': '排行榜',
+        '카드게임': '卡牌游戏',
       },
       'JPN': {
         '혼자하는 마피아': '一人マフィア',
@@ -386,6 +389,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': '採掘する',
         '살아남기': '生き残る',
         '순위표': 'ランキング表',
+        '카드게임': 'カードゲーム',
       },
       'GER': {
         '혼자하는 마피아': 'Solo-Mafia',
@@ -398,6 +402,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': 'Bergbau',
         '살아남기': 'Überleben',
         '순위표': 'Bestenliste',
+        '카드게임': 'Kartenspiel',
       },
       'FRA': {
         '혼자하는 마피아': 'Mafia Solo',
@@ -410,6 +415,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': 'Extraction',
         '살아남기': 'Survivre',
         '순위표': 'Classement',
+        '카드게임': 'Jeu de cartes',
       },
       'RUS': {
         '혼자하는 마피아': 'Соло-мафия',
@@ -422,6 +428,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': 'Добыча',
         '살아남기': 'Выжить',
         '순위표': 'Таблица лидеров',
+        '카드게임': 'Карточная игра',
       },
       'ESP': {
         '혼자하는 마피아': 'Mafia Solo',
@@ -434,6 +441,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': 'Minería',
         '살아남기': 'Sobrevivir',
         '순위표': 'clasificación',
+        '카드게임': 'Juego de cartas',
       },
       'ARA': {
         '혼자하는 마피아': 'مافيا منفردة',
@@ -446,6 +454,7 @@ class _MainPageState extends State<MainPage> {
         '광질하기': 'التعدين',
         '살아남기': 'البقاء',
         '순위표': 'جدول التصنيف',
+        '카드게임': 'لعبة البطاقات',
       },
     };
 

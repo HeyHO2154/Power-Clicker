@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
 import 'MainPage.dart';
+import '../Temp/Mining.dart';
 
 class LobbyPage extends StatefulWidget {
   @override
@@ -98,7 +99,7 @@ class _LobbyPageState extends State<LobbyPage> {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage(
-                  'assets/Theme/${MyApp.currentTheme}/MainPage.jpg'),
+                  'assets/Game/table.jpg'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5), BlendMode.darken),
@@ -129,7 +130,7 @@ class _LobbyPageState extends State<LobbyPage> {
                       },
                     ),
                     Text(
-                      '로비',
+                      lang('로비'),
                       style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
@@ -176,9 +177,9 @@ class _LobbyPageState extends State<LobbyPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "플레이어를 찾고 있습니다...",
+                        lang("상대를 찾고 있습니다..."),
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 25,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           shadows: [
@@ -199,6 +200,51 @@ class _LobbyPageState extends State<LobbyPage> {
                       )
                           : Icon(Icons.check_circle,
                           color: Colors.green, size: 50),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          // 미니 게임 페이지로 이동 (아직 구현되지 않은 경우 임시 동작)
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Mining(), // MiniGamePage를 구현해야 함
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black54, // 어두운 배경
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.games, color: Colors.amberAccent, size: 24),
+                            SizedBox(width: 10),
+                            Text(
+                              lang("기다리는 동안 게임하기"),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amberAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        lang("게임 중 상대를 찾으면 자동으로 시작됩니다."),
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
                     ],
                   ),
                 ),
@@ -209,4 +255,64 @@ class _LobbyPageState extends State<LobbyPage> {
       ),
     );
   }
+}
+
+String lang(String textKey) {
+  final localizedTexts = {
+    'KOR': {
+      '로비': '로비',
+      '상대를 찾고 있습니다...': '상대를 찾고 있습니다...',
+      '기다리는 동안 게임하기': '기다리는 동안 게임하기',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': '게임 중 상대를 찾으면 자동으로 시작됩니다.',
+    },
+    'ENG': {
+      '로비': 'Lobby',
+      '상대를 찾고 있습니다...': 'Searching for an opponent...',
+      '기다리는 동안 게임하기': 'Play a game while waiting',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'If an opponent is found during the game, it will start automatically.',
+    },
+    'ARA': {
+      '로비': 'الردهة',
+      '상대를 찾고 있습니다...': 'جارٍ البحث عن خصم...',
+      '기다리는 동안 게임하기': 'العب لعبة أثناء الانتظار',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'إذا تم العثور على خصم أثناء اللعب، فسيبدأ تلقائيًا.',
+    },
+    'CHN': {
+      '로비': '大厅',
+      '상대를 찾고 있습니다...': '正在寻找对手...',
+      '기다리는 동안 게임하기': '等待时玩游戏',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': '游戏中找到对手会自动开始。',
+    },
+    'JPA': {
+      '로비': 'ロビー',
+      '상대를 찾고 있습니다...': '対戦相手を探しています...',
+      '기다리는 동안 게임하기': '待っている間にゲームをプレイする',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'ゲーム中に相手が見つかった場合、自動的に開始します。',
+    },
+    'GER': {
+      '로비': 'Lobby',
+      '상대를 찾고 있습니다...': 'Suche nach einem Gegner...',
+      '기다리는 동안 게임하기': 'Spielen Sie ein Spiel, während Sie warten',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Wenn während des Spiels ein Gegner gefunden wird, startet es automatisch.',
+    },
+    'RUS': {
+      '로비': 'Лобби',
+      '상대를 찾고 있습니다...': 'Ищем соперника...',
+      '기다리는 동안 게임하기': 'Играйте в игру, пока ждете',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Если во время игры найден соперник, она начнется автоматически.',
+    },
+    'FRA': {
+      '로비': 'Hall',
+      '상대를 찾고 있습니다...': 'Recherche d\'un adversaire...',
+      '기다리는 동안 게임하기': 'Jouez à un jeu en attendant',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Si un adversaire est trouvé pendant le jeu, il commencera automatiquement.',
+    },
+    'ESP': {
+      '로비': 'Vestíbulo',
+      '상대를 찾고 있습니다...': 'Buscando un oponente...',
+      '기다리는 동안 게임하기': 'Juega un juego mientras esperas',
+      '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Si se encuentra un oponente durante el juego, comenzará automáticamente.',
+    },
+  };
+  return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
 }
