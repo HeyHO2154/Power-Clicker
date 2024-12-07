@@ -8,25 +8,24 @@ import '../main.dart';
 import '../MainPage/MainPage.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-class CardPage extends StatefulWidget {
+class CardPage2 extends StatefulWidget {
   @override
   _CardPageState createState() => _CardPageState();
 }
 
-class _CardPageState extends State<CardPage> {
+class _CardPageState extends State<CardPage2> {
   bool isLoading = true;
   bool isWaitingForResult = false; // 결과 대기 상태
   int countdown = 17;
-  int betting = 50;
+  int betting = 10;
   int myPoints = 0;
   int opponentPoints = 0;
-  String opponentId = "";
+  String opponentId = "AI";
   String serverMessage = "";
   List<int> myCards = [1, 1, 1, 1, 1];
   List<int> opponentCards = [0,0,0,0,0];
   List<int> opponentCards2 = [0,0,0,0,0];
   List<bool> selectedCards = [false, false, false, false, false];
-  WebSocketChannel? channel;
   final AudioPlayer _audioPlayer = AudioPlayer(); // 카드 클릭 효과음 플레이어
   final AudioPlayer _bgmPlayer = AudioPlayer(); // 배경 음악 플레이어
 
@@ -61,13 +60,12 @@ class _CardPageState extends State<CardPage> {
   void initState() {
     super.initState();
     _startBackgroundMusic(); // 배경 음악 시작
-    _connectToWebSocket();
     _getPointValue(MyApp.user_id, 0);
+    _SinglePlay();
   }
 
   @override
   void dispose() {
-    channel?.sink.close();
     _bgmPlayer.stop(); // 배경 음악 정지
     _bgmPlayer.dispose(); // 배경 음악 플레이어 해제
     _audioPlayer.dispose(); // 카드 클릭 효과음 플레이어 해제
@@ -97,67 +95,9 @@ class _CardPageState extends State<CardPage> {
     }
   }
 
-  void _connectToWebSocket() {
-    channel = WebSocketChannel.connect(
-      Uri.parse('${MyApp.url2}/game?user_id=${MyApp.user_id}'),
-    );
-
-    channel!.stream.listen(
-          (message) {
-        print('Received message: $message');
-
-        if (message.startsWith('OPPONENT:')) {
-          String opponent = message.split(':')[1];
-          setState(() {
-            opponentId = opponent;
-          });
-          _startCountdown(); // 내가 아직 카드를 전송하지 않은 경우,  카운트다운 시작
-          _getPointValue(opponent, 0);
-          _shuffleMyCards(); // 상대방 ID를 받은 후 내 카드 섞기
-        } else if (message.startsWith('RESULT:')) {
-          // 상대방 카드 데이터 수신
-          List<int> receivedCards = List<int>.from(jsonDecode(message.split(':')[1]));
-          opponentCards2 = receivedCards;
-          if (isWaitingForResult) {
-            _Result(); // 내가 이미 카드를 전송한 상태면 상대 카드를 즉시 공개
-          }
-        } else if (message.startsWith('QUIT:')) {
-          setState(() {
-            isWaitingForResult = true;
-            serverMessage = lang("상대가 게임을 나갔습니다");
-            myCards = [0, 0, 0, 0, 0];
-            opponentCards = [0,0,0,0,0];
-            opponentCards2 = [0,0,0,0,0];
-            selectedCards = [false, false, false, false, false];
-          });
-        } else if (message.startsWith('KICK:')) {
-          setState(() {
-            isWaitingForResult = true;
-            serverMessage = lang("상대가 시간 초과되었습니다!");
-            myCards = [0, 0, 0, 0, 0];
-            opponentCards = [0,0,0,0,0];
-            opponentCards2 = [0,0,0,0,0];
-            selectedCards = [false, false, false, false, false];
-          });
-        }
-          },
-      onError: (error) {
-        print('WebSocket error: $error');
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      },
-      onDone: () {
-        print('WebSocket closed');
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      },
-    );
+  void _SinglePlay() {
+    _startCountdown(); // 내가 아직 카드를 전송하지 않은 경우,  카운트다운 시작
+    _shuffleMyCards(); // 상대방 ID를 받은 후 내 카드 섞기
   }
 
   void _startCountdown() {
@@ -168,7 +108,6 @@ class _CardPageState extends State<CardPage> {
           serverMessage = "${lang("교환할 카드를 고르세요")} (${countdown-1})";
         });
         if(countdown<=0){
-          channel!.sink.add("TIMEOUT:${MyApp.user_id}");
           setState(() {
             isWaitingForResult = true;
             serverMessage = lang("제한시간 초과!");
@@ -180,13 +119,17 @@ class _CardPageState extends State<CardPage> {
     });
   }
 
-
   void _shuffleMyCards() {
     final random = Random();
     setState(() {
       myCards = List.generate(5, (_) => random.nextInt(6) + 1); // 1~6의 랜덤 숫자 5개 생성
     });
-    print('My cards shuffled: $myCards');
+  }
+  void _shuffleAICards() {
+    final random = Random();
+    setState(() {
+      opponentCards2 = List.generate(5, (_) => random.nextInt(6) + 1); // 1~6의 랜덤 숫자 5개 생성
+    });
   }
 
   void _updateSelectedCards() {
@@ -207,25 +150,18 @@ class _CardPageState extends State<CardPage> {
     _sendCardsToServer(newCards);
   }
 
-  void _sendCardsToServer(List<int> cards) {
-    if (channel != null) {
-      // 서버에서 기대하는 포맷으로 메시지를 전송
-      String cardData = "CARDS:${cards}";
-      channel!.sink.add(cardData);
-      print('Sent cards to server: $cardData');
-    }
-    print(opponentCards2);
-    // 상대 카드가 이미 도착했으면 즉시 공개
-    if (!opponentCards2.every((card) => card == 0)) {
-      setState(() {
-        opponentCards = opponentCards2;
-      });
-      _Result();
-    }else{
-      setState(() {
-        serverMessage = lang("상대를 기다리는 중..");
-      });
-    }
+  void _sendCardsToServer(List<int> cards) async {
+    setState(() {
+      serverMessage = lang("상대를 기다리는 중..");
+    });
+    await Future.delayed(Duration(seconds: 3), () {
+
+    });
+    setState(() {
+      _shuffleAICards();
+      opponentCards = opponentCards2;
+    });
+    _Result();
   }
 
   void _Result() async {
@@ -263,7 +199,6 @@ class _CardPageState extends State<CardPage> {
     await _getPointValue(MyApp.user_id, 0);
     Future.delayed(Duration(seconds: 7), () {
         if(myPoints<=0){
-          channel!.sink.add("TIMEOUT:${MyApp.user_id}");
           setState(() {
             isWaitingForResult = true;
             serverMessage = lang("잔액 부족");
@@ -283,15 +218,12 @@ class _CardPageState extends State<CardPage> {
             opponentCards2 = [0,0,0,0,0];
             selectedCards = [false, false, false, false, false];
             isWaitingForResult = false; // 결과 대기 상태
-            betting = 50;
+            betting = 10;
           });
         }
       });
 
   }
-
-
-
   // 카드 번호에 따라 카드 이미지 경로 반환
   String _getCardImagePath(int cardNumber) {
     if(cardNumber==0){
@@ -524,7 +456,7 @@ class _CardPageState extends State<CardPage> {
                                     ? null
                                     : () {
                                   _Chaching(); // 효과음 메서드 실행
-                                  betting = 100;
+                                  betting = 20;
                                 },
                               ),
                               _buildActionButton(

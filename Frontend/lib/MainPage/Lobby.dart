@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../Game/Card.dart';
+import '../Game/Card2.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
@@ -207,7 +208,7 @@ class _LobbyPageState extends State<LobbyPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Mining(), // MiniGamePage를 구현해야 함
+                              builder: (context) => CardPage2(), // MiniGamePage를 구현해야 함
                             ),
                           );
                         },
@@ -224,7 +225,7 @@ class _LobbyPageState extends State<LobbyPage> {
                             Icon(Icons.games, color: Colors.amberAccent, size: 24),
                             SizedBox(width: 10),
                             Text(
-                              lang("기다리는 동안 게임하기"),
+                              lang("기다리는 동안 혼자하기"),
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -264,54 +265,63 @@ String lang(String textKey) {
       '상대를 찾고 있습니다...': '상대를 찾고 있습니다...',
       '기다리는 동안 게임하기': '기다리는 동안 게임하기',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': '게임 중 상대를 찾으면 자동으로 시작됩니다.',
+      '기다리는 동안 혼자하기': '기다리는 동안 혼자하기',
     },
     'ENG': {
       '로비': 'Lobby',
       '상대를 찾고 있습니다...': 'Searching for an opponent...',
       '기다리는 동안 게임하기': 'Play a game while waiting',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'If an opponent is found during the game, it will start automatically.',
+      '기다리는 동안 혼자하기': 'Play alone while waiting',
     },
     'ARA': {
       '로비': 'الردهة',
       '상대를 찾고 있습니다...': 'جارٍ البحث عن خصم...',
       '기다리는 동안 게임하기': 'العب لعبة أثناء الانتظار',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'إذا تم العثور على خصم أثناء اللعب، فسيبدأ تلقائيًا.',
+      '기다리는 동안 혼자하기': 'اللعب منفردًا أثناء الانتظار',
     },
     'CHN': {
       '로비': '大厅',
       '상대를 찾고 있습니다...': '正在寻找对手...',
       '기다리는 동안 게임하기': '等待时玩游戏',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': '游戏中找到对手会自动开始。',
+      '기다리는 동안 혼자하기': '等待时单独游戏',
     },
     'JPN': {
       '로비': 'ロビー',
       '상대를 찾고 있습니다...': '対戦相手を探しています...',
       '기다리는 동안 게임하기': '待っている間にゲームをプレイする',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'ゲーム中に相手が見つかった場合、自動的に開始します。',
+      '기다리는 동안 혼자하기': '待ちながら一人でプレイ',
     },
     'GER': {
       '로비': 'Lobby',
       '상대를 찾고 있습니다...': 'Suche nach einem Gegner...',
       '기다리는 동안 게임하기': 'Spielen Sie ein Spiel, während Sie warten',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Wenn während des Spiels ein Gegner gefunden wird, startet es automatisch.',
+      '기다리는 동안 혼자하기': 'Allein spielen während des Wartens',
     },
     'RUS': {
       '로비': 'Лобби',
       '상대를 찾고 있습니다...': 'Ищем соперника...',
       '기다리는 동안 게임하기': 'Играйте в игру, пока ждете',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Если во время игры найден соперник, она начнется автоматически.',
+      '기다리는 동안 혼자하기': 'Играть в одиночку во время ожидания',
     },
     'FRA': {
       '로비': 'Hall',
       '상대를 찾고 있습니다...': 'Recherche d\'un adversaire...',
       '기다리는 동안 게임하기': 'Jouez à un jeu en attendant',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Si un adversaire est trouvé pendant le jeu, il commencera automatiquement.',
+      '기다리는 동안 혼자하기': 'Jouer seul en attendant',
     },
     'ESP': {
       '로비': 'Vestíbulo',
       '상대를 찾고 있습니다...': 'Buscando un oponente...',
       '기다리는 동안 게임하기': 'Juega un juego mientras esperas',
       '게임 중 상대를 찾으면 자동으로 시작됩니다.': 'Si se encuentra un oponente durante el juego, comenzará automáticamente.',
+      '기다리는 동안 혼자하기': 'Jugar solo mientras esperas',
     },
   };
   return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
