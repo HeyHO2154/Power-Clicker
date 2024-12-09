@@ -103,7 +103,7 @@ class _ShopPageState extends State<Shop> {
       // 구매 처리
       _inAppPurchase.buyConsumable(
         purchaseParam: purchaseParam,
-        autoConsume: false, // 수동 소비 처리
+        autoConsume: true, // 자동 소비 처리
       );
 
       // 구매 완료 후 소비 처리
