@@ -40,7 +40,6 @@ class _CardPageState extends State<CardPage> {
     }
   }
 
-  // 카드 클릭 시 효과음 재생
   Future<void> _card() async {
     try {
       await _audioPlayer.play(AssetSource('Sound/card.mp3')); // 효과음 파일 경로
@@ -48,10 +47,16 @@ class _CardPageState extends State<CardPage> {
       print("Error playing sound: $e");
     }
   }
-  // 카드 클릭 시 효과음 재생
   Future<void> _Chaching() async {
     try {
       await _audioPlayer.play(AssetSource('Sound/Chacing.mp3')); // 효과음 파일 경로
+    } catch (e) {
+      print("Error playing sound: $e");
+    }
+  }
+  Future<void> _Coin() async {
+    try {
+      await _audioPlayer.play(AssetSource('Sound/coin.mp3')); // 효과음 파일 경로
     } catch (e) {
       print("Error playing sound: $e");
     }
@@ -520,11 +525,11 @@ class _CardPageState extends State<CardPage> {
                             children: [
                               _buildActionButton(
                                 text: '${lang('추가 베팅')} ${betting}',
-                                onTap: isWaitingForResult
+                                onTap: (isWaitingForResult || myPoints < betting * 2)
                                     ? null
                                     : () {
-                                  _Chaching(); // 효과음 메서드 실행
-                                  betting = 100;
+                                  _Coin(); // 효과음 메서드 실행
+                                  betting = betting*2;
                                 },
                               ),
                               _buildActionButton(
