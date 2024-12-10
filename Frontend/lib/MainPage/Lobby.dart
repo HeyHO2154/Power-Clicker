@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
 import 'MainPage.dart';
-import '../Temp/Mining.dart';
 
 class LobbyPage extends StatefulWidget {
   @override
