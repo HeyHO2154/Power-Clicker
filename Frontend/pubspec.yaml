@@ -68,10 +68,11 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
-    - assets/Sound/
     - assets/Game/
     - assets/Game/Cards/
     - assets/Item/
+    - assets/Sound/
+    - assets/Sound/BGM/
     - assets/Theme/
     - assets/Theme/cat/
     - assets/Theme/christmas/

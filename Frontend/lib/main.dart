@@ -6,6 +6,7 @@ import 'Login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart'; // url_launcher 패키지 import
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   // 아래꺼 주석 해제하면 전체화면됨
@@ -28,6 +29,8 @@ class MyApp extends StatelessWidget {
   static String currentTheme = 'cat';
   static String version = '4.0'; //로그인시 벡엔드 버전과 다르면 접속 거부
 
+  static AudioPlayer bgmPlayer = AudioPlayer(); // 배경 음악 플레이어
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -43,12 +46,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   @override
   void initState() {
     super.initState();
+    _startBackgroundMusic();
     //_resetPreferences(); //디버그용 초기화
     _initializeSetting(); // 로컬 저장소 불러오기
     _checkLoginStatus();
+  }
+
+  // 배경 음악 시작 함수
+  Future<void> _startBackgroundMusic() async {
+    try {
+      await MyApp.bgmPlayer.setReleaseMode(ReleaseMode.loop); // 반복 재생 모드
+      await MyApp.bgmPlayer.play(AssetSource('Sound/BGM/videoplayback.weba')); // 배경 음악 경로
+    } catch (e) {
+      print("Error starting background music: $e");
+    }
   }
 
   // SharedPreferences 초기화 함수 - 디버깅용

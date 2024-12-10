@@ -34,7 +34,7 @@ class _CardPageState extends State<CardPage> {
   Future<void> _startBackgroundMusic() async {
     try {
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop); // 반복 재생 모드
-      await _bgmPlayer.play(AssetSource('Sound/CardBgm.mp3')); // 배경 음악 경로
+      await _bgmPlayer.play(AssetSource('Sound/BGM/CardBgm.mp3')); // 배경 음악 경로
     } catch (e) {
       print("Error starting background music: $e");
     }
@@ -65,6 +65,7 @@ class _CardPageState extends State<CardPage> {
   @override
   void initState() {
     super.initState();
+    MyApp.bgmPlayer.pause();
     _startBackgroundMusic(); // 배경 음악 시작
     _connectToWebSocket();
     _getPointValue(MyApp.user_id, 0);
@@ -72,6 +73,7 @@ class _CardPageState extends State<CardPage> {
 
   @override
   void dispose() {
+    MyApp.bgmPlayer.resume();
     channel?.sink.close();
     _bgmPlayer.stop(); // 배경 음악 정지
     _bgmPlayer.dispose(); // 배경 음악 플레이어 해제
@@ -266,7 +268,7 @@ class _CardPageState extends State<CardPage> {
     });
 
     await _getPointValue(MyApp.user_id, 0);
-    Future.delayed(Duration(seconds: 7), () {
+    Future.delayed(Duration(seconds: 5), () {
         if(myPoints<=0){
           channel!.sink.add("TIMEOUT:${MyApp.user_id}");
           setState(() {
