@@ -48,7 +48,7 @@ class _MyInfoPageState extends State<MyInfo> {
     await _getLevelValue(0);
     await _getRankValue(0);
     await _getItems(0, 0, 0);
-    await _getThemes(false, false, false);
+    await _getThemes(MyApp.user_id);
   }
 
   // 닉네임 업데이트 함수
@@ -66,7 +66,7 @@ class _MyInfoPageState extends State<MyInfo> {
         user_name = response.body;
       }else if (response.body != user_name) {
         setState(() {
-          _getPointValue(-1000);
+          _getPointValue(0);
           user_name = response.body;
         });
       } else {
@@ -124,24 +124,31 @@ class _MyInfoPageState extends State<MyInfo> {
     }
   }
 
-  Future<void> _getThemes(bool christmas, bool forest_friends, bool zombies) async {
-    final url = Uri.parse('${MyApp.url}/theme/themes');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'user_id': MyApp.user_id,
-        'christmas': christmas,
-        'forest_friends': forest_friends,
-        'zombies': zombies
-      }),
-    );
-    if (response.statusCode == 200) {
-      // JSON 데이터를 Map으로 변환
-      final Map<String, dynamic> itemData = jsonDecode(response.body);
-      setState(() {
-        _themeMap = itemData; // _themeMap은 Map<String, dynamic> 타입으로 선언되어야 함
-      });
+  Future<void> _getThemes(String userId) async {
+    try {
+      // API 호출
+      final response = await http.get(Uri.parse('${MyApp.url}/asset/themes?user_id=$userId'));
+
+      // 상태 코드 확인
+      if (response.statusCode == 200) {
+        // JSON 응답 파싱
+        List<dynamic> data = jsonDecode(response.body);
+        List<String> ownedThemes = List<String>.from(data);
+
+        // Theme_name과 비교하여 Theme_check 업데이트
+        for (int i = 0; i < Theme_name.length; i++) {
+          Theme_check[i] = ownedThemes.contains(Theme[i]);
+        }
+
+        // 상태 갱신
+        setState(() {});
+      } else {
+        // 에러 발생 시 로그 출력
+        print('Failed to fetch themes. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // 네트워크 또는 기타 오류 처리
+      print('Error fetching themes: $e');
     }
   }
   Future<void> _setTheme(String currentTheme) async {
@@ -151,6 +158,23 @@ class _MyInfoPageState extends State<MyInfo> {
       MyApp.currentTheme = currentTheme; // 앱의 현재 테마 업데이트
     });
   }
+  Future<void> _buyTheme(String themeId) async {
+    try {
+      await http.post(
+        Uri.parse('${MyApp.url}/asset/buyTheme'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': MyApp.user_id, // 현재 사용자 ID
+          'themeName': themeId,   // 구매할 테마 ID
+        }),
+      );
+    } catch (e) {
+      print('Error while purchasing theme: $e');
+    }
+  }
+
 
   Future<void> _getItems(int judge_baton, int political_speach, int bulletproof) async {
     final url = Uri.parse('${MyApp.url}/item/items');
@@ -358,7 +382,7 @@ class _MyInfoPageState extends State<MyInfo> {
               SizedBox(height: 20),
               // 설명 텍스트
               Text(
-                lang('랭크 설명'),
+                lang('다른 유저와 승리시 +1, 패배시 -1이 적용됩니다.'),
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white70,
@@ -496,7 +520,7 @@ class _MyInfoPageState extends State<MyInfo> {
                 ),
                 SizedBox(height: 5),
                 Text(
-                  lang('(닉네임 변경 시 1,000 코인 소모)'),
+                  lang('(변경에 1,000 코인 사용)'),
                   style: TextStyle(
                     fontSize: 15,
                     color: Colors.white70,
@@ -630,11 +654,8 @@ class _MyInfoPageState extends State<MyInfo> {
                   onTap: () {
                     _showDetailDialog(
                       context,
-                      Theme[index],
-                      Theme_name[index],
+                      index,
                       themeImage,
-                      Theme_info[index],
-                      Theme_check[index],
                     );
                   },
                   child: Container(
@@ -760,11 +781,8 @@ class _MyInfoPageState extends State<MyInfo> {
                 onTap: () {
                   _showDetailDialog(
                     context,
-                    "test",
+                    1,
                     itemImage,
-                    "test" ?? lang('설명이 없습니다.'),
-                    "test",
-                    false,
                   );
                 },
                 child: Column(
@@ -804,11 +822,8 @@ class _MyInfoPageState extends State<MyInfo> {
   // 다이얼로그 표시 함수
   void _showDetailDialog(
       BuildContext context,
-      String id,
-      String name,
+      int idx,
       String image,
-      String info,
-      bool check
       ) {
     showDialog(
       context: context,
@@ -833,7 +848,7 @@ class _MyInfoPageState extends State<MyInfo> {
               SizedBox(height: 10),
               // 이름
               Text(
-                name,
+                Theme_name[idx],
                 style: TextStyle(
                   fontSize: 20,
                   color: Color(0xFFD4AF37),
@@ -843,7 +858,7 @@ class _MyInfoPageState extends State<MyInfo> {
               SizedBox(height: 10),
               // 설명
               Text(
-                info,
+                Theme_info[idx],
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white70,
@@ -853,10 +868,10 @@ class _MyInfoPageState extends State<MyInfo> {
             ],
           ),
           actions: [
-            if (check) // 활성화 가능한 테마
+            if (Theme_check[idx]) // 활성화 가능한 테마
               TextButton(
                 onPressed: () {
-                  _setTheme(id);
+                  _setTheme(Theme[idx]);
                   Navigator.of(context).pop(); // 다이얼로그 닫기
                 },
                 child: Text(
@@ -867,23 +882,111 @@ class _MyInfoPageState extends State<MyInfo> {
                   ),
                 ),
               ),
-            if (!check) // 잠긴 테마의 경우
+            if (!Theme_check[idx]) // 잠긴 테마의 경우
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // 다이얼로그 닫기
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Shop()), // Shop.dart로 이동
-                  );
+                  if (points >= 10000) {
+                    // 포인트가 충분한 경우
+                    _getPointValue(-10000);
+                    _buyTheme(Theme[idx]);
+                    setState(() {
+                      Theme_check[idx] = true;
+                    });
+                    _setTheme(Theme[idx]);
+                    // 구매 완료 메시지 창 띄우기
+                    Navigator.of(context).pop(); // 현재 상품 설명창 닫기
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.black.withOpacity(0.9), // 어두운 배경
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // 모서리 둥글게
+                          ),
+                          title: Text(
+                            '구매 완료!',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          content: Text(
+                            '테마 구매가 완료되었습니다.',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // 대화창 닫기
+                              },
+                              child: Text(
+                                '확인',
+                                style: TextStyle(color: Colors.yellow),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  } else {
+                    // 포인트가 부족한 경우 안내창 띄우기
+                    Navigator.of(context).pop(); // 현재 상품 설명창 닫기
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.black?.withOpacity(1), // 어두운 붉은 색으로 설정
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // 모서리 둥글게
+                          ),
+                          title: Text(
+                            '잔액 부족',
+                            style: TextStyle(
+                              color: Colors.yellow,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          content: Text(
+                            '구매하기 위해 10,000 코인이 필요합니다.',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // 다이얼로그 닫기
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => Shop()), // Shop.dart로 이동
+                                );
+                              },
+                              child: Text(
+                                '코인 받으러 가기',
+                                style: TextStyle(
+                                  color: Colors.yellowAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
                 },
                 child: Text(
-                  lang('상점으로 이동'),
+                  lang('구매하기'),
                   style: TextStyle(
                     color: Color(0xFFD4AF37),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+
           ],
         );
       },

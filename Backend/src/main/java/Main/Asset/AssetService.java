@@ -14,4 +14,13 @@ public class AssetService {
     public List<String> getUserThemes(String userId) {
         return assetRepository.findUserThemes(userId);
     }
+    
+    public boolean buyTheme(String userId, String themeName) {
+    	Theme newTheme = new Theme();
+        newTheme.setUserId(userId);
+        newTheme.setThemeName(themeName);
+        newTheme.setThemeCheck(true);
+        assetRepository.save(newTheme);
+        return true;
+    }
 }

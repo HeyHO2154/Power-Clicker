@@ -16,15 +16,15 @@ CREATE TABLE users (
 
 #테마 테이블
 CREATE TABLE theme (
-    user_id VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
     theme_name VARCHAR(255) NOT NULL UNIQUE,
-    theme_check BOOL DEFAULT false,
+    theme_check BOOL DEFAULT true,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 #아이템 테이블
 CREATE TABLE item (
-    user_id VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
     item_name VARCHAR(255) NOT NULL UNIQUE,
     item_num INT DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -32,6 +32,8 @@ CREATE TABLE item (
 
 #테스트 유저 추가
 INSERT INTO users (user_id, user_pw, user_name, points, exp_level, exp_rank) VALUES ('test','googlg0380','testName',99999,99999,99999);
+INSERT INTO theme (user_id, theme_name) VALUES ('test','Cat');
+INSERT INTO theme (user_id, theme_name) VALUES ('test','Christmas');
 
 #전체 조회(JOIN 사용)
 SELECT * FROM users

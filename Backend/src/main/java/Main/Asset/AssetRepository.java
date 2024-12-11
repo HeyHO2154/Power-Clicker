@@ -11,4 +11,5 @@ public interface AssetRepository extends CrudRepository<Theme, String> {
 
     @Query("SELECT t.themeName FROM Theme t WHERE t.userId = :userId AND t.themeCheck = true")
     List<String> findUserThemes(String userId);
+    
 }
