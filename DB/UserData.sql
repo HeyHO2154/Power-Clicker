@@ -33,9 +33,7 @@ CREATE TABLE item (
 );
 
 #테스트 유저 추가
-INSERT INTO users (user_id, user_pw, user_name, points, exp_level, exp_rank) VALUES ('test','googlg0380','testName',99999,99999,99999);
-INSERT INTO theme (user_id, theme_name) VALUES ('test','Cat');
-INSERT INTO theme (user_id, theme_name) VALUES ('test','Christmas');
+INSERT INTO users (user_id, user_pw, user_name, points, exp_level, exp_rank) VALUES ('test','google0380','testName',99999,99999,99999);
 
 #전체 조회(JOIN 사용)
 SELECT * FROM users

@@ -34,7 +34,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      //home: HomePage(),
       home: HomePage(), // 홈 페이지를 초기 화면으로 설정
     );
   }
@@ -51,7 +50,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _resetPreferences(); //디버그용 초기화
-    _initializeSetting(); // 로컬 저장소 불러오기
+    //_initializeSetting(); // 로컬 저장소 불러오기
     _checkLoginStatus();
   }
 
