@@ -564,7 +564,7 @@ class _ShopPageState extends State<Shop> {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Color(0xFFD4AF37), width: 1.5), // 금색 테두리
           ),
-          child: Image.asset('assets/Theme/forest_friends.png', fit: BoxFit.cover),
+          child: Image.asset('assets/Theme/Forest.png', fit: BoxFit.cover),
         ),
         SizedBox(width: 10),
         Expanded(

@@ -34,7 +34,7 @@ class _CardPageState extends State<CardPage> {
   Future<void> _startBackgroundMusic() async {
     try {
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop); // 반복 재생 모드
-      await _bgmPlayer.play(AssetSource('Sound/BGM/CardBgm.mp3')); // 배경 음악 경로
+      await _bgmPlayer.play(AssetSource('Sound/BGM/CardGame.mp3')); // 배경 음악 경로
     } catch (e) {
       print("Error starting background music: $e");
     }

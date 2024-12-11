@@ -69,7 +69,7 @@ flutter:
   assets:
     - assets/
     - assets/Game/
-    - assets/Game/Cards/
+    - assets/Game/Cat/
     - assets/Item/
     - assets/Sound/
     - assets/Sound/BGM/

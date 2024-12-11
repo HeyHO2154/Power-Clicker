@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   // static const String url2 = 'ws://ekaf.kro.kr:25500';
   static String user_id = ''; //향후 본인 아이디는 모두 이걸로 통일
   static String currentLanguage = 'ENG'; // 기본 언어 설정
-  static String currentTheme = 'cat';
+  static String currentTheme = 'Cat';
   static String version = '4.0'; //로그인시 벡엔드 버전과 다르면 접속 거부
 
   static AudioPlayer bgmPlayer = AudioPlayer(); // 배경 음악 플레이어
@@ -50,20 +50,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _startBackgroundMusic();
+    //_startBackgroundMusic();
     //_resetPreferences(); //디버그용 초기화
     _initializeSetting(); // 로컬 저장소 불러오기
     _checkLoginStatus();
-  }
-
-  // 배경 음악 시작 함수
-  Future<void> _startBackgroundMusic() async {
-    try {
-      await MyApp.bgmPlayer.setReleaseMode(ReleaseMode.loop); // 반복 재생 모드
-      await MyApp.bgmPlayer.play(AssetSource('Sound/BGM/videoplayback.weba')); // 배경 음악 경로
-    } catch (e) {
-      print("Error starting background music: $e");
-    }
   }
 
   // SharedPreferences 초기화 함수 - 디버깅용
@@ -86,8 +76,11 @@ class _HomePageState extends State<HomePage> {
     if (savedTheme != null) {
       MyApp.currentTheme = savedTheme; // 저장된 언어로 설정
     } else {
-      MyApp.currentTheme = 'cat'; // 기본 언어 설정
+      MyApp.currentTheme = 'Cat'; // 기본 언어 설정
     }
+    //배경음악 재생
+    await MyApp.bgmPlayer.setReleaseMode(ReleaseMode.loop);
+    await MyApp.bgmPlayer.play(AssetSource('Sound/BGM/${MyApp.currentTheme}.mp3'));
   }
 
   Future<void> _checkLoginStatus() async {
