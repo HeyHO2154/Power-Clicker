@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AssetRepository extends CrudRepository<Theme, String> {
+public interface AssetRepository extends CrudRepository<Theme, Long> {
 
     @Query("SELECT t.themeName FROM Theme t WHERE t.userId = :userId AND t.themeCheck = true")
     List<String> findUserThemes(String userId);
