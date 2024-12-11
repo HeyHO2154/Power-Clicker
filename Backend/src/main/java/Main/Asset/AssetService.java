@@ -16,6 +16,7 @@ public class AssetService {
     }
     
     public boolean buyTheme(String userId, String themeName) {
+    	if (assetRepository.findByUserIdAndThemeName(userId, themeName).isPresent()) return false; // 테마가 이미 존재하면 false 반환
     	Theme newTheme = new Theme();
         newTheme.setUserId(userId);
         newTheme.setThemeName(themeName);

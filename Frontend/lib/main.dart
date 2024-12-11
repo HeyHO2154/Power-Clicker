@@ -50,8 +50,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    //_startBackgroundMusic();
-    //_resetPreferences(); //디버그용 초기화
+    _resetPreferences(); //디버그용 초기화
     _initializeSetting(); // 로컬 저장소 불러오기
     _checkLoginStatus();
   }

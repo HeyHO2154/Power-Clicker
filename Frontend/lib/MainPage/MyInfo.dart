@@ -48,7 +48,10 @@ class _MyInfoPageState extends State<MyInfo> {
     await _getLevelValue(0);
     await _getRankValue(0);
     await _getItems(0, 0, 0);
-    await _getThemes(MyApp.user_id);
+    await _buyTheme(Theme[0]);  //고양이는 기본적으로 구매
+    setState(() {
+      _getThemes(MyApp.user_id);
+    });
   }
 
   // 닉네임 업데이트 함수

@@ -16,7 +16,7 @@ CREATE TABLE users (
 
 #테마 테이블
 CREATE TABLE theme (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, -- AUTO_INCREMENT 및 PRIMARY KEY 추가
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     theme_name VARCHAR(255) NOT NULL,
     theme_check BOOL DEFAULT true,
@@ -25,6 +25,7 @@ CREATE TABLE theme (
 
 #아이템 테이블
 CREATE TABLE item (
+	id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     item_name VARCHAR(255) NOT NULL,
     item_num INT DEFAULT 0,
@@ -40,6 +41,6 @@ INSERT INTO theme (user_id, theme_name) VALUES ('test','Christmas');
 SELECT * FROM users
 LEFT JOIN theme ON users.user_id = theme.user_id
 LEFT JOIN item ON users.user_id = item.user_id;
-UPDATE users SET points = 99999 WHERE user_id = 'test';
+UPDATE users SET points = 99999 WHERE user_id = 'qwer';
 
 
