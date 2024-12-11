@@ -6,16 +6,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import Main.Item.Item;
-import Main.Item.ItemRepository;
-
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ItemRepository itemRepository;
 
     public String loginOrRegister(String userId, String userPw) {
     	//검색결과가 없을 때를 대비하여 Optional<>로 받음, 이거는 1개만 받는 거임(없을땐 Optional.empty()를 반환해줌)
@@ -42,10 +37,6 @@ public class UserService {
             newUser.setLogin_first(LocalDateTime.now()); // 현재 시간으로 설정
             newUser.setLogin_recent(LocalDateTime.now()); // 현재 시간으로 설정
             userRepository.save(newUser);
-            //Theme 과 Item 보유고 새로 등록
-            Item newItem = new Item();
-            newItem.setUser_id(userId);
-            itemRepository.save(newItem);
             return userId;
         }
         

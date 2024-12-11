@@ -10,19 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 import Main.User.User;
 
 @RestController
-@RequestMapping("/item")
-public class ItemController {
+@RequestMapping("/asset")
+public class AssetController {
 
     @Autowired
-    private ItemService itemService;
+    private AssetService assetService;
 
     @PostMapping("/items")
-    public ResponseEntity<Item> setItems(@RequestBody Item request) {
-    	Item items = itemService.setItems(
-        		request.getUser_id(), 
-        		request.getJudge_baton(), 
-        		request.getPolitical_speach(), 
-        		request.getBulletproof());
-        return ResponseEntity.ok(items);
+    public ResponseEntity<String> setItems(@RequestBody String request) {
+    
+        return ResponseEntity.ok(request);
     }
 }

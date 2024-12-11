@@ -14,7 +14,7 @@ class MyInfo extends StatefulWidget {
 
 class _MyInfoPageState extends State<MyInfo> {
   final TextEditingController nicknameController = TextEditingController();
-  String user_name = '';
+  String user_name = 'null';
   int exp_level = 0;
   int exp_rank = 0;
   int points = 0; // 예시 포인트 값
@@ -25,11 +25,14 @@ class _MyInfoPageState extends State<MyInfo> {
   String rankTitle = '브론즈';
   String rankImage = 'assets/UI/Ranks/브론즈.png';
 
+  //현헹 테마와 아이템
+  List<String> Theme = ['Cat','Christmas','Forest','Mafia'];
+  List<bool> Theme_check = [true, false, false, false];
+
   @override
   void initState() {
     super.initState();
     _initializeData();
-    _initializeDescriptions();
   }
 
   // 비동기 작업을 순차적으로 실행하는 함수
@@ -134,6 +137,13 @@ class _MyInfoPageState extends State<MyInfo> {
         _themeMap = itemData; // _themeMap은 Map<String, dynamic> 타입으로 선언되어야 함
       });
     }
+  }
+  Future<void> _setTheme(String currentTheme) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('currentTheme', currentTheme); // 로컬 저장소에 테마 저장
+    setState(() {
+      MyApp.currentTheme = currentTheme; // 앱의 현재 테마 업데이트
+    });
   }
 
   Future<void> _getItems(int judge_baton, int political_speach, int bulletproof) async {
@@ -601,19 +611,12 @@ class _MyInfoPageState extends State<MyInfo> {
           SizedBox(height: 10),
           SizedBox(
             height: 140, // 테마 아이콘 높이 (이름 포함)
-            child: _themeMap.isEmpty || _themeMap.keys.length <= 1
-                ? Center(
-              child: Text(
-                lang('테마 데이터가 없습니다.'),
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-                : ListView.builder(
+            child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: _themeMap.keys.length - 1, // user_id 제외
+              itemCount: Theme.length,
               itemBuilder: (context, index) {
-                final themeKey = _themeMap.keys.elementAt(index + 1);
-                final isUnlocked = _themeMap[themeKey] == true;
+                final themeKey = Theme[index];
+                final isUnlocked = Theme_check[index] == true;
                 final isActive = MyApp.currentTheme == themeKey; // 현재 활성화된 테마인지 확인
                 final themeImage = 'assets/Theme/$themeKey.png';
 
@@ -621,9 +624,9 @@ class _MyInfoPageState extends State<MyInfo> {
                   onTap: () {
                     _showDetailDialog(
                       context,
-                      themeNames[index],
+                      Theme[index],
                       themeImage,
-                      themeDescriptions[themeNames[index]] ?? lang('설명이 없습니다.'),
+                      Theme[index] ?? lang('설명이 없습니다.'),
                       isTheme: true, // 테마임을 명시
                       themeKey: themeKey, // 현재 테마 키 전달
                     );
@@ -679,7 +682,7 @@ class _MyInfoPageState extends State<MyInfo> {
                         ),
                         SizedBox(height: 5),
                         Text(
-                          themeNames[index],
+                          Theme[index],
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -696,8 +699,6 @@ class _MyInfoPageState extends State<MyInfo> {
       ),
     );
   }
-
-
 
   Widget _buildItemSection() {
     return Container(
@@ -753,9 +754,9 @@ class _MyInfoPageState extends State<MyInfo> {
                 onTap: () {
                   _showDetailDialog(
                     context,
-                    itemNames[index],
+                    "test",
                     itemImage,
-                    itemDescriptions[itemNames[index]] ?? lang('설명이 없습니다.'),
+                    "test" ?? lang('설명이 없습니다.'),
                     isTheme: false, // 아이템임을 명시
                   );
                 },
@@ -769,7 +770,7 @@ class _MyInfoPageState extends State<MyInfo> {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      itemNames[index],
+                      "test",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -900,457 +901,10 @@ class _MyInfoPageState extends State<MyInfo> {
     );
   }
 
-  Future<void> _setTheme(String currentTheme) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('currentTheme', currentTheme); // 로컬 저장소에 테마 저장
-    setState(() {
-      MyApp.currentTheme = currentTheme; // 앱의 현재 테마 업데이트
-    });
-  }
-
-  // 클래스 필드로 선언
-  List<String> themeNames = [];
-  List<String> itemNames = [];
-  Map<String, String> themeDescriptions = {};
-  Map<String, String> itemDescriptions = {};
-  void _initializeDescriptions() {
-    themeNames = [lang('고양이'), lang('마피아'), lang('크리스마스'), lang('숲속 친구들')];
-    itemNames = [lang('판사 봉'), lang('정치적 연설'), lang('방탄복')];
-    themeDescriptions = {
-      lang('마피아'): lang('클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.'),
-      lang('크리스마스'): lang('크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!'),
-      lang('숲속 친구들'): lang('숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.'),
-      lang('좀비 사태'): lang('좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!'),
-    };
-    itemDescriptions = {
-      lang('판사 봉'): lang('표를 행사할 때 2표를 행사합니다.'),
-      lang('정치적 연설'): lang('5% 확률로 투표로 인한 처형을 회피합니다.'),
-      lang('방탄복'): lang('5% 확률로 마피아의 살인을 회피합니다.'),
-    };
-  }
-
   String lang(String textKey) {
     final localizedTexts = {
-      'KOR': {
-        '내 정보': '내 정보',
-        '중복된 닉네임 입니다.': '중복된 닉네임 입니다.',
-        '닉네임': '닉네임',
-        '연승': '연승',
-        '닉네임 변경': '닉네임 변경',
-        '(닉네임 변경 시 1,000 코인 소모)': '(닉네임 변경 시 1,000 코인 소모)',
-        '랭크 정보': '랭크 정보',
-        '랭크 설명': '같이하기 플레이에서 승리하면 연승이 쌓이고, 패배하면 연승이 깎입니다. 각 랭크는 연승 점수에 따라 결정되며, 랭크 구간별로 티어가 나뉘어집니다.',
-        '확인': '확인',
-        '브론즈': '브론즈',
-        '실버': '실버',
-        '골드': '골드',
-        '플레티넘': '플레티넘',
-        '다이아몬드': '다이아몬드',
-        '마스터': '마스터',
-        '그랜드 마스터': '그랜드 마스터',
-        '레전드': '레전드',
-        '레벨': '레벨',
-        '경험치': '경험치',
-        '보유 테마': '보유 테마',
-        '테마 데이터가 없습니다.': '테마 데이터가 없습니다.',
-        '설명이 없습니다.': '설명이 없습니다.',
-        '보유 아이템': '보유 아이템',
-        '아이템 데이터가 없습니다.': '아이템 데이터가 없습니다.',
-        '마피아': '마피아',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.',
-        '크리스마스': '크리스마스',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!',
-        '숲속 친구들': '숲속 친구들',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.',
-        '좀비 사태': '좀비 사태',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!',
-        '판사 봉': '판사 봉',
-        '표를 행사할 때 2표를 행사합니다.': '표를 행사할 때 2표를 행사합니다.',
-        '정치적 연설': '정치적 연설',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '5% 확률로 투표로 인한 처형을 회피합니다.',
-        '방탄복': '방탄복',
-        '5% 확률로 마피아의 살인을 회피합니다.': '5% 확률로 마피아의 살인을 회피합니다.',
-        '해당 테마로 변경': '해당 테마로 변경',
-        '상점으로 이동': '상점으로 이동',
-      },
-      'ENG': {
-        '내 정보': 'My Info',
-        '중복된 닉네임 입니다.': 'This nickname is already taken.',
-        '닉네임': 'Name',
-        '연승': 'Win',
-        '닉네임 변경': 'Change Name',
-        '(닉네임 변경 시 1,000 코인 소모)': '(Changing nickname costs 1,000 coins)',
-        '랭크 정보': 'Rank Information',
-        '랭크 설명': 'Winning in multiplayer games will increase your winning streak, while losing will decrease it. Each rank is determined by the streak score, and tiers are divided accordingly.',
-        '확인': 'OK',
-        '브론즈': 'Bronze',
-        '실버': 'Silver',
-        '골드': 'Gold',
-        '플레티넘': 'Platinum',
-        '다이아몬드': 'Diamond',
-        '마스터': 'Master',
-        '그랜드 마스터': 'Grand Master',
-        '레전드': 'Legend',
-        '레벨': 'Level',
-        '경험치': 'Experience',
-        '보유 테마': 'Owned Themes',
-        '테마 데이터가 없습니다.': 'No theme data available.',
-        '설명이 없습니다.': 'No description available.',
-        '보유 아이템': 'Owned Items',
-        '아이템 데이터가 없습니다.': 'No item data available.',
-        '마피아': 'Mafia',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'A classic mafia theme with roles like Mafia, Police, and Doctor. Citizens must prevent Mafia murders.',
-        '크리스마스': 'Christmas',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'The Christmas theme brings warm holiday vibes with characters like Rudolph, Santa, and elves. Stop the Grinch!',
-        '숲속 친구들': 'Forest Friends',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        'The Forest Friends theme features adorable animals like deer, squirrels, and hedgehogs. Prevent the hunters!',
-        '좀비 사태': 'Zombie Apocalypse',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'The Zombie Apocalypse theme offers thrilling survival gameplay. Find the infected infiltrators in survivor camps!',
-        '판사 봉': 'Judge\'s Gavel',
-        '표를 행사할 때 2표를 행사합니다.': 'Casts 2 votes instead of 1.',
-        '정치적 연설': 'Political Speech',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '5% chance to avoid execution during voting.',
-        '방탄복': 'Bulletproof Vest',
-        '5% 확률로 마피아의 살인을 회피합니다.': '5% chance to avoid Mafia assassination.',
-        '해당 테마로 변경': 'Change to this theme',
-        '상점으로 이동': 'Go to shop',
-      },
-      'CHN': {
-        '내 정보': '我的信息',
-        '중복된 닉네임 입니다.': '昵称已被占用。',
-        '닉네임': '昵称',
-        '연승': '连胜',
-        '닉네임 변경': '更改昵称',
-        '(닉네임 변경 시 1,000 코인 소모)': '（更改昵称需要花费 1,000 金币）',
-        '랭크 정보': '等级信息',
-        '랭크 설명': '在多人游戏中获胜会增加连胜记录，而失败会减少连胜记录。每个等级由连胜分数决定，并按等级划分。',
-        '확인': '确认',
-        '브론즈': '青铜',
-        '실버': '白银',
-        '골드': '黄金',
-        '플레티넘': '铂金',
-        '다이아몬드': '钻石',
-        '마스터': '大师',
-        '그랜드 마스터': '宗师',
-        '레전드': '传奇',
-        '레벨': '等级',
-        '경험치': '经验值',
-        '보유 테마': '已拥有的主题',
-        '테마 데이터가 없습니다.': '没有主题数据。',
-        '설명이 없습니다.': '没有说明。',
-        '보유 아이템': '已拥有的物品',
-        '아이템 데이터가 없습니다.': '没有物品数据。',
-        '마피아': '黑手党',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        '经典的黑手党主题，包含黑手党、警察、医生等多个角色。市民需要阻止黑手党的谋杀。',
-        '크리스마스': '圣诞节',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        '圣诞主题展现温暖的年末氛围。包含鲁道夫、圣诞老人、小精灵等多个角色，阻止格林奇的假礼物！',
-        '숲속 친구들': '森林朋友',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        '森林朋友主题充满可爱的小动物，如鹿、松鼠和刺猬。阻止猎人！',
-        '좀비 사태': '僵尸危机',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        '僵尸危机主题带来紧张刺激的生存体验。找出潜入幸存者营地的感染者！',
-        '판사 봉': '法官槌',
-        '표를 행사할 때 2표를 행사합니다.': '投票时可投两票。',
-        '정치적 연설': '政治演讲',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '有5%的几率避免投票处决。',
-        '방탄복': '防弹背心',
-        '5% 확률로 마피아의 살인을 회피합니다.': '有5%的几率躲避黑手党的刺杀。',
-        '해당 테마로 변경': '更改为此主题',
-        '상점으로 이동': '前往商店',
-      },
-      'JPN': {
-        '내 정보': '私の情報',
-        '중복된 닉네임 입니다.': '重複したニックネームです。',
-        '닉네임': '名前',
-        '연승': '連勝',
-        '닉네임 변경': '名前変更',
-        '(닉네임 변경 시 1,000 코인 소모)': '（ニックネーム変更には1,000コインが必要です）',
-        '랭크 정보': 'ランク情報',
-        '랭크 설명': 'マルチプレイで勝利すると連勝が増え、敗北すると連勝が減ります。各ランクは連勝スコアによって決まり、ティアごとに分かれています。',
-        '확인': '確認',
-        '브론즈': 'ブロンズ',
-        '실버': 'シルバー',
-        '골드': 'ゴールド',
-        '플레티넘': 'プラチナ',
-        '다이아몬드': 'ダイヤモンド',
-        '마스터': 'マスター',
-        '그랜드 마스터': 'グランドマスター',
-        '레전드': 'レジェンド',
-        '레벨': 'レベル',
-        '경험치': '経験値',
-        '보유 테마': '所持テーマ',
-        '테마 데이터가 없습니다.': 'テーマデータがありません。',
-        '설명이 없습니다.': '説明がありません。',
-        '보유 아이템': '所持アイテム',
-        '아이템 데이터가 없습니다.': 'アイテムデータがありません。',
-        '마피아': 'マフィア',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'クラシックなマフィアテーマです。マフィア、警察、医者などの役割が登場し、市民はマフィアの殺人を防がなければなりません。',
-        '크리스마스': 'クリスマス',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'クリスマステーマは暖かい年末の雰囲気を表現しています。ルドルフ、サンタ、小人などが登場し、グリンチの偽プレゼントを阻止してください！',
-        '숲속 친구들': '森の仲間たち',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        '森の仲間たちテーマは可愛い動物たちが登場します。鹿、リス、ハリネズミなどが登場し、ハンターを阻止してください。',
-        '좀비 사태': 'ゾンビ危機',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'ゾンビ危機テーマはスリリングなサバイバルテーマです。多くの生存者が登場し、生存者キャンプに忍び込んだ感染者を見つけてください！',
-        '판사 봉': '裁判官の槌',
-        '표를 행사할 때 2표를 행사합니다.': '投票時に2票を行使できます。',
-        '정치적 연설': '政治演説',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '5%の確率で投票による処刑を回避します。',
-        '방탄복': '防弾チョッキ',
-        '5% 확률로 마피아의 살인을 회피합니다.': '5%の確率でマフィアの殺人を回避します。',
-        '해당 테마로 변경': 'このテーマに変更',
-        '상점으로 이동': 'ショップに移動',
-      },
-      'GER': {
-        '내 정보': 'Meine Info',
-        '중복된 닉네임 입니다.': 'Der Benutzername ist bereits vergeben.',
-        '닉네임': 'Namen',
-        '연승': 'Siegesserie',
-        '닉네임 변경': 'ändern',
-        '(닉네임 변경 시 1,000 코인 소모)': '(Das Ändern des Benutzernamens kostet 1.000 Münzen)',
-        '랭크 정보': 'Ranginformationen',
-        '랭크 설명': 'Gewinne im Multiplayer-Modus erhöhen deine Siegesserie, während Verluste sie verringern. Jeder Rang wird durch den Siegesserien-Score bestimmt, und Tiers werden entsprechend unterteilt.',
-        '확인': 'Bestätigen',
-        '브론즈': 'Bronze',
-        '실버': 'Silber',
-        '골드': 'Gold',
-        '플레티넘': 'Platin',
-        '다이아몬드': 'Diamant',
-        '마스터': 'Meister',
-        '그랜드 마스터': 'Großmeister',
-        '레전드': 'Legende',
-        '레벨': 'Level',
-        '경험치': 'Erfahrungspunkte',
-        '보유 테마': 'Besitzte Themen',
-        '테마 데이터가 없습니다.': 'Keine Themen-Daten verfügbar.',
-        '설명이 없습니다.': 'Keine Beschreibung verfügbar.',
-        '보유 아이템': 'Besitzte Gegenstände',
-        '아이템 데이터가 없습니다.': 'Keine Gegenstands-Daten verfügbar.',
-        '마피아': 'Mafia',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'Dies ist ein klassisches Mafia-Thema. Mafia, Polizei, Arzt und andere Rollen treten auf, und die Bürger müssen die Morde der Mafia verhindern.',
-        '크리스마스': 'Weihnachten',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'Das Weihnachtsthema vermittelt eine warme Jahresendstimmung. Rudolph, Santa, Elfen und andere Charaktere treten auf. Stoppen Sie die gefälschten Geschenke des Grinch!',
-        '숲속 친구들': 'Waldfreunde',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        'Das Waldfreunde-Thema bringt niedliche Tiere zusammen. Hirsche, Eichhörnchen, Igel und andere süße Tiere erscheinen, und Sie müssen die Jäger aufhalten.',
-        '좀비 사태': 'Zombie-Krise',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'Das Zombie-Krisenthema ist ein spannendes Überlebensthema. Viele Überlebende erscheinen, und Sie müssen die Infizierten im Überlebenslager aufdecken!',
-        '판사 봉': 'Richterhammer',
-        '표를 행사할 때 2표를 행사합니다.': 'Sie können bei der Abstimmung zwei Stimmen abgeben.',
-        '정치적 연설': 'Politische Rede',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': 'Mit einer Wahrscheinlichkeit von 5% wird die Hinrichtung durch Abstimmung vermieden.',
-        '방탄복': 'Kugelsichere Weste',
-        '5% 확률로 마피아의 살인을 회피합니다.': 'Mit einer Wahrscheinlichkeit von 5% wird ein Mord der Mafia vermieden.',
-        '해당 테마로 변경': 'Thema ändern',
-        '상점으로 이동': 'Zum Shop gehen',
-      },
-      'FRA': {
-        '내 정보': 'Mes info',
-        '중복된 닉네임 입니다.': 'Le pseudo est déjà utilisé.',
-        '닉네임': 'Pseudo',
-        '연승': 'Victoires',
-        '닉네임 변경': 'changement',
-        '(닉네임 변경 시 1,000 코인 소모)': '(Changer de pseudo coûte 1 000 pièces)',
-        '랭크 정보': 'Informations sur les rangs',
-        '랭크 설명': 'Gagner en mode multijoueur augmente votre série de victoires, tandis que perdre la diminue. Chaque rang est déterminé par le score de série de victoires, et les niveaux sont divisés en conséquence.',
-        '확인': 'Confirmer',
-        '브론즈': 'Bronze',
-        '실버': 'Argent',
-        '골드': 'Or',
-        '플레티넘': 'Platine',
-        '다이아몬드': 'Diamant',
-        '마스터': 'Maître',
-        '그랜드 마스터': 'Grand Maître',
-        '레전드': 'Légende',
-        '레벨': 'Niveau',
-        '경험치': 'Expérience',
-        '보유 테마': 'Thèmes possédés',
-        '테마 데이터가 없습니다.': 'Pas de données de thème.',
-        '설명이 없습니다.': 'Pas de description disponible.',
-        '보유 아이템': 'Objets possédés',
-        '아이템 데이터가 없습니다.': 'Pas de données d\'objet.',
-        '마피아': 'Mafia',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'Un thème classique Mafia. Avec des rôles comme mafia, policier, médecin, les citoyens doivent empêcher les meurtres de la mafia.',
-        '크리스마스': 'Noël',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'Le thème de Noël capture l\'ambiance chaleureuse des fêtes de fin d\'année. Empêchez les faux cadeaux du Grinch avec des personnages comme Rudolph, le Père Noël, et les lutins.',
-        '숲속 친구들': 'Amis de la forêt',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        'Le thème Amis de la forêt présente des animaux adorables comme des cerfs, des écureuils, et des hérissons. Empêchez les chasseurs !',
-        '좀비 사태': 'Apocalypse zombie',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'Le thème Apocalypse zombie est centré sur la survie intense. Trouvez les infectés infiltrés dans le camp des survivants !',
-        '판사 봉': 'Marteau du juge',
-        '표를 행사할 때 2표를 행사합니다.': 'Donne 2 votes lors d\'une élection.',
-        '정치적 연설': 'Discours politique',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '5 % de chance d\'éviter une exécution par vote.',
-        '방탄복': 'Gilet pare-balles',
-        '5% 확률로 마피아의 살인을 회피합니다.': '5 % de chance d\'éviter une attaque de la mafia.',
-        '해당 테마로 변경': 'Changer pour ce thème',
-        '상점으로 이동': 'Aller à la boutique',
-      },
-      'RUS': {
-        '내 정보': 'Моя информация',
-        '중복된 닉네임 입니다.': 'Это имя пользователя уже занято.',
-        '닉네임': 'имя',
-        '연승': 'победа',
-        '닉네임 변경': 'изменять',
-        '(닉네임 변경 시 1,000 코인 소모)': '(Изменение имени пользователя стоит 1 000 монет)',
-        '랭크 정보': 'Информация о рангах',
-        '랭크 설명': 'Победа в многопользовательских играх увеличивает серию побед, а поражение уменьшает её. Каждый ранг определяется количеством побед, а ранги делятся на уровни.',
-        '확인': 'Подтвердить',
-        '브론즈': 'Бронза',
-        '실버': 'Серебро',
-        '골드': 'Золото',
-        '플레티넘': 'Платина',
-        '다이아몬드': 'Алмаз',
-        '마스터': 'Мастер',
-        '그랜드 마스터': 'Гранд Мастер',
-        '레전드': 'Легенда',
-        '레벨': 'Уровень',
-        '경험치': 'Опыт',
-        '보유 테마': 'Доступные темы',
-        '테마 데이터가 없습니다.': 'Нет данных о темах.',
-        '설명이 없습니다.': 'Описание отсутствует.',
-        '보유 아이템': 'Доступные предметы',
-        '아이템 데이터가 없습니다.': 'Нет данных о предметах.',
-        '마피아': 'Мафия',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'Классическая тема Мафии. Роли включают мафию, полицию и врача. Граждане должны остановить убийства мафии.',
-        '크리스마스': 'Рождество',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'Тема Рождества передает теплую атмосферу праздника. Защитите подарки от Гринча с помощью Рудольфа, Санты и эльфов.',
-        '숲속 친구들': 'Лесные друзья',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        'Тема Лесных друзей включает милых животных, таких как олени, белки и ежики. Остановите охотников!',
-        '좀비 사태': 'Зомби-апокалипсис',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'Тема Зомби-апокалипсиса сосредоточена на выживании. Найдите зараженных, которые проникли в лагерь выживших!',
-        '판사 봉': 'Молот судьи',
-        '표를 행사할 때 2표를 행사합니다.': 'Дает 2 голоса на голосовании.',
-        '정치적 연설': 'Политическая речь',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '5 % шанс избежать казни по голосованию.',
-        '방탄복': 'Бронежилет',
-        '5% 확률로 마피아의 살인을 회피합니다.': '5 % шанс избежать убийства мафией.',
-        '해당 테마로 변경': 'Переключиться на эту тему',
-        '상점으로 이동': 'Перейти в магазин',
-      },
-      'ESP': {
-        '내 정보': 'Mi información',
-        '중복된 닉네임 입니다.': 'El nombre de usuario ya está en uso.',
-        '닉네임': 'Nombre',
-        '연승': 'Victorias',
-        '닉네임 변경': 'Cambiar',
-        '(닉네임 변경 시 1,000 코인 소모)': '(Cambiar el nombre de usuario cuesta 1,000 monedas)',
-        '랭크 정보': 'Información de rangos',
-        '랭크 설명': 'Ganar en partidas multijugador aumenta tu racha de victorias, mientras que perder la disminuye. Cada rango se determina por el puntaje de racha y los niveles se dividen en consecuencia.',
-        '확인': 'Confirmar',
-        '브론즈': 'Bronce',
-        '실버': 'Plata',
-        '골드': 'Oro',
-        '플레티넘': 'Platino',
-        '다이아몬드': 'Diamante',
-        '마스터': 'Maestro',
-        '그랜드 마스터': 'Gran Maestro',
-        '레전드': 'Leyenda',
-        '레벨': 'Nivel',
-        '경험치': 'Experiencia',
-        '보유 테마': 'Temas disponibles',
-        '테마 데이터가 없습니다.': 'No hay datos de temas.',
-        '설명이 없습니다.': 'No hay descripción.',
-        '보유 아이템': 'Objetos disponibles',
-        '아이템 데이터가 없습니다.': 'No hay datos de objetos.',
-        '마피아': 'Mafia',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'El tema clásico de la mafia. Incluye roles como mafia, policía y médico. Los ciudadanos deben detener a la mafia.',
-        '크리스마스': 'Navidad',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'El tema navideño transmite una cálida atmósfera festiva. Protege los regalos del Grinch con la ayuda de Rodolfo, Santa y los elfos.',
-        '숲속 친구들': 'Amigos del bosque',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        'El tema de los amigos del bosque presenta adorables animales como ciervos, ardillas y erizos. ¡Detén a los cazadores!',
-        '좀비 사태': 'Apocalipsis zombi',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'El tema del apocalipsis zombi se centra en la supervivencia. Encuentra a los infectados infiltrados en el campamento.',
-        '판사 봉': 'Mazo del juez',
-        '표를 행사할 때 2표를 행사합니다.': 'Permite emitir 2 votos en las votaciones.',
-        '정치적 연설': 'Discurso político',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': '5% de probabilidad de evitar la ejecución por votación.',
-        '방탄복': 'Chaleco antibalas',
-        '5% 확률로 마피아의 살인을 막을 수 있습니다.': '5% de probabilidad de evitar un asesinato de la mafia.',
-        '해당 테마로 변경': 'Cambiar a este tema',
-        '상점으로 이동': 'Ir a la tienda',
-      },
-      'ARA': {
-        '내 정보': 'معلوماتي',
-        '중복된 닉네임 입니다.': 'اسم المستخدم موجود بالفعل.',
-        '닉네임': 'اسم',
-        '연승': 'انتصار',
-        '닉네임 변경': 'يتغير',
-        '(닉네임 변경 시 1,000 코인 소모)': '(تغيير اسم المستخدم يكلف 1,000 عملة)',
-        '랭크 정보': 'معلومات الرتبة',
-        '랭크 설명': 'الفوز في الألعاب متعددة اللاعبين يزيد من سلسلة انتصاراتك، بينما يؤدي الخسارة إلى تقليلها. يتم تحديد كل رتبة بناءً على نتيجة السلسلة، وتنقسم الرتب وفقًا لذلك.',
-        '확인': 'تأكيد',
-        '브론즈': 'برونزي',
-        '실버': 'فضي',
-        '골드': 'ذهبي',
-        '플레티넘': 'بلاتيني',
-        '다이아몬드': 'ألماسي',
-        '마스터': 'ماستر',
-        '그랜드 마스터': 'الماستر الكبير',
-        '레전드': 'أسطورة',
-        '레벨': 'المستوى',
-        '경험치': 'نقاط الخبرة',
-        '보유 테마': 'الثيمات المتاحة',
-        '테마 데이터가 없습니다.': 'لا توجد بيانات للثيمات.',
-        '설명이 없습니다.': 'لا يوجد وصف.',
-        '보유 아이템': 'العناصر المتاحة',
-        '아이템 데이터가 없습니다.': 'لا توجد بيانات للعناصر.',
-        '마피아': 'المافيا',
-        '클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.':
-        'ثيم المافيا الكلاسيكي. يتضمن أدوار مثل المافيا والشرطة والطبيب. يجب على المواطنين منع القتل من قبل المافيا.',
-        '크리스마스': 'الكريسماس',
-        '크리스마스 테마는 따뜻한 연말 분위기를 표현합니다. 루돌프, 산타, 요정 등 여러 캐릭터가 등장하며, 그린치의 가짜 선물을 저지하세요!':
-        'ثيم الكريسماس يعبر عن أجواء احتفالية دافئة. احمِ الهدايا من غرينش بمساعدة رودولف وسانتا والأقزام.',
-        '숲속 친구들': 'أصدقاء الغابة',
-        '숲속 친구들 테마는 귀여운 동물들이 함께하는 테마입니다. 사슴, 다람쥐, 고슴도치 등 여러 귀여운 동물들이 등장하며, 사냥꾼을 막아야 합니다.':
-        'ثيم أصدقاء الغابة يقدم حيوانات لطيفة مثل الغزلان والسناجب والقنافذ. أوقف الصيادين!',
-        '좀비 사태': 'كارثة الزومبي',
-        '좀비 사태 테마는 스릴 넘치는 생존 테마입니다. 여러 생존자들이 등장하며, 생존자 캠프에 몰래 들어온 감염자를 색출해야 합니다!':
-        'ثيم كارثة الزومبي يركز على البقاء. اكتشف المصابين الذين تسللوا إلى المعسكر.',
-        '판사 봉': 'مطرقة القاضي',
-        '표를 행사할 때 2표를 행사합니다.': 'يمكنك التصويت مرتين في الانتخابات.',
-        '정치적 연설': 'خطاب سياسي',
-        '5% 확률로 투표로 인한 처형을 회피합니다.': 'فرصة 5% لتجنب الإعدام عن طريق التصويت.',
-        '방탄복': 'بي تي اس',
-        '5% 확률로 마피아의 살인을 막을 수 있습니다.': 'فرصة 5% لتجنب جريمة قتل من المافيا.',
-        '해당 테마로 변경': 'تغيير إلى هذا الثيم',
-        '상점으로 이동': 'اذهب إلى المتجر',
-      },
 
     };
-
     return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
   }
-
-
-
 }
