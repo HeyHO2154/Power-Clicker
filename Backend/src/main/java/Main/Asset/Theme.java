@@ -1,23 +1,43 @@
 package Main.Asset;
 
-
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "theme")
 public class Theme {
 
     @Id
-    @Column(name = "user_id")
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // AUTO_INCREMENT에 매핑
+    private Long id; // PRIMARY KEY
 
-    @Column(name = "theme_name", unique = true, nullable = false)
-    private String themeName;
+    private String userId; // user_id 컬럼에 매핑
+    private String themeName; // theme_name 컬럼에 매핑
+    private Boolean themeCheck = true; // theme_check 컬럼에 매핑, 기본값 true
 
-    @Column(name = "theme_check", nullable = false)
-    private boolean themeCheck;
+    // 기본 생성자
+    public Theme() {
+    }
 
-    // Getters and setters
+    // 생성자
+    public Theme(String userId, String themeName, Boolean themeCheck) {
+        this.userId = userId;
+        this.themeName = themeName;
+        this.themeCheck = themeCheck;
+    }
+
+    // Getter와 Setter
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getUserId() {
         return userId;
     }
@@ -34,11 +54,21 @@ public class Theme {
         this.themeName = themeName;
     }
 
-    public boolean isThemeCheck() {
+    public Boolean getThemeCheck() {
         return themeCheck;
     }
 
-    public void setThemeCheck(boolean themeCheck) {
+    public void setThemeCheck(Boolean themeCheck) {
         this.themeCheck = themeCheck;
+    }
+
+    @Override
+    public String toString() {
+        return "Theme{" +
+                "id=" + id +
+                ", userId='" + userId + '\'' +
+                ", themeName='" + themeName + '\'' +
+                ", themeCheck=" + themeCheck +
+                '}';
     }
 }
