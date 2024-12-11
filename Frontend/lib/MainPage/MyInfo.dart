@@ -27,7 +27,13 @@ class _MyInfoPageState extends State<MyInfo> {
 
   //현헹 테마와 아이템
   List<String> Theme = ['Cat','Christmas','Forest','Mafia'];
+  List<String> Theme_name = ['고양이','크리스마스','숲 친구','마피아'];
   List<bool> Theme_check = [true, false, false, false];
+  List<String> Theme_info = [
+    '귀여운 고양이들이 나오는 기본 테마입니다.',
+    '크리스마스 분위기를 한껏 느껴보세요',
+    '숲속 친구들과 함께 자연을 즐겨요',
+    '마피아 특유의 클래식함과 긴장감을 느껴보세요'];
 
   @override
   void initState() {
@@ -625,10 +631,10 @@ class _MyInfoPageState extends State<MyInfo> {
                     _showDetailDialog(
                       context,
                       Theme[index],
+                      Theme_name[index],
                       themeImage,
-                      Theme[index] ?? lang('설명이 없습니다.'),
-                      isTheme: true, // 테마임을 명시
-                      themeKey: themeKey, // 현재 테마 키 전달
+                      Theme_info[index],
+                      Theme_check[index],
                     );
                   },
                   child: Container(
@@ -682,7 +688,7 @@ class _MyInfoPageState extends State<MyInfo> {
                         ),
                         SizedBox(height: 5),
                         Text(
-                          Theme[index],
+                          Theme_name[index],
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -757,7 +763,8 @@ class _MyInfoPageState extends State<MyInfo> {
                     "test",
                     itemImage,
                     "test" ?? lang('설명이 없습니다.'),
-                    isTheme: false, // 아이템임을 명시
+                    "test",
+                    false,
                   );
                 },
                 child: Column(
@@ -794,16 +801,15 @@ class _MyInfoPageState extends State<MyInfo> {
     );
   }
 
-
   // 다이얼로그 표시 함수
   void _showDetailDialog(
       BuildContext context,
-      String title,
-      String imagePath,
-      String description, {
-        bool isTheme = false,
-        String themeKey = '',
-      }) {
+      String id,
+      String name,
+      String image,
+      String info,
+      bool check
+      ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -817,9 +823,9 @@ class _MyInfoPageState extends State<MyInfo> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 이미지
+              SizedBox(height: 30),
               Image.asset(
-                imagePath,
+                image,
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
@@ -827,7 +833,7 @@ class _MyInfoPageState extends State<MyInfo> {
               SizedBox(height: 10),
               // 이름
               Text(
-                title,
+                name,
                 style: TextStyle(
                   fontSize: 20,
                   color: Color(0xFFD4AF37),
@@ -837,7 +843,7 @@ class _MyInfoPageState extends State<MyInfo> {
               SizedBox(height: 10),
               // 설명
               Text(
-                description,
+                info,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white70,
@@ -847,10 +853,10 @@ class _MyInfoPageState extends State<MyInfo> {
             ],
           ),
           actions: [
-            if (isTheme && _themeMap[themeKey] == true) // 활성화 가능한 테마
+            if (check) // 활성화 가능한 테마
               TextButton(
                 onPressed: () {
-                  _setTheme(themeKey);
+                  _setTheme(id);
                   Navigator.of(context).pop(); // 다이얼로그 닫기
                 },
                 child: Text(
@@ -861,24 +867,7 @@ class _MyInfoPageState extends State<MyInfo> {
                   ),
                 ),
               ),
-            if (isTheme && _themeMap[themeKey] == false) // 잠긴 테마의 경우
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // 다이얼로그 닫기
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Shop()), // Shop.dart로 이동
-                  );
-                },
-                child: Text(
-                  lang('상점으로 이동'),
-                  style: TextStyle(
-                    color: Color(0xFFD4AF37),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            if (!isTheme) // 아이템의 경우
+            if (!check) // 잠긴 테마의 경우
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // 다이얼로그 닫기
