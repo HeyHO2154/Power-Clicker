@@ -292,7 +292,7 @@ class _ShopPageState extends State<Shop> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/Theme/cat.png'),
+              image: AssetImage('assets/Theme/${MyApp.currentTheme}.png'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5), BlendMode.darken),

@@ -8,16 +8,12 @@ import org.springframework.stereotype.Service;
 
 import Main.Item.Item;
 import Main.Item.ItemRepository;
-import Main.Theme.Theme;
-import Main.Theme.ThemeRepository;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
     @Autowired
     private ItemRepository itemRepository;
 
@@ -47,11 +43,8 @@ public class UserService {
             newUser.setLogin_recent(LocalDateTime.now()); // 현재 시간으로 설정
             userRepository.save(newUser);
             //Theme 과 Item 보유고 새로 등록
-            Theme newTheme = new Theme();
             Item newItem = new Item();
-            newTheme.setUser_id(userId);
             newItem.setUser_id(userId);
-            themeRepository.save(newTheme);
             itemRepository.save(newItem);
             return userId;
         }

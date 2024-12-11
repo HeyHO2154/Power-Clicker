@@ -35,11 +35,11 @@ class _MyInfoPageState extends State<MyInfo> {
   // 비동기 작업을 순차적으로 실행하는 함수
   Future<void> _initializeData() async {
     await _getUserName();
-    await _getPointValue(900);
-    await _getLevelValue(90);
-    await _getRankValue(9);
-    await _getItems(1, 2, 3);
-    await _getThemes(true, false, false);
+    await _getPointValue(0);
+    await _getLevelValue(0);
+    await _getRankValue(0);
+    await _getItems(0, 0, 0);
+    await _getThemes(false, false, false);
   }
 
   // 닉네임 업데이트 함수
@@ -168,7 +168,7 @@ class _MyInfoPageState extends State<MyInfo> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/Theme/${MyApp.currentTheme}/MyInfo.jpg'),
+              image: AssetImage('assets/Theme/${MyApp.currentTheme}.png'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5), BlendMode.darken),
@@ -251,7 +251,7 @@ class _MyInfoPageState extends State<MyInfo> {
                       _buildNicknameSection(),
                       _buildLevelAndExperienceSection(),
                       _buildThemeSection(),
-                      _buildItemSection(), // 아이템 섹션 추가
+                      //_buildItemSection(), // 아이템 섹션 추가
                     ],
                   ),
                 ),
@@ -914,7 +914,7 @@ class _MyInfoPageState extends State<MyInfo> {
   Map<String, String> themeDescriptions = {};
   Map<String, String> itemDescriptions = {};
   void _initializeDescriptions() {
-    themeNames = [lang('마피아'), lang('크리스마스'), lang('숲속 친구들'), lang('좀비 사태')];
+    themeNames = [lang('고양이'), lang('마피아'), lang('크리스마스'), lang('숲속 친구들')];
     itemNames = [lang('판사 봉'), lang('정치적 연설'), lang('방탄복')];
     themeDescriptions = {
       lang('마피아'): lang('클래식한 마피아 테마입니다. 마피아, 경찰, 의사 등 여러 직업이 등장하며, 시민들은 마피아의 살인을 막아야 합니다.'),

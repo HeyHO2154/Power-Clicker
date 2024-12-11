@@ -7,7 +7,7 @@ import '../main.dart';
 import 'Farming.dart';
 import 'Lobby.dart';
 import 'Shop.dart';
-import 'War.dart';
+import 'MyInfo.dart';
 
 class MainPage extends StatefulWidget {
   static String? currentUserId;
@@ -60,7 +60,7 @@ class _MainPageState extends State<MainPage> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/Theme/${MyApp.currentTheme}/MainPage.jpg'),
+              image: AssetImage('assets/Theme/${MyApp.currentTheme}.png'),
               fit: BoxFit.cover, // 배경 이미지를 화면에 맞게 조정
               colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5), BlendMode.darken), // 어두운 필터 적용
@@ -190,7 +190,7 @@ class _MainPageState extends State<MainPage> {
                                         lang('순위표'),
                                         'assets/UI/Ranks/최상위.png',
                                         50,
-                                        War(),
+                                        MyInfo(),
                                       ),
                                     ),
                                   ),

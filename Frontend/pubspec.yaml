@@ -74,9 +74,6 @@ flutter:
     - assets/Sound/
     - assets/Sound/BGM/
     - assets/Theme/
-    - assets/Theme/cat/
-    - assets/Theme/christmas/
-    - assets/Theme/defaults/
     - assets/UI/
     - assets/UI/Langs/
     - assets/UI/Ranks/
