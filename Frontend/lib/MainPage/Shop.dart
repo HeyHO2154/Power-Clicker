@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -281,6 +280,10 @@ class _ShopPageState extends State<Shop> {
     });
   }
 
+  String formatWithComma(int number) {
+    return NumberFormat('#,###').format(number);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -349,7 +352,7 @@ class _ShopPageState extends State<Shop> {
                           ),
                           SizedBox(width: 5),
                           Text(
-                            '$points',
+                            '${formatWithComma(points)}',
                             style: TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.w600,

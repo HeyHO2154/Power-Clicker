@@ -7,6 +7,7 @@ import 'dart:math'; // 랜덤 숫자 생성용
 import '../main.dart';
 import '../MainPage/MainPage.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:intl/intl.dart' as numdot;
 
 class CardPage extends StatefulWidget {
 
@@ -384,6 +385,10 @@ class _CardPageState extends State<CardPage> {
     return rankImage;
   }
 
+  String formatWithComma(int number) {
+    return numdot.NumberFormat('#,###').format(number);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -489,7 +494,7 @@ class _CardPageState extends State<CardPage> {
                               Text(
                                 getTruncatedText(opponentId, MediaQuery.of(context).size.width * 0.6),
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -514,9 +519,9 @@ class _CardPageState extends State<CardPage> {
                               ),
                               SizedBox(width: 5),
                               Text(
-                                '$opponentPoints',
+                                '${formatWithComma(opponentPoints)}',
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.amberAccent,
                                 ),
@@ -554,9 +559,9 @@ class _CardPageState extends State<CardPage> {
                               ),
                               SizedBox(width: 5),
                               Text(
-                                '$myPoints',
+                                '${formatWithComma(myPoints)}',
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.amberAccent,
                                 ),
@@ -584,7 +589,7 @@ class _CardPageState extends State<CardPage> {
                               Text(
                                 getTruncatedText(MyApp.user_id, MediaQuery.of(context).size.width * 0.6),
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),

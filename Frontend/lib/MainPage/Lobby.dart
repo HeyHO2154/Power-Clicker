@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
 import 'MainPage.dart';
+import 'package:intl/intl.dart';
 
 class LobbyPage extends StatefulWidget {
   @override
@@ -72,6 +73,9 @@ class _LobbyPageState extends State<LobbyPage> {
     );
   }
 
+  String formatWithComma(int number) {
+    return NumberFormat('#,###').format(number);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +139,7 @@ class _LobbyPageState extends State<LobbyPage> {
                         ),
                         SizedBox(width: 5),
                         Text(
-                          '$points',
+                          '${formatWithComma(points)}',
                           style: TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.w600,

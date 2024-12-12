@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
 import 'Shop.dart';
+import 'package:intl/intl.dart';
 
 class MyInfo extends StatefulWidget {
   @override
@@ -200,6 +201,10 @@ class _MyInfoPageState extends State<MyInfo> {
     }
   }
 
+  String formatWithComma(int number) {
+    return NumberFormat('#,###').format(number);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -274,7 +279,7 @@ class _MyInfoPageState extends State<MyInfo> {
                               height: 50, // 아이콘 크기 설정
                             ),
                             Text(
-                              '$points',
+                              '${formatWithComma(points)}',
                               style: TextStyle(
                                 fontSize: 25,
                                 fontWeight: FontWeight.w600,

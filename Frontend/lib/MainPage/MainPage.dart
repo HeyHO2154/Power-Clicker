@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-
+import 'package:intl/intl.dart';
 import '../main.dart';
 import '../Game/Card.dart';
 import 'Lobby.dart';
@@ -48,6 +48,10 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+
+  String formatWithComma(int number) {
+    return NumberFormat('#,###').format(number);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +111,7 @@ class _MainPageState extends State<MainPage> {
                                       height: 50, // 아이콘 크기 설정
                                     ),
                                     Text(
-                                      '$points',
+                                      '${formatWithComma(points)}',
                                       style: TextStyle(
                                         fontSize: 25,
                                         fontWeight: FontWeight.w600,
