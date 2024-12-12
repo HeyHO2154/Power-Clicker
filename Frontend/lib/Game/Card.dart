@@ -341,7 +341,7 @@ class _CardPageState extends State<CardPage> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/Game/table.jpg'),
+              image: AssetImage('assets/Game/Cat/table.jpg'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 Colors.black.withOpacity(0.5),
