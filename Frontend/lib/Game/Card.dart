@@ -655,7 +655,7 @@ class _CardPageState extends State<CardPage> {
                                     ? null
                                     : () {
                                   _Coin(); // 효과음 메서드 실행
-                                  betting = (myPoints*0.5).toInt();
+                                  betting = 200;
                                 },
                               ),
                               _buildActionButton(
