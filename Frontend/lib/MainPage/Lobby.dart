@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../Game/Card.dart';
-import '../Game/Card2.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
@@ -14,7 +13,6 @@ class LobbyPage extends StatefulWidget {
 }
 
 class _LobbyPageState extends State<LobbyPage> {
-  bool isLoading = true;
   int points = 0;
   WebSocketChannel? channel;
 
@@ -60,30 +58,15 @@ class _LobbyPageState extends State<LobbyPage> {
     channel!.stream.listen(
           (message) {
         print('Received message: $message');
-        if (message.startsWith('START_GAME')) {
-          // CardPage로 이동하며 WebSocketChannel 전달
+        if (message.startsWith('START:')) {
+          String opponentId = message.split(':')[1].trim();
+          //pushReplacement는 기존의 페이지를 새로운 페이지로 대체해서, 사실상 dispose 발동
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => CardPage(),
+              builder: (context) => CardPage(online: true, opponent: opponentId),
             ),
           );
-        }
-      },
-      onError: (error) {
-        print('WebSocket error: $error');
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      },
-      onDone: () {
-        print('WebSocket closed');
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
         }
       },
     );
@@ -193,21 +176,15 @@ class _LobbyPageState extends State<LobbyPage> {
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 20),
-                      isLoading
-                          ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.amberAccent),
-                      )
-                          : Icon(Icons.check_circle,
-                          color: Colors.green, size: 50),
+                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amberAccent)),
                       SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          // 미니 게임 페이지로 이동 (아직 구현되지 않은 경우 임시 동작)
+                          // push는 뒤로가기 누르면 이전 페이지로 돌아옴(소켓으로 끌고오기용으로 push썼음)
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CardPage2(), // MiniGamePage를 구현해야 함
+                              builder: (context) => CardPage(online: false), // MiniGamePage를 구현해야 함
                             ),
                           );
                         },

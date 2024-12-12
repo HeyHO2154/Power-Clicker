@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../main.dart';
-import 'Farming.dart';
+import '../Game/Card.dart';
 import 'Lobby.dart';
 import 'Shop.dart';
 import 'MyInfo.dart';
@@ -152,7 +152,7 @@ class _MainPageState extends State<MainPage> {
                                       aspectRatio: 1.0,
                                       child: _buildMenuButton(
                                         context,
-                                        lang('카드게임'),
+                                        lang('같이하기'),
                                         'assets/Game/Cat/1.png',
                                         50,
                                         LobbyPage(),
@@ -167,10 +167,10 @@ class _MainPageState extends State<MainPage> {
                                       aspectRatio: 1.0,
                                       child: _buildMenuButton(
                                         context,
-                                        lang('살아남기'),
+                                        lang('혼자하기'),
                                         'assets/Game/Cat/back.png',
                                         45,
-                                        Farming(),
+                                        CardPage(online: false),
                                       ),
                                     ),
                                   ),

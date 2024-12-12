@@ -14,7 +14,7 @@ public class User {
     private String user_id;
 	private String user_pw;
 	private String user_name;
-	private int points;
+	private int points = 1000; //기본 천포인트
     private int exp_level;
     private int exp_rank;
     private LocalDateTime login_first;
