@@ -39,6 +39,6 @@ INSERT INTO users (user_id, user_pw, user_name, points, exp_level, exp_rank) VAL
 SELECT * FROM users
 LEFT JOIN theme ON users.user_id = theme.user_id
 LEFT JOIN item ON users.user_id = item.user_id;
-UPDATE users SET points = 99999 WHERE user_id = 'qwer';
+UPDATE users SET points = 1234 WHERE user_id = 'asdf';
 
 

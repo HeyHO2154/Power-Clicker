@@ -27,6 +27,12 @@ class _CardPageState extends State<CardPage> {
   int betting = 1;
   int myPoints = 0;
   int opponentPoints = 1000;
+  int exp_level = 0;
+  int exp_rank = 0;
+  String rankImage = "";
+  int exp_level2 = 0;
+  int exp_rank2 = 0;
+  String rankImage2 = 'assets/UI/Ranks/브론즈.png';
   String opponentId = "AI";
   String serverMessage = "";
   List<int> myCards = [1, 1, 1, 1, 1];
@@ -75,6 +81,8 @@ class _CardPageState extends State<CardPage> {
     _startBackgroundMusic(); // 배경 음악 시작
     _connectToWebSocket();
     _getPointValue(MyApp.user_id, 0);
+    _getRankValue(MyApp.user_id, 0);
+    _getLevelValue(MyApp.user_id, 0);
   }
 
   @override
@@ -108,19 +116,39 @@ class _CardPageState extends State<CardPage> {
       print('Error fetching points: $e');
     }
   }
-  Future<void> _getLevelValue(int num) async {
-    await http.post(
+  Future<void> _getLevelValue(String id, int n) async {
+    final response = await http.post(
       Uri.parse('${MyApp.url}/user/level'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': MyApp.user_id, 'exp_level': num}),
+      body: jsonEncode({'user_id': id, 'exp_level': n}),
     );
+    if (response.statusCode == 200 && mounted) {
+      setState(() {
+        if (MyApp.user_id != id) {
+          exp_level2 = int.parse(response.body);
+        } else {
+          exp_level = int.parse(response.body);
+        }
+      });
+    }
   }
-  Future<void> _getRankValue(int num) async {
-    await http.post(
+  Future<void> _getRankValue(String id, int n) async {
+    final response = await http.post(
       Uri.parse('${MyApp.url}/user/rank'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id': MyApp.user_id, 'exp_rank': num}),
+      body: jsonEncode({'user_id': id, 'exp_rank': n}),
     );
+    if (response.statusCode == 200 && mounted) {
+      setState(() {
+        if (MyApp.user_id != id) {
+          exp_rank2 = int.parse(response.body);
+          rankImage2 = _updateRankInfo(exp_rank2);
+        } else {
+          exp_rank = int.parse(response.body);
+          rankImage = _updateRankInfo(exp_rank);
+        }
+      });
+    }
   }
 
   void _connectToWebSocket() {
@@ -185,10 +213,10 @@ class _CardPageState extends State<CardPage> {
         opponentId = widget.opponent!;
       });
       _getPointValue(opponentId, 0);
+      _getLevelValue(opponentId, 0);
+      _getRankValue(opponentId, 0);
     }
     _shuffleMyCards();
-
-
   }
 
   void _startCountdown() {
@@ -267,18 +295,18 @@ class _CardPageState extends State<CardPage> {
 
     String resultMessage;
 
-    _getLevelValue(1); //한판당 경험치+1
+    await _getLevelValue(MyApp.user_id, 1); //한판당 경험치+1
     if (myScore > opponentScore) {
       // 내가 이겼을 때
       _Chaching();
       resultMessage = "${lang("승리!")} +${betting}";
-      _getPointValue(MyApp.user_id, betting); // 점수 추가
-      if(widget.online) _getRankValue(1);
+      await _getPointValue(MyApp.user_id, betting); // 점수 추가
+      if(widget.online) await _getRankValue(MyApp.user_id, 1);
     } else if (myScore < opponentScore) {
       // 내가 졌을 때
       resultMessage = "${lang("패배..")} -${betting}";
-      _getPointValue(MyApp.user_id, betting*-1); // 점수 차감
-      if(widget.online) _getRankValue(-1);
+      await _getPointValue(MyApp.user_id, betting*-1); // 점수 차감
+      if(widget.online) await _getRankValue(MyApp.user_id, -1);
     } else {
       // 무승부
       resultMessage = lang("무승부");
@@ -331,6 +359,29 @@ class _CardPageState extends State<CardPage> {
       return 'assets/Game/Cat/back.png';
     }
     return 'assets/Game/Cat/$cardNumber.png';
+  }
+
+  // 랭크 정보 업데이트 함수
+  String _updateRankInfo(exp_rank) {
+    if (exp_rank < 10) {
+      rankImage = 'assets/UI/Ranks/브론즈.png';
+    } else if (exp_rank < 20) {
+      rankImage = 'assets/UI/Ranks/실버.png';
+    } else if (exp_rank < 30) {
+      rankImage = 'assets/UI/Ranks/골드.png';
+    } else if (exp_rank < 40) {
+      rankImage = 'assets/UI/Ranks/플레티넘.png';
+    } else if (exp_rank < 50) {
+      rankImage = 'assets/UI/Ranks/다이아.png';
+    } else if (exp_rank < 60) {
+      rankImage = 'assets/UI/Ranks/마스터.png';
+    } else if (exp_rank < 70) {
+      rankImage = 'assets/UI/Ranks/그마.png';
+    } else {
+      rankImage = 'assets/UI/Ranks/최상위.png';
+    }
+
+    return rankImage;
   }
 
   @override
@@ -416,11 +467,25 @@ class _CardPageState extends State<CardPage> {
                               );
                             }),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height:10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              SizedBox(width: 20),
+                              SizedBox(width: 10),
+                              Container(
+                                width: 60, // 이미지 크기 조절
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    rankImage2,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 10),
                               Text(
                                 getTruncatedText(opponentId, MediaQuery.of(context).size.width * 0.6),
                                 style: TextStyle(
@@ -430,22 +495,31 @@ class _CardPageState extends State<CardPage> {
                                 ),
                               ),
                               SizedBox(width: 10),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/UI/coin.png',
-                                    height: 40,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    '$opponentPoints',
-                                    style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.amberAccent,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                'Lv. ${(exp_level2 / 100).floor()+1}',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white70,
+                                ),
+                              ),
+
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(width: 20),
+                              Image.asset(
+                                'assets/UI/coin.png',
+                                height: 40,
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                '$opponentPoints',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amberAccent,
+                                ),
                               ),
                             ],
                           ),
@@ -455,11 +529,6 @@ class _CardPageState extends State<CardPage> {
                     // 중간 공간: 설명서 이미지 및 메시지
                     Column(
                       children: [
-                        Image.asset(
-                          'assets/Game/rule.png',
-                          width: 100,
-                        ),
-                        SizedBox(height: 10),
                         Text(
                           serverMessage,
                           style: TextStyle(
@@ -477,9 +546,41 @@ class _CardPageState extends State<CardPage> {
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               SizedBox(width: 20),
+                              Image.asset(
+                                'assets/UI/coin.png',
+                                height: 40,
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                '$myPoints',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amberAccent,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(width: 10),
+                              Container(
+                                width: 60, // 이미지 크기 조절
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    rankImage,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width:10),
                               Text(
                                 getTruncatedText(MyApp.user_id, MediaQuery.of(context).size.width * 0.6),
                                 style: TextStyle(
@@ -489,22 +590,12 @@ class _CardPageState extends State<CardPage> {
                                 ),
                               ),
                               SizedBox(width: 10),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/UI/coin.png',
-                                    height: 40,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    '$myPoints',
-                                    style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.amberAccent,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                'Lv. ${(exp_level / 100).floor()+1} (${exp_level-((exp_level / 100).floor())*100}/100)',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white70,
+                                ),
                               ),
                             ],
                           ),
@@ -660,7 +751,6 @@ Widget _buildActionButton({required String text, VoidCallback? onTap}) {
     ),
   );
 }
-
 
 // 글자수 생략 함수 (내부에서 스타일 고정)
 String getTruncatedText(String text, double maxWidth) {
