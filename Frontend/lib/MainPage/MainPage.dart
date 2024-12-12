@@ -157,7 +157,7 @@ class _MainPageState extends State<MainPage> {
                                       child: _buildMenuButton(
                                         context,
                                         lang('같이하기'),
-                                        'assets/Game/Cat/1.png',
+                                        'assets/Game/${MyApp.currentTheme}/2.png',
                                         50,
                                         LobbyPage(),
                                       ),
@@ -172,7 +172,7 @@ class _MainPageState extends State<MainPage> {
                                       child: _buildMenuButton(
                                         context,
                                         lang('혼자하기'),
-                                        'assets/Game/Cat/back.png',
+                                        'assets/Game/${MyApp.currentTheme}/1.png',
                                         45,
                                         CardPage(online: false),
                                       ),

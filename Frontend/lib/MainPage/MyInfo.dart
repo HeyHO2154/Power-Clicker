@@ -3,7 +3,7 @@ import 'package:frontend/MainPage/MainPage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
 import 'Shop.dart';
 import 'package:intl/intl.dart';
@@ -161,6 +161,8 @@ class _MyInfoPageState extends State<MyInfo> {
     setState(() {
       MyApp.currentTheme = currentTheme; // 앱의 현재 테마 업데이트
     });
+    await MyApp.bgmPlayer.stop();
+    await MyApp.bgmPlayer.play(AssetSource('Sound/BGM/${MyApp.currentTheme}.mp3')); //노래 바꾸기
   }
   Future<void> _buyTheme(String themeId) async {
     try {

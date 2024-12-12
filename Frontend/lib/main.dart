@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
     }
     //배경음악 재생
     await MyApp.bgmPlayer.setReleaseMode(ReleaseMode.loop);
-    await MyApp.bgmPlayer.play(AssetSource('Sound/BGM/Cat.mp3'));
+    await MyApp.bgmPlayer.play(AssetSource('Sound/BGM/${MyApp.currentTheme}.mp3'));
   }
 
   Future<void> _checkLoginStatus() async {

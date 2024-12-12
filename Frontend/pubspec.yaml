@@ -70,6 +70,9 @@ flutter:
     - assets/
     - assets/Game/
     - assets/Game/Cat/
+    - assets/Game/Christmas/
+    - assets/Game/Forest/
+    - assets/Game/Mafia/
     - assets/Item/
     - assets/Sound/
     - assets/Sound/BGM/

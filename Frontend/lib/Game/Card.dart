@@ -357,9 +357,9 @@ class _CardPageState extends State<CardPage> {
   // 카드 번호에 따라 카드 이미지 경로 반환
   String _getCardImagePath(int cardNumber) {
     if(cardNumber==0){
-      return 'assets/Game/Cat/back.png';
+      return 'assets/Game/${MyApp.currentTheme}/back.png';
     }
-    return 'assets/Game/Cat/$cardNumber.png';
+    return 'assets/Game/${MyApp.currentTheme}/$cardNumber.png';
   }
 
   // 랭크 정보 업데이트 함수
@@ -397,7 +397,7 @@ class _CardPageState extends State<CardPage> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/Game/Cat/table.jpg'),
+              image: AssetImage('assets/Game/${MyApp.currentTheme}/table.jpg'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 Colors.black.withOpacity(0.5),
