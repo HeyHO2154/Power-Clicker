@@ -86,7 +86,7 @@ class _LobbyPageState extends State<LobbyPage> {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage(
-                  'assets/Game/Cat/table.jpg'),
+                  'assets/Game/${MyApp.currentTheme}/table.jpg'),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5), BlendMode.darken),
