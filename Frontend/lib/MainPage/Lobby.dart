@@ -163,6 +163,11 @@ class _LobbyPageState extends State<LobbyPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Image.asset(
+                        'assets/Game/rule.png',
+                        height: 200,
+                      ),
+                      SizedBox(height: 20),
                       Text(
                         lang("상대를 찾고 있습니다..."),
                         style: TextStyle(
