@@ -173,7 +173,7 @@ class _MainPageState extends State<MainPage> {
                                         context,
                                         lang('혼자하기'),
                                         'assets/Game/${MyApp.currentTheme}/1.png',
-                                        45,
+                                        50,
                                         CardPage(online: false),
                                       ),
                                     ),
