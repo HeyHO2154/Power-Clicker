@@ -35,6 +35,8 @@ class _CardPageState extends State<CardPage> {
   int exp_rank2 = 0;
   String rankImage2 = 'assets/UI/Ranks/브론즈.png';
   String opponentId = "AI";
+  String myName = "Me";
+  String yourName = "AI";
   String serverMessage = "";
   List<int> myCards = [1, 1, 1, 1, 1];
   List<int> opponentCards = [0,0,0,0,0];
@@ -81,6 +83,7 @@ class _CardPageState extends State<CardPage> {
     MyApp.bgmPlayer.pause();
     _startBackgroundMusic(); // 배경 음악 시작
     _connectToWebSocket();
+    _getUserName(MyApp.user_id);
     _getPointValue(MyApp.user_id, 0);
     _getRankValue(MyApp.user_id, 0);
     _getLevelValue(MyApp.user_id, 0);
@@ -115,6 +118,27 @@ class _CardPageState extends State<CardPage> {
       }
     } catch (e) {
       print('Error fetching points: $e');
+    }
+  }
+  // 닉네임 업데이트 함수
+  Future<void> _getUserName(String id) async{
+    final response = await http.post(
+      Uri.parse('${MyApp.url}/user/name'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(
+          {'user_id': id, 'user_name': ''}),
+    );
+    print("start: "+MyApp.user_id+","+id);
+    if (response.statusCode == 200) {
+      setState(() {
+        if (MyApp.user_id != id) {
+          yourName = response.body;
+          print("you"+response.body);
+        } else {
+          myName = response.body;
+          print("me"+response.body);
+        }
+      });
     }
   }
   Future<void> _getLevelValue(String id, int n) async {
@@ -212,6 +236,7 @@ class _CardPageState extends State<CardPage> {
     if(widget.online) {
       setState(() {
         opponentId = widget.opponent!;
+        _getUserName(widget.opponent!);
       });
       _getPointValue(opponentId, 0);
       _getLevelValue(opponentId, 0);
@@ -302,7 +327,7 @@ class _CardPageState extends State<CardPage> {
       _Chaching();
       resultMessage = "${lang("승리!")} +${betting}";
       await _getPointValue(MyApp.user_id, betting); // 점수 추가
-      if(widget.online) await _getRankValue(MyApp.user_id, 1);
+      if(widget.online) await _getRankValue(MyApp.user_id, 2);
     } else if (myScore < opponentScore) {
       // 내가 졌을 때
       resultMessage = "${lang("패배..")} -${betting}";
@@ -492,7 +517,7 @@ class _CardPageState extends State<CardPage> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                getTruncatedText(opponentId, MediaQuery.of(context).size.width * 0.6),
+                                getTruncatedText(yourName, MediaQuery.of(context).size.width * 0.6),
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -587,7 +612,7 @@ class _CardPageState extends State<CardPage> {
                               ),
                               SizedBox(width:10),
                               Text(
-                                getTruncatedText(MyApp.user_id, MediaQuery.of(context).size.width * 0.6),
+                                getTruncatedText(myName, MediaQuery.of(context).size.width * 0.6),
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
