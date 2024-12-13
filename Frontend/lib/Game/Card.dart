@@ -27,7 +27,7 @@ class _CardPageState extends State<CardPage> {
   int countdown = 17;
   int betting = 50;
   int myPoints = 0;
-  int opponentPoints = 1000;
+  int opponentPoints = 0;
   int exp_level = 0;
   int exp_rank = 0;
   String rankImage = "";

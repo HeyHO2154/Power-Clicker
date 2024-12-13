@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
 import 'package:http/http.dart' as http;
 
@@ -27,7 +27,7 @@ class _ShopPageState extends State<Shop> {
   bool _isButtonActive = true;
   String remainingTime = "00:00:00";
   Timer? _timer;
-  int time_second = 20;
+  int time_second = 1800;
 
 
 
@@ -51,6 +51,7 @@ class _ShopPageState extends State<Shop> {
 
   @override
   void dispose() {
+    MyApp.bgmPlayer.resume();
     // 스트림 구독 해제
     if (_subscription != null) {
       _subscription!.cancel();
@@ -211,6 +212,7 @@ class _ShopPageState extends State<Shop> {
   }
 
   Future<void> _onFreePointsClicked() async {
+    MyApp.bgmPlayer.pause();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 30분 후
     await prefs.setInt('cooltime', newCooltime);
