@@ -25,7 +25,7 @@ class _CardPageState extends State<CardPage> {
   bool isLoading = true;
   bool isWaitingForResult = false; // 결과 대기 상태
   int countdown = 17;
-  int betting = 50;
+  int betting = 100;
   int myPoints = 0;
   int opponentPoints = 0;
   int exp_level = 0;
@@ -372,7 +372,7 @@ class _CardPageState extends State<CardPage> {
             opponentCards2 = [0,0,0,0,0];
             selectedCards = [false, false, false, false, false];
             isWaitingForResult = false; // 결과 대기 상태
-            betting = 50;
+            betting = 100;
           });
         }
       });
@@ -674,15 +674,16 @@ class _CardPageState extends State<CardPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 버튼 사이 동일한 간격
                             children: [
-                              _buildActionButton(
-                                text: '${lang('추가 베팅')} ${betting}',
-                                onTap: (isWaitingForResult || betting != 50)
-                                    ? null
-                                    : () {
-                                  _Coin(); // 효과음 메서드 실행
-                                  betting = 100;
-                                },
-                              ),
+                              //구글에서 자꾸 이거 지적해서 임시로 보류
+                              // _buildActionButton(
+                              //   text: '${lang('추가 베팅')} ${betting}',
+                              //   onTap: (isWaitingForResult || betting != 50)
+                              //       ? null
+                              //       : () {
+                              //     _Coin(); // 효과음 메서드 실행
+                              //     betting = 100;
+                              //   },
+                              // ),
                               _buildActionButton(
                                 text: lang('카드 변경'),
                                 onTap: isWaitingForResult
