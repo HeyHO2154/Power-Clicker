@@ -191,7 +191,7 @@ class _MainPageState extends State<MainPage> {
                                       aspectRatio: 1.0,
                                       child: _buildMenuButton(
                                         context,
-                                        lang('순위표'),
+                                        lang('내 정보'),
                                         'assets/UI/Ranks/최상위.png',
                                         50,
                                         MyInfo(),
@@ -355,6 +355,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': '살아남기',
         '순위표': '순위표',
         '카드게임': '카드게임',
+        '같이하기': '같이하기',
+        '혼자하기': '혼자하기',
+        '내 정보': '내 정보',
       },
       'ENG': {
         '혼자하는 마피아': 'Solo Mafia',
@@ -368,6 +371,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': 'Survive',
         '순위표': 'Leaderboard',
         '카드게임': 'Card Game',
+        '같이하기': 'Play Together',
+        '혼자하기': 'Play Alone',
+        '내 정보': 'My Info',
       },
       'CHN': {
         '혼자하는 마피아': '单人游戏',
@@ -381,6 +387,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': '生存',
         '순위표': '排行榜',
         '카드게임': '卡牌游戏',
+        '같이하기': '一起玩',
+        '혼자하기': '单独玩',
+        '내 정보': '我的信息'
       },
       'JPN': {
         '혼자하는 마피아': '一人マフィア',
@@ -394,6 +403,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': '生き残る',
         '순위표': 'ランキング表',
         '카드게임': 'カードゲーム',
+        '같이하기': '一緒に遊ぶ',
+        '혼자하기': '一人で遊ぶ',
+        '내 정보': '私の情報',
       },
       'GER': {
         '혼자하는 마피아': 'Solo-Mafia',
@@ -407,6 +419,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': 'Überleben',
         '순위표': 'Bestenliste',
         '카드게임': 'Kartenspiel',
+        '같이하기': 'Zusammen spielen',
+        '혼자하기': 'Alleine spielen',
+        '내 정보': 'Meine Infos'
       },
       'FRA': {
         '혼자하는 마피아': 'Mafia Solo',
@@ -420,6 +435,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': 'Survivre',
         '순위표': 'Classement',
         '카드게임': 'Jeu de cartes',
+        '같이하기': 'Jouer ensemble',
+        '혼자하기': 'Jouer seul',
+        '내 정보': 'Mes informations'
       },
       'RUS': {
         '혼자하는 마피아': 'Соло-мафия',
@@ -433,6 +451,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': 'Выжить',
         '순위표': 'Таблица лидеров',
         '카드게임': 'Карточная игра',
+        '같이하기': 'Играть вместе',
+        '혼자하기': 'Играть в одиночку',
+        '내 정보': 'Моя информация'
       },
       'ESP': {
         '혼자하는 마피아': 'Mafia Solo',
@@ -446,6 +467,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': 'Sobrevivir',
         '순위표': 'clasificación',
         '카드게임': 'Juego de cartas',
+        '같이하기': 'Jugar juntos',
+        '혼자하기': 'Jugar solo',
+        '내 정보': 'Mi información'
       },
       'ARA': {
         '혼자하는 마피아': 'مافيا منفردة',
@@ -459,6 +483,9 @@ class _MainPageState extends State<MainPage> {
         '살아남기': 'البقاء',
         '순위표': 'جدول التصنيف',
         '카드게임': 'لعبة البطاقات',
+        '같이하기': 'اللعب معًا',
+        '혼자하기': 'اللعب وحدك',
+        '내 정보': 'معلوماتي'
       },
     };
 

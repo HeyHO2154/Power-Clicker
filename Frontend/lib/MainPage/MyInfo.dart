@@ -15,7 +15,7 @@ class MyInfo extends StatefulWidget {
 
 class _MyInfoPageState extends State<MyInfo> {
   final TextEditingController nicknameController = TextEditingController();
-  String user_name = 'null';
+  String user_name = '';
   int exp_level = 0;
   int exp_rank = 0;
   int points = 0; // 예시 포인트 값
@@ -52,6 +52,12 @@ class _MyInfoPageState extends State<MyInfo> {
     await _buyTheme(Theme[0]);  //고양이는 기본적으로 구매
     setState(() {
       _getThemes(MyApp.user_id);
+      Theme_name = [lang('고양이'),lang('크리스마스'),lang('숲속 친구들'),lang('마피아')];
+      Theme_info = [
+        lang('귀여운 고양이들이 나오는 기본 테마입니다'),
+        lang('크리스마스 분위기를 한껏 느껴보세요'),
+        lang('숲속 친구들과 함께 자연을 즐겨요'),
+        lang('마피아 특유의 클래식함과 긴장감을 느껴보세요')];
     });
   }
 
@@ -66,17 +72,17 @@ class _MyInfoPageState extends State<MyInfo> {
     );
 
     if (response.statusCode == 200) {
-      if(user_name == ''){
+      if(user_name == ""){
         user_name = response.body;
       }else if (response.body != user_name) {
         setState(() {
-          _getPointValue(0);
+          _getPointValue(-1000);
           user_name = response.body;
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(lang('중복된 닉네임 입니다.')),
+            content: Text(lang('중복된 닉네임 입니다')),
             backgroundColor: Colors.grey.shade700,
           ),
         );
@@ -392,7 +398,7 @@ class _MyInfoPageState extends State<MyInfo> {
               SizedBox(height: 20),
               // 설명 텍스트
               Text(
-                lang('다른 유저와 승리시 +1, 패배시 -1이 적용됩니다.'),
+                lang('다른 유저와 승리시 +1, 패배시 -1이 적용됩니다'),
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white70,
@@ -485,33 +491,13 @@ class _MyInfoPageState extends State<MyInfo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      lang('닉네임'),
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFFD4AF37),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed:
-                      points >= 1000 ? _getUserName : null, // 포인트가 1000 이상일 때만 활성화
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFD4AF37), // 비활성화일 때도 금색 유지
-                        disabledForegroundColor: Colors.grey.withOpacity(0.38),
-                        disabledBackgroundColor: Colors.grey.withOpacity(0.35),
-                        foregroundColor: Colors.black,
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(lang('닉네임 변경')),
-                    ),
-                  ],
+                Text(
+                  lang('닉네임'),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Color(0xFFD4AF37),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 10),
                 TextField(
@@ -529,8 +515,23 @@ class _MyInfoPageState extends State<MyInfo> {
                   style: TextStyle(color: Colors.white),
                 ),
                 SizedBox(height: 5),
+                ElevatedButton(
+                  onPressed:
+                  points >= 1000 ? _getUserName : null, // 포인트가 1000 이상일 때만 활성화
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFD4AF37), // 비활성화일 때도 금색 유지
+                    disabledForegroundColor: Colors.grey.withOpacity(0.38),
+                    disabledBackgroundColor: Colors.grey.withOpacity(0.35),
+                    foregroundColor: Colors.black,
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(lang('닉네임 변경')),
+                ),
                 Text(
-                  lang('(변경에 1,000 코인 사용)'),
+                  lang('(변경에 1,000 코인)'),
                   style: TextStyle(
                     fontSize: 15,
                     color: Colors.white70,
@@ -594,7 +595,7 @@ class _MyInfoPageState extends State<MyInfo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${lang('레벨')}: ${(exp_level / 100).floor()+1}',
+            'Lv. ${(exp_level / 100).floor()+1}',
             style: TextStyle(
               fontSize: 20,
               color: Color(0xFFD4AF37),
@@ -768,7 +769,7 @@ class _MyInfoPageState extends State<MyInfo> {
           _itemMap.isEmpty || _itemMap.keys.length <= 1
               ? Center(
             child: Text(
-              lang('아이템 데이터가 없습니다.'),
+              lang('아이템 데이터가 없습니다'),
               style: TextStyle(color: Colors.white),
             ),
           )
@@ -885,7 +886,7 @@ class _MyInfoPageState extends State<MyInfo> {
                   Navigator.of(context).pop(); // 다이얼로그 닫기
                 },
                 child: Text(
-                  lang('해당 테마로 변경'),
+                  lang('테마 변경'),
                   style: TextStyle(
                     color: Color(0xFFD4AF37),
                     fontWeight: FontWeight.bold,
@@ -914,14 +915,14 @@ class _MyInfoPageState extends State<MyInfo> {
                             borderRadius: BorderRadius.circular(10), // 모서리 둥글게
                           ),
                           title: Text(
-                            '구매 완료!',
+                            lang('구매 완료!'),
                             style: TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           content: Text(
-                            '테마 구매가 완료되었습니다.',
+                            '${Theme_name[idx]} ${lang('구매 완료!')}',
                             style: TextStyle(color: Colors.white),
                           ),
                           actions: [
@@ -930,7 +931,7 @@ class _MyInfoPageState extends State<MyInfo> {
                                 Navigator.of(context).pop(); // 대화창 닫기
                               },
                               child: Text(
-                                '확인',
+                                lang('확인'),
                                 style: TextStyle(color: Colors.yellow),
                               ),
                             ),
@@ -950,7 +951,7 @@ class _MyInfoPageState extends State<MyInfo> {
                             borderRadius: BorderRadius.circular(10), // 모서리 둥글게
                           ),
                           title: Text(
-                            '잔액 부족',
+                            lang('잔액 부족'),
                             style: TextStyle(
                               color: Colors.yellow,
                               fontWeight: FontWeight.bold,
@@ -958,7 +959,7 @@ class _MyInfoPageState extends State<MyInfo> {
                             ),
                           ),
                           content: Text(
-                            '구매하기 위해 10,000 코인이 필요합니다.',
+                            lang('10,000 코인이 필요합니다'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -974,7 +975,7 @@ class _MyInfoPageState extends State<MyInfo> {
                                 );
                               },
                               child: Text(
-                                '코인 받으러 가기',
+                                lang('코인 받기'),
                                 style: TextStyle(
                                   color: Colors.yellowAccent,
                                   fontWeight: FontWeight.bold,
@@ -1005,7 +1006,339 @@ class _MyInfoPageState extends State<MyInfo> {
 
   String lang(String textKey) {
     final localizedTexts = {
-
+      'KOR': {
+        '구매하기': '구매하기',
+        '코인 받기': '코인 받기',
+        '10,000 코인이 필요합니다': '10,000 코인이 필요합니다',
+        '잔액 부족': '잔액 부족',
+        '확인': '확인',
+        '구매 완료!': '구매 완료!',
+        '테마 변경': '테마 변경',
+        '보유 아이템': '보유 아이템',
+        '아이템 데이터가 없습니다': '아이템 데이터가 없습니다',
+        '보유 테마': '보유 테마',
+        '경험치': '경험치',
+        '브론즈': '브론즈',
+        '실버': '실버',
+        '골드': '골드',
+        '플레티넘': '플레티넘',
+        '다이아몬드': '다이아몬드',
+        '마스터': '마스터',
+        '그랜드 마스터': '그랜드 마스터',
+        '레전드': '레전드',
+        '(변경에 1,000 코인)': '(변경에 1,000 코인)',
+        '닉네임 변경': '닉네임 변경',
+        '중복된 닉네임 입니다': '중복된 닉네임 입니다',
+        '닉네임': '닉네임',
+        '연승': '연승',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다',
+        '랭크 정보': '랭크 정보',
+        '내 정보': '내 정보',
+        '고양이': '고양이',
+        '크리스마스': '크리스마스',
+        '숲속 친구들': '숲속 친구들',
+        '마피아': '마피아',
+        '귀여운 고양이들이 나오는 기본 테마입니다': '귀여운 고양이들이 나오는 기본 테마입니다',
+        '크리스마스 분위기를 한껏 느껴보세요': '크리스마스 분위기를 한껏 느껴보세요',
+        '숲속 친구들과 함께 자연을 즐겨요': '숲속 친구들과 함께 자연을 즐겨요',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': '마피아 특유의 클래식함과 긴장감을 느껴보세요'
+      },
+      'ENG': {
+        '구매하기': 'Buy',
+        '코인 받기': 'Get Coins',
+        '10,000 코인이 필요합니다': 'Need 10,000 Coins',
+        '잔액 부족': 'Insufficient Balance',
+        '확인': 'OK',
+        '구매 완료!': 'Purchase Complete!',
+        '테마 변경': 'Change Theme',
+        '보유 아이템': 'Owned Items',
+        '아이템 데이터가 없습니다': 'No Item Data',
+        '보유 테마': 'Owned Themes',
+        '경험치': 'XP',
+        '브론즈': 'Bronze',
+        '실버': 'Silver',
+        '골드': 'Gold',
+        '플레티넘': 'Platinum',
+        '다이아몬드': 'Diamond',
+        '마스터': 'Master',
+        '그랜드 마스터': 'Grand Master',
+        '레전드': 'Legend',
+        '(변경에 1,000 코인)': '(Change: 1,000 Coins)',
+        '닉네임 변경': 'Change Nickname',
+        '중복된 닉네임 입니다': 'Nickname Exists',
+        '닉네임': 'Nickname',
+        '연승': 'Winning Streak',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': '+1 for Win, -1 for Loss',
+        '랭크 정보': 'Rank Info',
+        '내 정보': 'My Info',
+        '고양이': 'Cat',
+        '크리스마스': 'Christmas',
+        '숲속 친구들': 'Forest Friends',
+        '마피아': 'Mafia',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'Default Theme with Cute Cats',
+        '크리스마스 분위기를 한껏 느껴보세요': 'Feel the Christmas Spirit',
+        '숲속 친구들과 함께 자연을 즐겨요': 'Enjoy Nature with Forest Friends',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'Experience Mafia’s Classic Tension'
+      },
+      'ARA': {
+        '구매하기': 'شراء',
+        '코인 받기': 'احصل على العملات',
+        '10,000 코인이 필요합니다': 'تحتاج 10,000 عملة',
+        '잔액 부족': 'الرصيد غير كافٍ',
+        '확인': 'موافق',
+        '구매 완료!': 'تم الشراء!',
+        '테마 변경': 'تغيير الثيم',
+        '보유 아이템': 'العناصر المملوكة',
+        '아이템 데이터가 없습니다': 'لا توجد بيانات للعناصر',
+        '보유 테마': 'الثيمات المملوكة',
+        '경험치': 'التجربة',
+        '브론즈': 'برونزي',
+        '실버': 'فضي',
+        '골드': 'ذهبي',
+        '플레티넘': 'بلاتيني',
+        '다이아몬드': 'ماسي',
+        '마스터': 'ماستر',
+        '그랜드 마스터': 'جراند ماستر',
+        '레전드': 'أسطورة',
+        '(변경에 1,000 코인)': '(تغيير: 1,000 عملة)',
+        '닉네임 변경': 'تغيير الاسم المستعار',
+        '중복된 닉네임 입니다': 'الاسم المستعار مستخدم',
+        '닉네임': 'الاسم المستعار',
+        '연승': 'سلسلة الانتصارات',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': '+1 للفوز، -1 للخسارة',
+        '랭크 정보': 'معلومات التصنيف',
+        '내 정보': 'معلوماتي',
+        '고양이': 'قطة',
+        '크리스마스': 'عيد الميلاد',
+        '숲속 친구들': 'أصدقاء الغابة',
+        '마피아': 'المافيا',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'ثيم القطط اللطيفة الافتراضي',
+        '크리스마스 분위기를 한껏 느껴보세요': 'استمتع بجو عيد الميلاد',
+        '숲속 친구들과 함께 자연을 즐겨요': 'استمتع بالطبيعة مع أصدقاء الغابة',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'استمتع بتوتر وأناقة المافيا الكلاسيكية'
+      },
+      'CHN': {
+        '구매하기': '购买',
+        '코인 받기': '领取金币',
+        '10,000 코인이 필요합니다': '需要10,000金币',
+        '잔액 부족': '余额不足',
+        '확인': '确认',
+        '구매 완료!': '购买完成！',
+        '테마 변경': '更换主题',
+        '보유 아이템': '拥有的物品',
+        '아이템 데이터가 없습니다': '没有物品数据',
+        '보유 테마': '拥有的主题',
+        '경험치': '经验值',
+        '브론즈': '青铜',
+        '실버': '白银',
+        '골드': '黄金',
+        '플레티넘': '铂金',
+        '다이아몬드': '钻石',
+        '마스터': '大师',
+        '그랜드 마스터': '宗师',
+        '레전드': '传奇',
+        '(변경에 1,000 코인)': '(更换需1,000金币)',
+        '닉네임 변경': '更改昵称',
+        '중복된 닉네임 입니다': '昵称已被占用',
+        '닉네임': '昵称',
+        '연승': '连胜',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': '胜+1, 败-1',
+        '랭크 정보': '排名信息',
+        '내 정보': '我的信息',
+        '고양이': '猫咪',
+        '크리스마스': '圣诞节',
+        '숲속 친구들': '森林朋友',
+        '마피아': '黑手党',
+        '귀여운 고양이들이 나오는 기본 테마입니다': '默认可爱猫咪主题',
+        '크리스마스 분위기를 한껏 느껴보세요': '尽情感受圣诞气氛',
+        '숲속 친구들과 함께 자연을 즐겨요': '与森林朋友一起享受自然',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': '感受黑手党的经典与紧张'
+      },
+      'JPN': {
+        '구매하기': '購入',
+        '코인 받기': 'コインを受け取る',
+        '10,000 코인이 필요합니다': '10,000コインが必要です',
+        '잔액 부족': '残高不足',
+        '확인': '確認',
+        '구매 완료!': '購入完了！',
+        '테마 변경': 'テーマ変更',
+        '보유 아이템': '所有アイテム',
+        '아이템 데이터가 없습니다': 'アイテムデータがありません',
+        '보유 테마': '所有テーマ',
+        '경험치': '経験値',
+        '브론즈': 'ブロンズ',
+        '실버': 'シルバー',
+        '골드': 'ゴールド',
+        '플레티넘': 'プラチナ',
+        '다이아몬드': 'ダイヤモンド',
+        '마스터': 'マスター',
+        '그랜드 마스터': 'グランドマスター',
+        '레전드': 'レジェンド',
+        '(변경에 1,000 코인)': '(変更: 1,000コイン)',
+        '닉네임 변경': 'ニックネーム変更',
+        '중복된 닉네임 입니다': 'ニックネームが重複しています',
+        '닉네임': 'ニックネーム',
+        '연승': '連勝',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': '勝利で+1、敗北で-1',
+        '랭크 정보': 'ランク情報',
+        '내 정보': '私の情報',
+        '고양이': '猫',
+        '크리스마스': 'クリスマス',
+        '숲속 친구들': '森の仲間',
+        '마피아': 'マフィア',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'かわいい猫たちが登場する基本テーマ',
+        '크리스마스 분위기를 한껏 느껴보세요': 'クリスマスの雰囲気を楽しんでください',
+        '숲속 친구들과 함께 자연을 즐겨요': '森の仲間と一緒に自然を楽しもう',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'マフィアのクラシックな緊張感を感じてください'
+      },
+      'FRA': {
+        '구매하기': 'Acheter',
+        '코인 받기': 'Recevoir des pièces',
+        '10,000 코인이 필요합니다': '10,000 pièces requises',
+        '잔액 부족': 'Solde insuffisant',
+        '확인': 'Confirmer',
+        '구매 완료!': 'Achat réussi!',
+        '테마 변경': 'Changer de thème',
+        '보유 아이템': 'Objets possédés',
+        '아이템 데이터가 없습니다': 'Aucune donnée d’objet',
+        '보유 테마': 'Thèmes possédés',
+        '경험치': 'Expérience',
+        '브론즈': 'Bronze',
+        '실버': 'Argent',
+        '골드': 'Or',
+        '플레티넘': 'Platine',
+        '다이아몬드': 'Diamant',
+        '마스터': 'Maître',
+        '그랜드 마스터': 'Grand Maître',
+        '레전드': 'Légende',
+        '(변경에 1,000 코인)': '(1,000 pièces pour changer)',
+        '닉네임 변경': 'Changer le pseudo',
+        '중복된 닉네임 입니다': 'Pseudo déjà pris',
+        '닉네임': 'Pseudo',
+        '연승': 'Série de victoires',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': 'Victoire: +1, Défaite: -1',
+        '랭크 정보': 'Infos de rang',
+        '내 정보': 'Mes infos',
+        '고양이': 'Chat',
+        '크리스마스': 'Noël',
+        '숲속 친구들': 'Amis de la forêt',
+        '마피아': 'Mafia',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'Un thème de base avec des chats mignons',
+        '크리스마스 분위기를 한껏 느껴보세요': 'Profitez de l’ambiance de Noël',
+        '숲속 친구들과 함께 자연을 즐겨요': 'Profitez de la nature avec les amis de la forêt',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'Ressentez la tension classique de la mafia'
+      },
+      'GER': {
+        '구매하기': 'Kaufen',
+        '코인 받기': 'Münzen erhalten',
+        '10,000 코인이 필요합니다': '10.000 Münzen benötigt',
+        '잔액 부족': 'Unzureichendes Guthaben',
+        '확인': 'Bestätigen',
+        '구매 완료!': 'Kauf abgeschlossen!',
+        '테마 변경': 'Thema ändern',
+        '보유 아이템': 'Besitzgegenstände',
+        '아이템 데이터가 없습니다': 'Keine Gegenstandsdaten',
+        '보유 테마': 'Besitzthemen',
+        '경험치': 'Erfahrung',
+        '브론즈': 'Bronze',
+        '실버': 'Silber',
+        '골드': 'Gold',
+        '플레티넘': 'Platin',
+        '다이아몬드': 'Diamant',
+        '마스터': 'Meister',
+        '그랜드 마스터': 'Großmeister',
+        '레전드': 'Legende',
+        '(변경에 1,000 코인)': '(1.000 Münzen für Änderung)',
+        '닉네임 변경': 'Spitznamen ändern',
+        '중복된 닉네임 입니다': 'Spitzname bereits vergeben',
+        '닉네임': 'Spitzname',
+        '연승': 'Siegessträhne',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': 'Sieg: +1, Niederlage: -1',
+        '랭크 정보': 'Ranginfo',
+        '내 정보': 'Meine Infos',
+        '고양이': 'Katze',
+        '크리스마스': 'Weihnachten',
+        '숲속 친구들': 'Waldfreunde',
+        '마피아': 'Mafia',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'Ein Grundthema mit niedlichen Katzen',
+        '크리스마스 분위기를 한껏 느껴보세요': 'Genießen Sie die Weihnachtsatmosphäre',
+        '숲속 친구들과 함께 자연을 즐겨요': 'Genießen Sie die Natur mit den Waldfreunden',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'Erleben Sie die klassische Spannung der Mafia'
+      },
+      'ESP': {
+        '구매하기': 'Comprar',
+        '코인 받기': 'Recibir monedas',
+        '10,000 코인이 필요합니다': 'Se necesitan 10.000 monedas',
+        '잔액 부족': 'Saldo insuficiente',
+        '확인': 'Confirmar',
+        '구매 완료!': '¡Compra completada!',
+        '테마 변경': 'Cambiar tema',
+        '보유 아이템': 'Objetos poseídos',
+        '아이템 데이터가 없습니다': 'Sin datos de objetos',
+        '보유 테마': 'Temas poseídos',
+        '경험치': 'Experiencia',
+        '브론즈': 'Bronce',
+        '실버': 'Plata',
+        '골드': 'Oro',
+        '플레티넘': 'Platino',
+        '다이아몬드': 'Diamante',
+        '마스터': 'Maestro',
+        '그랜드 마스터': 'Gran Maestro',
+        '레전드': 'Leyenda',
+        '(변경에 1,000 코인)': '(1.000 monedas para cambiar)',
+        '닉네임 변경': 'Cambiar apodo',
+        '중복된 닉네임 입니다': 'Apodo ya en uso',
+        '닉네임': 'Apodo',
+        '연승': 'Racha ganadora',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': 'Victoria: +1, Derrota: -1',
+        '랭크 정보': 'Información de rango',
+        '내 정보': 'Mi información',
+        '고양이': 'Gato',
+        '크리스마스': 'Navidad',
+        '숲속 친구들': 'Amigos del bosque',
+        '마피아': 'Mafia',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'Un tema básico con gatos adorables',
+        '크리스마스 분위기를 한껏 느껴보세요': 'Disfruta del ambiente navideño',
+        '숲속 친구들과 함께 자연을 즐겨요': 'Disfruta la naturaleza con los amigos del bosque',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'Siente la tensión clásica de la mafia'
+      },
+      'RUS': {
+        '구매하기': 'Купить',
+        '코인 받기': 'Получить монеты',
+        '10,000 코인이 필요합니다': 'Требуется 10,000 монет',
+        '잔액 부족': 'Недостаточно средств',
+        '확인': 'Подтвердить',
+        '구매 완료!': 'Покупка завершена!',
+        '테마 변경': 'Сменить тему',
+        '보유 아이템': 'Доступные предметы',
+        '아이템 데이터가 없습니다': 'Нет данных о предметах',
+        '보유 테마': 'Доступные темы',
+        '경험치': 'Опыт',
+        '브론즈': 'Бронза',
+        '실버': 'Серебро',
+        '골드': 'Золото',
+        '플레티넘': 'Платина',
+        '다이아몬드': 'Алмаз',
+        '마스터': 'Мастер',
+        '그랜드 마스터': 'Грандмастер',
+        '레전드': 'Легенда',
+        '(변경에 1,000 코인)': '(1,000 монет для изменения)',
+        '닉네임 변경': 'Сменить никнейм',
+        '중복된 닉네임 입니다': 'Никнейм уже занят',
+        '닉네임': 'Никнейм',
+        '연승': 'Серия побед',
+        '다른 유저와 승리시 +1, 패배시 -1이 적용됩니다': 'Победа: +1, Поражение: -1',
+        '랭크 정보': 'Информация о ранге',
+        '내 정보': 'Моя информация',
+        '고양이': 'Кот',
+        '크리스마스': 'Рождество',
+        '숲속 친구들': 'Лесные друзья',
+        '마피아': 'Мафия',
+        '귀여운 고양이들이 나오는 기본 테마입니다': 'Основная тема с милыми котами',
+        '크리스마스 분위기를 한껏 느껴보세요': 'Наслаждайтесь рождественской атмосферой',
+        '숲속 친구들과 함께 자연을 즐겨요': 'Наслаждайтесь природой с лесными друзьями',
+        '마피아 특유의 클래식함과 긴장감을 느껴보세요': 'Почувствуйте классическое напряжение мафии'
+      }
     };
     return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
   }
