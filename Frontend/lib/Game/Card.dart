@@ -285,14 +285,13 @@ class _CardPageState extends State<CardPage> {
     setState(() {
       myCards = newCards;
       selectedCards = [false, false, false, false, false]; // 선택 초기화
-      isWaitingForResult = true; // 결과 대기 상태
     });
-
-    // 변경된 카드 배열을 서버로 전송
-    _sendCardsToServer(newCards);
   }
 
   void _sendCardsToServer(List<int> cards) {
+    setState(() {
+      isWaitingForResult = true; // 결과 대기 상태
+    });
     if (channel != null && widget.online) {
       String cardData = "CARDS:${widget.opponent}:${cards}:";
       channel!.sink.add(cardData);
@@ -674,23 +673,23 @@ class _CardPageState extends State<CardPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 버튼 사이 동일한 간격
                             children: [
-                              //구글에서 자꾸 이거 지적해서 임시로 보류
-                              // _buildActionButton(
-                              //   text: '${lang('추가 베팅')} ${betting}',
-                              //   onTap: (isWaitingForResult || betting != 50)
-                              //       ? null
-                              //       : () {
-                              //     _Coin(); // 효과음 메서드 실행
-                              //     betting = 100;
-                              //   },
-                              // ),
                               _buildActionButton(
-                                text: lang('카드 변경'),
+                                text: '${lang('변경하기')} -25',
+                                onTap: (isWaitingForResult || myPoints < 25)
+                                    ? null
+                                    : () {
+                                  _Coin(); // 효과음 메서드 실행
+                                  _getPointValue(MyApp.user_id, -25);
+                                  _updateSelectedCards();
+                                },
+                              ),
+                              _buildActionButton(
+                                text: lang('턴 종료'),
                                 onTap: isWaitingForResult
                                     ? null
                                     : () {
                                   _Chaching(); // 효과음 메서드 실행
-                                  _updateSelectedCards();
+                                  _sendCardsToServer(myCards);;
                                 },
                               ),
                             ],
@@ -827,6 +826,8 @@ String lang(String textKey) {
       '카드 게임': '카드 게임',
       '추가 베팅': '추가 베팅',
       '카드 변경': '카드 변경',
+      '턴 종료': '턴 종료',
+      "변경하기": "변경하기",
     },
     'ENG': {
       '상대가 게임을 나갔습니다': 'Opponent left the game',
@@ -840,6 +841,8 @@ String lang(String textKey) {
       '카드 게임': 'Card Game',
       '추가 베팅': 'Extra Bet',
       '카드 변경': 'Change Cards',
+      '턴 종료': 'End Turn',
+      "변경하기": "Change",
     },
     'ARA': {
       '상대가 게임을 나갔습니다': 'انسحب الخصم',
@@ -853,6 +856,8 @@ String lang(String textKey) {
       '카드 게임': 'لعبة البطاقات',
       '추가 베팅': 'رهان إضافي',
       '카드 변경': 'تبديل البطاقات',
+      '턴 종료': 'إنهاء الدور',
+      "변경하기": "تغيير",
     },
     'CHN': {
       '상대가 게임을 나갔습니다': '对手退出了游戏',
@@ -866,6 +871,8 @@ String lang(String textKey) {
       '카드 게임': '纸牌游戏',
       '추가 베팅': '额外下注',
       '카드 변경': '更换牌',
+      '턴 종료': '结束回合',
+      "변경하기": "更改",
     },
     'JPN': {
       '상대가 게임을 나갔습니다': '相手がゲームを退出しました',
@@ -879,6 +886,8 @@ String lang(String textKey) {
       '카드 게임': 'カードゲーム',
       '추가 베팅': '追加ベット',
       '카드 변경': 'カード変更',
+      '턴 종료': 'ターン終了',
+      "변경하기": "変更する",
     },
     'GER': {
       '상대가 게임을 나갔습니다': 'Gegner hat das Spiel verlassen',
@@ -892,6 +901,8 @@ String lang(String textKey) {
       '카드 게임': 'Kartenspiel',
       '추가 베팅': 'Zusatzwette',
       '카드 변경': 'Karten wechseln',
+      '턴 종료': 'Zug beenden',
+      "변경하기": "Ändern",
     },
     'RUS': {
       '상대가 게임을 나갔습니다': 'Противник вышел из игры',
@@ -905,6 +916,8 @@ String lang(String textKey) {
       '카드 게임': 'Карточная игра',
       '추가 베팅': 'Дополнительная ставка',
       '카드 변경': 'Смена карт',
+      '턴 종료': 'Завершить ход',
+      "변경하기": "Изменить",
     },
     'FRA': {
       '상대가 게임을 나갔습니다': 'Adversaire a quitté la partie',
@@ -918,6 +931,8 @@ String lang(String textKey) {
       '카드 게임': 'Jeu de cartes',
       '추가 베팅': 'Mise supplémentaire',
       '카드 변경': 'Changer de cartes',
+      '턴 종료': 'Fin du tour',
+      "변경하기": "Changer",
     },
     'ESP': {
       '상대가 게임을 나갔습니다': 'El oponente abandonó el juego',
@@ -931,6 +946,8 @@ String lang(String textKey) {
       '카드 게임': 'Juego de cartas',
       '추가 베팅': 'Apuesta adicional',
       '카드 변경': 'Cambiar cartas',
+      '턴 종료': 'Terminar turno',
+      "변경하기": "Cambiar",
     },
 
   };
