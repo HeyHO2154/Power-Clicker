@@ -18,18 +18,10 @@ class Shop extends StatefulWidget {
 
 class _ShopPageState extends State<Shop> {
   int points = 0;
-  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
-  final List<String> _productIds = ['point_1000', 'point_6000', 'point_12000'];
-  Map<String, ProductDetails> _products = {};
-  StreamSubscription<List<PurchaseDetails>>? _subscription;
-  RewardedInterstitialAd? _rewardedInterstitialAd; // 보상형 전면 광고
-  bool _isAdLoaded = false;
   bool _isButtonActive = true;
   String remainingTime = "00:00:00";
   Timer? _timer;
-  int time_second = 1800;
-
-
+  int time_second = 10;
 
   @override
   void initState() {
@@ -38,30 +30,16 @@ class _ShopPageState extends State<Shop> {
   }
 
   Future<void> _initializePage() async {
-    try {
-      await _initializeProducts(); // 상품 초기화
-      await _getPointValue(0); // 포인트 조회
-      await _loadRewardedInterstitialAd(); // 보상형 전면 광고 로드
-      await _checkCooltime(); // 쿨타임 확인
-      await _consumeUnprocessedPurchases(); // 미처리된 구매 소비
-    } catch (e) {
-      print("초기화 중 오류 발생: $e");
-    }
+    await _checkCooltime(); // 쿨타임 확인
+    _getPointValue(0);
   }
 
   @override
   void dispose() {
     MyApp.bgmPlayer.resume();
-    // 스트림 구독 해제
-    if (_subscription != null) {
-      _subscription!.cancel();
-      _subscription = null;
-    }
     _timer?.cancel();
-    _rewardedInterstitialAd?.dispose();
     super.dispose();
   }
-
 
   Future<void> _getPointValue(n) async {
     final url = Uri.parse('${MyApp.url}/user/point');
@@ -81,135 +59,6 @@ class _ShopPageState extends State<Shop> {
     }
   }
 
-  Future<void> _initializeProducts() async {
-    if (_products.isNotEmpty) return;
-
-    final ProductDetailsResponse response =
-    await _inAppPurchase.queryProductDetails(_productIds.toSet());
-    if (response.notFoundIDs.isNotEmpty) {
-      print('Some products were not found: ${response.notFoundIDs}');
-    }
-    setState(() {
-      _products = {for (var product in response.productDetails) product.id: product};
-    });
-  }
-
-  Future<void> _purchaseProduct(String productId) async {
-    final ProductDetails? productDetails = _products[productId];
-    if (productDetails != null) {
-      final PurchaseParam purchaseParam = PurchaseParam(
-        productDetails: productDetails,
-      );
-      // 구매 처리
-      _inAppPurchase.buyConsumable(
-        purchaseParam: purchaseParam,
-        autoConsume: true, // 자동 소비 처리
-      );
-
-      // 구매 완료 후 소비 처리
-      _subscription = _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
-        for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
-          if (purchaseDetails.status == PurchaseStatus.purchased) {
-            _consumePurchase(purchaseDetails);
-          }
-        }
-      });
-    } else {
-      print('Product not found: $productId');
-    }
-  }
-
-  Future<void> _consumePurchase(PurchaseDetails purchaseDetails) async {
-    try {
-      await _inAppPurchase.completePurchase(purchaseDetails); // 구매 소비
-      print('소비 완료: ${purchaseDetails.productID}');
-
-      // 상품 ID에 따라 포인트 또는 아이템 지급
-      switch (purchaseDetails.productID) {
-        case 'point_1000':
-          await _getPointValue(1000);
-          break;
-        case 'point_6000':
-          await _getPointValue(6000);
-          break;
-        case 'point_12000':
-          await _getPointValue(12000);
-          break;
-        default:
-          print('알 수 없는 제품 ID: ${purchaseDetails.productID}');
-      }
-    } catch (e) {
-      print('소비 중 오류 발생: $e');
-    }
-  }
-  Future<void> _consumeUnprocessedPurchases() async {
-    final Stream<List<PurchaseDetails>> purchaseStream = _inAppPurchase.purchaseStream;
-    final completer = Completer<void>();
-
-    _subscription = purchaseStream.listen((purchaseDetailsList) async {
-      for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
-        if (purchaseDetails.status == PurchaseStatus.purchased) {
-          await _consumePurchase(purchaseDetails); // 소비 처리
-        } else if (purchaseDetails.status == PurchaseStatus.error) {
-          print('구매 처리 중 오류 발생: ${purchaseDetails.error}');
-        }
-      }
-      completer.complete();
-    });
-
-    await completer.future; // 모든 처리 완료를 기다림
-  }
-
-
-  Future<void> _loadRewardedInterstitialAd() async {
-    await RewardedInterstitialAd.load(
-      //adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
-      adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
-      request: const AdRequest(),
-      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          setState(() {
-            _rewardedInterstitialAd = ad;
-            _isAdLoaded = true;
-          });
-          print('Rewarded Interstitial Ad loaded.');
-        },
-        onAdFailedToLoad: (error) {
-          print('보상형 전면 광고 로드 실패: ${error.message}');
-          // 일정 시간 후 다시 로드 시도
-          Future.delayed(Duration(seconds: 5), () {
-            _loadRewardedInterstitialAd();
-          });
-        },
-      ),
-    );
-  }
-
-  Future<void> _showRewardedInterstitialAd() async {
-    if (_rewardedInterstitialAd != null && _isAdLoaded) {
-      _rewardedInterstitialAd!.show(
-        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-          setState(() {
-            points += reward.amount.toInt(); // 포인트 지급
-          });
-          _getPointValue(1000);
-        },
-      );
-
-      // 광고 재로드
-      _rewardedInterstitialAd = null;
-      _isAdLoaded = false;
-      _loadRewardedInterstitialAd();
-    } else {
-      print('광고가 아직 로드되지 않았습니다.');
-      _loadRewardedInterstitialAd(); // 광고 재로드 시도
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.remove('cooltime');
-      setState(() {
-        _isButtonActive = true;
-      });
-    }
-  }
 
   Future<void> _onFreePointsClicked() async {
     MyApp.bgmPlayer.pause();
@@ -217,7 +66,6 @@ class _ShopPageState extends State<Shop> {
     int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 30분 후
     await prefs.setInt('cooltime', newCooltime);
 
-    _showRewardedInterstitialAd(); // 보상형 전면 광고 표시
     setState(() {
       _isButtonActive = false;
     });
@@ -401,20 +249,9 @@ class _ShopPageState extends State<Shop> {
                         ),
                         SizedBox(height: 20),
                         _buildSection(
-                          title: lang('코인 무료 충전'),
+                          title: lang('코인 획득 - [ Ad ]'),
                           child: _buildFreePointsSection(),
                         ),
-                        // SizedBox(height: 20),
-                        // _buildSection(
-                        //   title: '테마 구매',
-                        //   child: _buildThemePurchaseSection(),
-                        // ),
-                        // SizedBox(height: 20),
-                        // _buildSection(
-                        //   title: '아이템 구매',
-                        //   child: _buildItemPurchaseSection(),
-                        // ),
-                        // SizedBox(height: 50),
                       ],
                     ),
                   ),
@@ -443,7 +280,7 @@ class _ShopPageState extends State<Shop> {
           ),
         ],
       ),
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 24), // 좌, 상, 우, 하 순서
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -479,41 +316,63 @@ class _ShopPageState extends State<Shop> {
       children: [
         GestureDetector(
           onTap: () {
-            _purchaseProduct(productId); // 결제 함수 호출
+            // 탭 이벤트 처리
           },
-          child: Container(
-            width: 110,
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Color(0xFFD4AF37), width: 1.5), // 금색 테두리
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  imagePath, // 이미지 경로 추가
-                  width: 80, // 이미지 너비
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 110,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Color(0xFFD4AF37), width: 3), // 금색 테두리
                 ),
-                Text(
-                  points,
-                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      imagePath, // 이미지 경로 추가
+                      width: 90, // 이미지 너비
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 10), // 금색 테두리 박스와 가격 간격
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 가로 정렬: 중앙
+                children: [
+                  Text(
+                    points,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amberAccent, // 금색 강조
+                      shadows: [
+                        Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))
+                      ],
+                    ),
+                  ),
+                  Image.asset(
+                    'assets/UI/coin.png', // 코인 이미지 경로
+                    height: 30, // 이미지 크기
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         if (label != null)
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            padding: EdgeInsets.symmetric(horizontal: 6.5, vertical: 1.5),
             decoration: BoxDecoration(
               color: Colors.red,
               borderRadius: BorderRadius.circular(5),
             ),
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
       ],
@@ -530,7 +389,7 @@ class _ShopPageState extends State<Shop> {
         child: ElevatedButton(
           onPressed: _isButtonActive ? _onFreePointsClicked : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.yellow.shade800,
+            backgroundColor: Colors.green,
             disabledBackgroundColor: Colors.grey,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10), // 모서리 반경 조정
@@ -539,20 +398,29 @@ class _ShopPageState extends State<Shop> {
           ),
           child: _isButtonActive
               ? Row(
-            mainAxisSize: MainAxisSize.min, // 내용 크기에 맞춤
+            mainAxisAlignment: MainAxisAlignment.center, // 가로 정렬: 중앙
             children: [
               Text(
-                '+1,000 ',
+                "+1,000",
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.amberAccent, // 금색 강조
+                  shadows: [
+                    Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))
+                  ],
                 ),
               ),
-              Image.asset(
-                'assets/UI/coin.png', // 코인 이미지 경로
-                height: 40, // 이미지 크기
+              SizedBox(width: 8), // 텍스트와 아이콘 사이 간격
+              Icon(
+                Icons.video_library, // 광고를 암시하는 아이콘
+                color: Colors.orange, // 강조 색상
+                size: 22, // 아이콘 크기
               ),
+              // Image.asset(
+              //   'assets/UI/coin.png', // 코인 이미지 경로
+              //   height: 33, // 이미지 크기
+              // ),
             ],
           )
               : Text(
@@ -568,89 +436,6 @@ class _ShopPageState extends State<Shop> {
     );
   }
 
-
-  // 3. 테마 구매
-  Widget _buildThemePurchaseSection() {
-    return Row(
-      children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Color(0xFFD4AF37), width: 1.5), // 금색 테두리
-          ),
-          child: Image.asset('assets/Theme/Forest.png', fit: BoxFit.cover),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '숲속 친구들 테마',
-                style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 5),
-              Text(
-                '귀여운 동물들이 등장하는 숲속 테마입니다. 사슴, 다람쥐, 고슴도치 등이 포함됩니다.',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '구매 00:00:00',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {}, // 구매 버튼
-                    child: Text('구매'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // 4. 아이템 구매
-  Widget _buildItemPurchaseSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildItemCard("판사 봉", "x5", 'assets/Item/judge_baton.png'),
-        _buildItemCard("방탄복", "x3", 'assets/Item/bulletproof.png'),
-        _buildItemCard("정치적 연설", "x10", 'assets/Item/political_speach.png'),
-      ],
-    );
-  }
-
-  Widget _buildItemCard(String name, String quantity, String imagePath) {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.black54,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Color(0xFFD4AF37), width: 1.5), // 금색 테두리
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(imagePath, width: 40, height: 40, fit: BoxFit.cover),
-          SizedBox(height: 5),
-          Text(name, style: TextStyle(color: Colors.white, fontSize: 14)),
-          SizedBox(height: 5),
-          Text(quantity, style: TextStyle(color: Colors.grey, fontSize: 12)),
-        ],
-      ),
-    );
-  }
 
 }
 
