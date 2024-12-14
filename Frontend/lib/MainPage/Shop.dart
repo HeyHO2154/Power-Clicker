@@ -104,7 +104,7 @@ class _ShopPageState extends State<Shop> {
   }
   void _handlePurchase(String productId) {
     int pointsToAdd = 0;
-    if (productId == 'point_1000') {
+    if (productId == 'point2_1000') {
       pointsToAdd = 1000;
     } else if (productId == 'point_6000') {
       pointsToAdd = 6000;
@@ -403,7 +403,7 @@ class _ShopPageState extends State<Shop> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildPointPurchaseButton("+1,000", 'point_1000', imagePath: 'assets/UI/Cash/money1.png'),
+        _buildPointPurchaseButton("+1,000", 'point2_1000', imagePath: 'assets/UI/Cash/money1.png'),
         _buildPointPurchaseButton("+6,000", 'point_6000', label: "+10%", imagePath: 'assets/UI/Cash/money2.png'),
         _buildPointPurchaseButton("+12,000", 'point_12000', label: "+20%", imagePath: 'assets/UI/Cash/money3.png'),
       ],
