@@ -37,6 +37,7 @@ class _ShopPageState extends State<Shop> {
     super.initState();
     _loadRewardedAd();
     _initializeInAppPurchase();
+    _checkUnconsumedPurchases(); // 소모되지 않은 구매 확인 및 처리
     _inAppPurchase.purchaseStream.listen((purchases) {
       for (final purchase in purchases) {
         if (purchase.status == PurchaseStatus.purchased) {
@@ -113,7 +114,20 @@ class _ShopPageState extends State<Shop> {
     }
     _getPointValue(pointsToAdd); // 백엔드에 포인트 추가 요청
   }
-
+  Future<void> _checkUnconsumedPurchases() async {
+    // 구매 복구 요청
+    await _inAppPurchase.restorePurchases();
+    // 복구된 구매 항목은 purchaseStream에서 처리
+    _inAppPurchase.purchaseStream.listen((purchases) {
+      for (final purchase in purchases) {
+        if (purchase.status == PurchaseStatus.restored) {
+          // 복구된 구매 처리
+          print('복구할 구매를 찾았습니다: ${purchase.productID}');
+          _inAppPurchase.completePurchase(purchase); // 구매 완료 처리
+        }
+      }
+    });
+  }
 
   void _loadRewardedAd() {
     RewardedInterstitialAd.load(
