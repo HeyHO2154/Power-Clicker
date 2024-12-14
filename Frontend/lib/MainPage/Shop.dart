@@ -546,60 +546,51 @@ class _ShopPageState extends State<Shop> {
 
 String lang(String textKey) {
   final localizedTexts = {
-    'KOR': {
-      '상점': '상점',
-      '코인 구매': '코인 구매',
-      '코인 무료 충전': '코인 무료 충전',
-      '시간': '시간',
+    "KOR": {
+      "코인 획득 - [ Ad ]": "코인 획득 - [ Ad ]",
+      "상점": "상점",
+      "코인 구매": "코인 구매"
     },
-    'ENG': {
-      '상점': 'Shop',
-      '코인 구매': 'Buy Coins',
-      '코인 무료 충전': 'Free Coin Charge',
-      '시간': 'Time',
+    "ENG": {
+      "코인 획득 - [ Ad ]": "Earn Coins - [ Ad ]",
+      "상점": "Shop",
+      "코인 구매": "Buy Coins"
     },
-    'ARA': {
-      '상점': 'متجر',
-      '코인 구매': 'شراء العملات',
-      '코인 무료 충전': 'شحن العملات المجاني',
-      '시간': 'الوقت',
+    "ARA": {
+      "코인 획득 - [ Ad ]": "احصل على العملات - [ Ad ]",
+      "상점": "المتجر",
+      "코인 구매": "شراء العملات"
     },
-    'CHN': {
-      '상점': '商店',
-      '코인 구매': '购买金币',
-      '코인 무료 충전': '免费金币充电',
-      '시간': '时间',
+    "CHN": {
+      "코인 획득 - [ Ad ]": "获取金币 - [ Ad ]",
+      "상점": "商店",
+      "코인 구매": "购买金币"
     },
-    'JPA': {
-      '상점': 'ショップ',
-      '코인 구매': 'コイン購入',
-      '코인 무료 충전': 'コイン無料チャージ',
-      '시간': '時間',
+    "JPN": {
+      "코인 획득 - [ Ad ]": "コイン獲得 - [ Ad ]",
+      "상점": "ショップ",
+      "코인 구매": "コイン購入"
     },
-    'GER': {
-      '상점': 'Laden',
-      '코인 구매': 'Münzen kaufen',
-      '코인 무료 충전': 'Kostenlose Münzaufladung',
-      '시간': 'Zeit',
+    "GER": {
+      "코인 획득 - [ Ad ]": "Münzen erhalten - [ Ad ]",
+      "상점": "Geschäft",
+      "코인 구매": "Münzen kaufen"
     },
-    'RUS': {
-      '상점': 'Магазин',
-      '코인 구매': 'Покупка монет',
-      '코인 무료 충전': 'Бесплатная зарядка монет',
-      '시간': 'Время',
+    "RUS": {
+      "코인 획득 - [ Ad ]": "Получить монеты - [ Ad ]",
+      "상점": "Магазин",
+      "코인 구매": "Купить монеты"
     },
-    'FRA': {
-      '상점': 'Magasin',
-      '코인 구매': 'Acheter des pièces',
-      '코인 무료 충전': 'Recharge gratuite de pièces',
-      '시간': 'Temps',
+    "FRA": {
+      "코인 획득 - [ Ad ]": "Gagner des pièces - [ Ad ]",
+      "상점": "Magasin",
+      "코인 구매": "Acheter des pièces"
     },
-    'ESP': {
-      '상점': 'Tienda',
-      '코인 구매': 'Comprar monedas',
-      '코인 무료 충전': 'Recarga gratuita de monedas',
-      '시간': 'Tiempo',
-    },
+    "ESP": {
+      "코인 획득 - [ Ad ]": "Obtener monedas - [ Ad ]",
+      "상점": "Tienda",
+      "코인 구매": "Comprar monedas"
+    }
   };
 
   return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
