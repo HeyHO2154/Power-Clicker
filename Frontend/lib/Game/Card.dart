@@ -291,6 +291,7 @@ class _CardPageState extends State<CardPage> {
   void _sendCardsToServer(List<int> cards) {
     setState(() {
       isWaitingForResult = true; // 결과 대기 상태
+      selectedCards = [false, false, false, false, false]; // 선택 초기화
     });
     if (channel != null && widget.online) {
       String cardData = "CARDS:${widget.opponent}:${cards}:";
