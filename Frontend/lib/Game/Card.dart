@@ -30,7 +30,7 @@ class _CardPageState extends State<CardPage> {
   int opponentPoints = 0;
   int exp_level = 0;
   int exp_rank = 0;
-  String rankImage = "";
+  String rankImage = "assets/UI/Ranks/브론즈.png";
   int exp_level2 = 0;
   int exp_rank2 = 0;
   String rankImage2 = 'assets/UI/Ranks/브론즈.png';
@@ -388,25 +388,26 @@ class _CardPageState extends State<CardPage> {
 
   // 랭크 정보 업데이트 함수
   String _updateRankInfo(exp_rank) {
+    String rankIcon = '';
     if (exp_rank < 10) {
-      rankImage = 'assets/UI/Ranks/브론즈.png';
+      rankIcon = 'assets/UI/Ranks/브론즈.png';
     } else if (exp_rank < 20) {
-      rankImage = 'assets/UI/Ranks/실버.png';
+      rankIcon = 'assets/UI/Ranks/실버.png';
     } else if (exp_rank < 30) {
-      rankImage = 'assets/UI/Ranks/골드.png';
+      rankIcon = 'assets/UI/Ranks/골드.png';
     } else if (exp_rank < 40) {
-      rankImage = 'assets/UI/Ranks/플레티넘.png';
+      rankIcon = 'assets/UI/Ranks/플레티넘.png';
     } else if (exp_rank < 50) {
-      rankImage = 'assets/UI/Ranks/다이아.png';
+      rankIcon = 'assets/UI/Ranks/다이아.png';
     } else if (exp_rank < 60) {
-      rankImage = 'assets/UI/Ranks/마스터.png';
+      rankIcon = 'assets/UI/Ranks/마스터.png';
     } else if (exp_rank < 70) {
-      rankImage = 'assets/UI/Ranks/그마.png';
+      rankIcon = 'assets/UI/Ranks/그마.png';
     } else {
-      rankImage = 'assets/UI/Ranks/최상위.png';
+      rankIcon = 'assets/UI/Ranks/최상위.png';
     }
 
-    return rankImage;
+    return rankIcon;
   }
 
   String formatWithComma(int number) {
