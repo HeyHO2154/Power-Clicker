@@ -537,17 +537,28 @@ class _CardPageState extends State<CardPage> {
                           Row(
                             children: [
                               SizedBox(width: 20),
-                              Image.asset(
-                                'assets/UI/coin.png',
-                                height: 40,
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                '${formatWithComma(opponentPoints)}',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.amberAccent,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5), // 반투명 검은색
+                                  borderRadius: BorderRadius.circular(20), // 모서리 둥글게
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5), // 내부 여백
+                                child: Row(
+                                  children: [
+                                    Image.asset(
+                                      'assets/UI/coin.png',
+                                      height: 40, // 아이콘 크기
+                                    ),
+                                    SizedBox(width: 5), // 아이콘과 텍스트 간격
+                                    Text(
+                                      '${formatWithComma(opponentPoints)}',
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.amberAccent, // 금색 강조
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -577,17 +588,28 @@ class _CardPageState extends State<CardPage> {
                           Row(
                             children: [
                               SizedBox(width: 20),
-                              Image.asset(
-                                'assets/UI/coin.png',
-                                height: 40,
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                '${formatWithComma(myPoints)}',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.amberAccent,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5), // 반투명 검은색
+                                  borderRadius: BorderRadius.circular(20), // 모서리 둥글게
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5), // 내부 여백
+                                child: Row(
+                                  children: [
+                                    Image.asset(
+                                      'assets/UI/coin.png',
+                                      height: 40, // 아이콘 크기
+                                    ),
+                                    SizedBox(width: 5), // 아이콘과 텍스트 간격
+                                    Text(
+                                      '${formatWithComma(myPoints)}',
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.amberAccent, // 금색 강조
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

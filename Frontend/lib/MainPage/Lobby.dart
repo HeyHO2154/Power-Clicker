@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import '../main.dart';
 import 'MainPage.dart';
+import 'Shop.dart';
 import 'package:intl/intl.dart';
 
 class LobbyPage extends StatefulWidget {
@@ -131,29 +132,41 @@ class _LobbyPageState extends State<LobbyPage> {
                         ],
                       ),
                     ),
-                    Row(
-                      children: [
-                        Image.asset(
-                          'assets/UI/coin.png',
-                          height: 50,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Shop()),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5), // 반투명 검은색
+                          borderRadius: BorderRadius.circular(20), // 모서리 둥글게
                         ),
-                        SizedBox(width: 5),
-                        Text(
-                          '${formatWithComma(points)}',
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.amberAccent,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 4,
-                                color: Colors.black38,
-                                offset: Offset(2, 2),
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 0), // 내부 여백
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min, // 내용에 맞게 크기 조정
+                          children: [
+                            Image.asset(
+                              'assets/UI/coin.png',
+                              height: 50, // 아이콘 크기 설정
+                            ),
+                            SizedBox(width: 5), // 아이콘과 텍스트 간격
+                            Text(
+                              '${formatWithComma(points)}',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.amberAccent, // 금색 강조
+                                shadows: [
+                                  Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(2, 2))
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
