@@ -27,11 +27,27 @@ class _ShopPageState extends State<Shop> {
   RewardedInterstitialAd? _rewardedInterstitialAd;
   bool _isAdLoaded = false; // 광고 로드 상태(로드 안됐는데도 버튼 눌리기 방지용)
 
+  //인앱결제 변수
+  final List<String> _productIds = ['point2_1000', 'point_6000', 'point_12000'];
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  List<ProductDetails> _products = [];
 
   @override
   void initState() {
     super.initState();
     _loadRewardedAd();
+    _initializeInAppPurchase();
+    _inAppPurchase.purchaseStream.listen((purchases) {
+      for (final purchase in purchases) {
+        if (purchase.status == PurchaseStatus.purchased) {
+          // 구매 완료 시 포인트 추가
+          _handlePurchase(purchase.productID);
+          _inAppPurchase.completePurchase(purchase); // 구매 완료 처리
+        } else if (purchase.status == PurchaseStatus.error) {
+          print('Purchase error: ${purchase.error}');
+        }
+      }
+    });
     _initializePage(); // 순차적으로 실행하도록 별도 메서드 호출
   }
 
@@ -66,10 +82,43 @@ class _ShopPageState extends State<Shop> {
     }
   }
 
+  Future<void> _initializeInAppPurchase() async {
+    final bool available = await _inAppPurchase.isAvailable();
+    if (!available) {
+      print('In-app purchases are not available.');
+      return;
+    }
+
+    final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(_productIds.toSet());
+    if (response.error == null) {
+      setState(() {
+        _products = response.productDetails;
+      });
+    } else {
+      print('Error fetching product details: ${response.error}');
+    }
+  }
+  void _buyProduct(ProductDetails product) {
+    final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
+    _inAppPurchase.buyConsumable(purchaseParam: purchaseParam, autoConsume: true);
+  }
+  void _handlePurchase(String productId) {
+    int pointsToAdd = 0;
+    if (productId == 'point_1000') {
+      pointsToAdd = 1000;
+    } else if (productId == 'point_6000') {
+      pointsToAdd = 6000;
+    } else if (productId == 'point_12000') {
+      pointsToAdd = 12000;
+    }
+    _getPointValue(pointsToAdd); // 백엔드에 포인트 추가 요청
+  }
+
+
   void _loadRewardedAd() {
     RewardedInterstitialAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
-      //adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
+      //adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
+      adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
       request: AdRequest(),
       rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
         onAdLoaded: (ad) {
@@ -117,6 +166,7 @@ class _ShopPageState extends State<Shop> {
           _isButtonActive = false;
         });
 
+        MyApp.bgmPlayer.resume(); // 광고 종료 후 BGM 재개
         _startTimer(time_second * 1000); // 타이머 시작
       });
 
@@ -124,7 +174,6 @@ class _ShopPageState extends State<Shop> {
       _loadRewardedAd();
     }
   }
-
   // 쿨타임 확인 및 버튼 상태 관리
   Future<void> _checkCooltime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -157,7 +206,6 @@ class _ShopPageState extends State<Shop> {
       }
     }
   }
-
   // 타이머 시작 (1초 단위로 남은 시간 업데이트)
   void _startTimer(int diff) {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
@@ -367,7 +415,13 @@ class _ShopPageState extends State<Shop> {
       children: [
         GestureDetector(
           onTap: () {
-            // 탭 이벤트 처리
+            // 인앱 상품 구매
+            final product = _products.firstWhere((p) => p.id == productId);
+            if (product != null) {
+              _buyProduct(product);
+            } else {
+              print('Product not found: $productId');
+            }
           },
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
