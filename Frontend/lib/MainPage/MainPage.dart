@@ -136,23 +136,44 @@ class _MainPageState extends State<MainPage> {
                             ],
                           ),
                         ),
-                        Text(
-                          lang('파워 클리커'),
-                          style: TextStyle(
-                            fontSize: 45,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFD4AF37), // 제목을 금색으로
-                            shadows: [
-                              Shadow(
-                                blurRadius: 15,
-                                color: Colors.black54,
-                                offset: Offset(4, 4),
+                        Stack(
+                          alignment: Alignment.center, // 기본 중앙 정렬
+                          children: [
+                            Image.asset(
+                              'assets/UI/logo.png',
+                              height: 200, // 아이콘 크기 설정
+                              width: 300,
+                            ),
+                            Positioned(
+                              bottom: -10, // 이미지 중심보다 약간 아래로 이동
+                              child: Text(
+                                lang('CAT CARD'),
+                                style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  foreground: Paint()
+                                    ..style = PaintingStyle.stroke
+                                    ..strokeWidth = 6 // 테두리 두께
+                                    ..color = Colors.black, // 테두리 색상
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
+                            ),
+                            Positioned(
+                              bottom: -10, // 같은 위치
+                              child: Text(
+                                lang('CAT CARD'),
+                                style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white, // 텍스트 내부 색상
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
-                      Padding(
+                        Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
