@@ -21,7 +21,7 @@ class _ShopPageState extends State<Shop> {
   bool _isButtonActive = true;
   String remainingTime = "00:00:00";
   Timer? _timer;
-  int time_second = 10;
+  int time_second = 1800;
 
   //광고 변수
   RewardedInterstitialAd? _rewardedInterstitialAd;

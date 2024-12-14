@@ -147,7 +147,7 @@ class _MainPageState extends State<MainPage> {
                             Positioned(
                               bottom: -10, // 이미지 중심보다 약간 아래로 이동
                               child: Text(
-                                lang('CAT CARD'),
+                                lang('파워 클리커'),
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.bold,
@@ -162,11 +162,11 @@ class _MainPageState extends State<MainPage> {
                             Positioned(
                               bottom: -10, // 같은 위치
                               child: Text(
-                                lang('CAT CARD'),
+                                lang('파워 클리커'),
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white, // 텍스트 내부 색상
+                                  color: Colors.amberAccent, // 텍스트 내부 색상
                                 ),
                                 textAlign: TextAlign.center,
                               ),
