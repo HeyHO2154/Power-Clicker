@@ -23,21 +23,28 @@ class _ShopPageState extends State<Shop> {
   Timer? _timer;
   int time_second = 10;
 
+  //광고 변수
+  RewardedInterstitialAd? _rewardedInterstitialAd;
+  bool _isAdLoaded = false; // 광고 로드 상태(로드 안됐는데도 버튼 눌리기 방지용)
+
+
   @override
   void initState() {
     super.initState();
+    _loadRewardedAd();
     _initializePage(); // 순차적으로 실행하도록 별도 메서드 호출
   }
 
   Future<void> _initializePage() async {
     await _checkCooltime(); // 쿨타임 확인
-    _getPointValue(0);
+    await _getPointValue(0);
   }
 
   @override
   void dispose() {
     MyApp.bgmPlayer.resume();
     _timer?.cancel();
+    _rewardedInterstitialAd?.dispose(); // 광고 객체 해제
     super.dispose();
   }
 
@@ -59,8 +66,33 @@ class _ShopPageState extends State<Shop> {
     }
   }
 
-
+  void _loadRewardedAd() {
+    RewardedInterstitialAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/5354046379', // 테스트 ID
+      //adUnitId: 'ca-app-pub-4725119578294745/9459280599', // 보상형 전면 광고 ID
+      request: AdRequest(),
+      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _rewardedInterstitialAd = ad;
+            _isAdLoaded = true; // 광고 로드 완료
+          });
+        },
+        onAdFailedToLoad: (error) {
+          print('Rewarded Interstitial Ad failed to load: $error');
+          setState(() {
+            _isAdLoaded = false; // 광고 로드 실패
+          });
+        },
+      ),
+    );
+  }
   Future<void> _onFreePointsClicked() async {
+    if (!_isAdLoaded) {
+      print('Ad is not loaded yet.');
+      return; // 광고가 로드되지 않은 경우 버튼이 반응하지 않음
+    }
+
     MyApp.bgmPlayer.pause();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 30분 후
@@ -68,11 +100,30 @@ class _ShopPageState extends State<Shop> {
 
     setState(() {
       _isButtonActive = false;
+      _isAdLoaded = false; // 광고가 사용된 후 다시 로드 필요
     });
 
     _startTimer(time_second * 1000); // 30분 타이머 시작
-  }
 
+    //광고 실행
+    if (_rewardedInterstitialAd != null) {
+      _rewardedInterstitialAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem reward) async {
+        await _getPointValue(1000); // 포인트 업데이트
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        int newCooltime = DateTime.now().millisecondsSinceEpoch + time_second * 1000; // 쿨타임 설정
+        await prefs.setInt('cooltime', newCooltime);
+
+        setState(() {
+          _isButtonActive = false;
+        });
+
+        _startTimer(time_second * 1000); // 타이머 시작
+      });
+
+      // 광고가 끝난 후 새 광고 로드
+      _loadRewardedAd();
+    }
+  }
 
   // 쿨타임 확인 및 버튼 상태 관리
   Future<void> _checkCooltime() async {
