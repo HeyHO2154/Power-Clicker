@@ -8,6 +8,7 @@ import '../Game/Card.dart';
 import 'Lobby.dart';
 import 'Shop.dart';
 import 'MyInfo.dart';
+import 'solama_service.dart';
 
 class MainPage extends StatefulWidget {
   static String? currentUserId;
@@ -206,7 +207,7 @@ class _MainPageState extends State<MainPage> {
                                         lang('혼자하기'),
                                         'assets/Game/${MyApp.currentTheme}/1.png',
                                         50,
-                                        CardPage(online: false),
+                                        ChatPage(),
                                       ),
                                     ),
                                   ),
