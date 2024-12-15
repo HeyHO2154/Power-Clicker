@@ -332,7 +332,13 @@ class _CardPageState extends State<CardPage> {
       // 내가 졌을 때
       resultMessage = "${lang("패배..")} -${betting}";
       await _getPointValue(MyApp.user_id, betting*-1); // 점수 차감
-      if(widget.online) await _getRankValue(MyApp.user_id, -1);
+      if(widget.online) {
+        if(exp_rank < 0){
+          await _getRankValue(MyApp.user_id, exp_rank*-1);
+        }else{
+          await _getRankValue(MyApp.user_id, -1);
+        }
+      };
     } else {
       // 무승부
       resultMessage = lang("무승부");
