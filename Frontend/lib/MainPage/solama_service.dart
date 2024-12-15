@@ -29,7 +29,7 @@ class _ChatPageState extends State<ChatPage> {
           "messages": [
             {
               "role": "user",
-              "content": prompt+"라는 말에 대해 중세 상인처럼 대답해줘",
+              "content": prompt,
             }
           ]
         }),

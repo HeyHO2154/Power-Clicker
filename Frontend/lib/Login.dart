@@ -133,35 +133,18 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  lang('파워 클리커'),
+                  lang('사용할 아이디와 비밀번호를 입력하세요'),
                   style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFD4AF37), // 금색 강조
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10,
-                        color: Colors.black54,
-                        offset: Offset(3, 3),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 80),
-                Text(
-                  lang('최초 접속시에 뜨는 창입니다. 이후 자동 로그인 됩니다.'),
-                  style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 20,
                     color: Colors.grey[300],
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 40),
                 TextField(
                   controller: idController,
                   decoration: InputDecoration(
-                    labelText: lang('아이디를 입력해주세요'),
+                    labelText: lang('아이디'),
                     labelStyle: TextStyle(color: Colors.white),
                     filled: true,
                     fillColor: Colors.black54,
@@ -177,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
                   controller: passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: lang('비밀번호를 입력해주세요'),
+                    labelText: lang('비밀번호'),
                     labelStyle: TextStyle(color: Colors.white),
                     filled: true,
                     fillColor: Colors.black54,
@@ -289,6 +272,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': '입장하기',
         '언어 선택': '언어 선택',
         '파워 클리커': '파워 클리커',
+        "사용할 아이디와 비밀번호를 입력하세요": "사용할 아이디와 비밀번호를 입력하세요",
+        "아이디": "아이디",
+        "비밀번호": "비밀번호"
       },
       'ENG': {
         '경고': 'Warning',
@@ -302,6 +288,10 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': 'Enter',
         '언어 선택': 'Language Selection',
         '파워 클리커': 'Power Clicker',
+        "사용할 아이디와 비밀번호를 입력하세요": "Enter the username and password to use",
+        "아이디": "Username",
+        "비밀번호": "Password"
+
       },
       'CHN': {
         '경고': '警告',
@@ -315,6 +305,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': '进入',
         '언어 선택': '语言选择',
         '파워 클리커': '功率点击器',
+        "사용할 아이디와 비밀번호를 입력하세요": "请输入用户名和密码",
+        "아이디": "用户名",
+        "비밀번호": "密码"
       },
       'JPN': {
         '경고': '警告',
@@ -328,6 +321,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': '入場',
         '언어 선택': '言語選択',
         '파워 클리커': 'パワークリッカー',
+        "사용할 아이디와 비밀번호를 입력하세요": "使用するユーザー名とパスワードを入力してください",
+        "아이디": "ユーザー名",
+        "비밀번호": "パスワード"
       },
       'GER': {
         '경고': 'Warnung',
@@ -341,6 +337,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': 'Eingeben',
         '언어 선택': 'Sprachauswahl',
         '파워 클리커': 'Leistungsklicker',
+        "사용할 아이디와 비밀번호를 입력하세요": "Geben Sie den zu verwendenden Benutzernamen und das Passwort ein",
+        "아이디": "Benutzername",
+        "비밀번호": "Passwort"
       },
       'FRA': {
         '경고': 'Avertissement',
@@ -354,6 +353,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': 'Entrer',
         '언어 선택': 'Sélection de langue',
         '파워 클리커': 'Cliqueur Puissant',
+        "사용할 아이디와 비밀번호를 입력하세요": "Entrez le nom d'utilisateur et le mot de passe à utiliser",
+        "아이디": "Nom d'utilisateur",
+        "비밀번호": "Mot de passe"
       },
       'RUS': {
         '경고': 'Предупреждение',
@@ -367,6 +369,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': 'Войти',
         '언어 선택': 'Выбор языка',
         '파워 클리커': 'Мощный Кликер',
+        "사용할 아이디와 비밀번호를 입력하세요": "Введите имя пользователя и пароль для использования",
+        "아이디": "Имя пользователя",
+        "비밀번호": "Пароль"
       },
       'ESP': {
         '경고': 'Advertencia',
@@ -380,6 +385,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': 'Entrar',
         '언어 선택': 'Selección de idioma',
         '파워 클리커': 'Clicador Potente',
+        "사용할 아이디와 비밀번호를 입력하세요": "Ingrese el nombre de usuario y la contraseña a utilizar",
+        "아이디": "Nombre de usuario",
+        "비밀번호": "Contraseña"
       },
       'ARA': {
         '경고': 'تحذير',
@@ -393,6 +401,9 @@ class _LoginPageState extends State<LoginPage> {
         '입장하기': 'الدخول',
         '언어 선택': 'اختيار اللغة',
         '파워 클리커': 'النقر القوي',
+        "사용할 아이디와 비밀번호를 입력하세요": "أدخل اسم المستخدم وكلمة المرور",
+        "아이디": "اسم المستخدم",
+        "비밀번호": "كلمة المرور"
       },
     };
     return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
