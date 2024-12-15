@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:frontend/main.dart'; // MyApp.url 사용을 위한 임포트
 
 class ChatPage extends StatefulWidget {
   @override
@@ -11,64 +10,93 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   String _responseMessage = '';
+  bool _isLoading = false;
 
-  // API 호출과 응답 파싱 모두 여기서 처리
-  Future<String> _generateScenario(String prompt) async {
+  // 스트리밍 응답 처리 함수
+  Future<void> _streamResponse(String prompt) async {
     final String apiUrl = 'http://ekaf.kro.kr:11434/v1/chat/completions';
-    //final String apiUrl = 'http://10.0.2.2:11434/v1/chat/completions';
+
+    setState(() {
+      _responseMessage = '';
+      _isLoading = true;
+    });
 
     try {
-      // HTTP POST 요청
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
-        body: json.encode({
+      // HTTP POST 요청 (스트리밍 요청)
+      final request = http.Request('POST', Uri.parse(apiUrl))
+        ..headers['Content-Type'] = 'application/json; charset=utf-8'
+        ..body = json.encode({
           "model": "llama3.2:1b",
           "messages": [
-            {
-              "role": "user",
-              "content": prompt,
-            }
-          ]
-        }),
-      );
+            {"role": "user", "content": prompt}
+          ],
+          "stream": true // 스트리밍 활성화
+        });
 
-      // 응답 파싱
-      if (response.statusCode == 200) {
-        final responseData = json.decode(utf8.decode(response.bodyBytes));
-        return responseData['choices']?[0]?['message']?['content'] ?? '응답이 비어있습니다.';
+      final streamedResponse = await request.send();
+
+      if (streamedResponse.statusCode == 200) {
+        // 스트림에서 데이터를 한 줄씩 읽음
+        streamedResponse.stream
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((line) {
+          try {
+            if (line.trim().isNotEmpty) {
+              if (line.startsWith('data:')) {
+                // 'data:' 접두사 제거
+                final jsonString = line.substring(5).trim();
+
+                // [DONE] 처리
+                if (jsonString == '[DONE]') {
+                  print('스트리밍 완료');
+                  return;
+                }
+
+                // JSON 디코딩
+                final decodedLine = json.decode(jsonString);
+                final content = decodedLine['choices']?[0]?['delta']?['content'] ?? '';
+
+                // 화면 업데이트
+                setState(() {
+                  _responseMessage += content;
+                });
+              }
+            }
+          } catch (e) {
+            print('JSON 디코딩 오류: $e\n받은 데이터: $line');
+          }
+        }, onDone: () {
+          setState(() {
+            _isLoading = false;
+          });
+          print('스트리밍 완료');
+        }, onError: (error) {
+          setState(() {
+            _responseMessage = '오류 발생: $error';
+            _isLoading = false;
+          });
+        });
+
+
       } else {
-        throw Exception('API 요청 실패: ${response.statusCode}\n응답 본문: ${utf8.decode(response.bodyBytes)}');
+        throw Exception(
+            '스트리밍 요청 실패: ${streamedResponse.statusCode}\n응답 본문: ${await streamedResponse.stream.bytesToString()}');
       }
     } catch (e) {
-      print('Ollama API 호출 오류: $e');
-      return '오류 발생: $e';
+      setState(() {
+        _responseMessage = '오류 발생: $e';
+        _isLoading = false;
+      });
     }
   }
 
   // 메시지 전송
-  void _sendMessage() async {
-    final userMessage = _controller.text.trim(); // 사용자 입력 메시지 가져오기
+  void _sendMessage() {
+    final userMessage = _controller.text.trim();
     if (userMessage.isNotEmpty) {
-      setState(() {
-        _responseMessage = '응답을 기다리는 중...'; // 로딩 메시지 표시
-      });
-
-      try {
-        // API 호출 및 응답 처리
-        final response = await _generateScenario(userMessage);
-        setState(() {
-          _responseMessage = response; // 받은 응답을 화면에 표시
-        });
-      } catch (e) {
-        setState(() {
-          _responseMessage = '오류 발생: $e'; // 오류 처리
-        });
-      }
-
-      _controller.clear(); // 입력 필드 초기화
+      _streamResponse(userMessage); // 스트리밍 응답 호출
+      _controller.clear();
     }
   }
 
@@ -76,7 +104,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sollama Chat'),
+        title: Text('Sollama Chat (Streaming)'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -91,8 +119,8 @@ class _ChatPageState extends State<ChatPage> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: _sendMessage,
-              child: Text('확인'),
+              onPressed: _isLoading ? null : _sendMessage,
+              child: Text(_isLoading ? '응답 대기 중...' : '확인'),
             ),
             SizedBox(height: 16.0),
             Expanded(
