@@ -25,7 +25,7 @@ class _ChatPageState extends State<ChatPage> {
           'Content-Type': 'application/json; charset=utf-8',
         },
         body: json.encode({
-          "model": "Sollama",
+          "model": "llama3.2:1b",
           "messages": [
             {
               "role": "user",
