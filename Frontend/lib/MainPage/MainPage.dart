@@ -190,7 +190,7 @@ class _MainPageState extends State<MainPage> {
                                       aspectRatio: 1.0,
                                       child: _buildMenuButton(
                                         context,
-                                        lang('같이하기'),
+                                        lang('카드게임'),
                                         'assets/Game/${MyApp.currentTheme}/2.png',
                                         50,
                                         LobbyPage(),
@@ -205,9 +205,9 @@ class _MainPageState extends State<MainPage> {
                                       aspectRatio: 1.0,
                                       child: _buildMenuButton(
                                         context,
-                                        lang('혼자하기'),
-                                        'assets/Game/${MyApp.currentTheme}/1.png',
-                                        50,
+                                        lang('BAR'),
+                                        'assets/UI/wine.png',
+                                        60,
                                         Counsler(),
                                       ),
                                     ),

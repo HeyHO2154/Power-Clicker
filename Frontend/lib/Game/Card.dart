@@ -717,7 +717,7 @@ class _CardPageState extends State<CardPage> {
                                     ? null
                                     : () {
                                   _Chaching(); // 효과음 메서드 실행
-                                  _sendCardsToServer(myCards);;
+                                  _sendCardsToServer(myCards);
                                 },
                               ),
                             ],
