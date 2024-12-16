@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/Game/Counsler.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -8,7 +9,7 @@ import '../Game/Card.dart';
 import 'Lobby.dart';
 import 'Shop.dart';
 import 'MyInfo.dart';
-import 'solama_service.dart';
+import '../Game/solama_service.dart';
 
 class MainPage extends StatefulWidget {
   static String? currentUserId;
@@ -207,7 +208,7 @@ class _MainPageState extends State<MainPage> {
                                         lang('혼자하기'),
                                         'assets/Game/${MyApp.currentTheme}/1.png',
                                         50,
-                                        ChatPage(),
+                                        Counsler(),
                                       ),
                                     ),
                                   ),
