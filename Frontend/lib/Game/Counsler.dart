@@ -8,6 +8,7 @@ import '../main.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'translate.dart';
 
 class Counsler extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class Counsler extends StatefulWidget {
 
 class _CounslerState extends State<Counsler> {
   final TextEditingController _controller = TextEditingController();
+  String _sourceLang = 'en'; // 초기 입력 언어를 저장할 변수
   String _responseMessage = 'How can I help you?';
   bool _isLoading = false;
   int points = 0;
@@ -82,35 +84,43 @@ class _CounslerState extends State<Counsler> {
       body: jsonEncode(
           {'user_id': id, 'user_name': ''}),
     );
-    print("start: "+MyApp.user_id+","+id);
     if (response.statusCode == 200) {
       setState(() {
-        _responseMessage = 'Hi ${response.body}, How can I help you? \n (10 coins per talk)';
-        print("me"+response.body);
+        _responseMessage = '${response.body}! ${lang('어서오세요, 주문하시겠습니까?')} \n (${lang('대화당 10 코인')})';
       });
     }
   }
 
-  void _sendMessage() {
-
+  void _sendMessage() async {
     final userMessage = _controller.text.trim();
-    if (userMessage.isNotEmpty && points>=10) {
-      _wine();
+
+    if (userMessage.isNotEmpty && points >= 10) {
+      _wine(); // 효과음 재생
       setState(() {
         _responseMessage = '';
         _isLoading = true;
-        _getPointValue(-10);
       });
 
+      // 1. 입력한 언어를 영어로 번역
+      String translatedInput = await translateText(userMessage, "auto", "en");
+      _sourceLang = await detectInputLanguage(userMessage); //사용자 언어 감지(추후 대답용)
+
+      // 포인트 감소
+      await _getPointValue(-10);
+
+      // 2. 번역된 메시지를 AI에게 전송
       SolamaService.streamResponse(
-        prompt: userMessage,
-        onContentReceived: (content) {
+        prompt: translatedInput,
+        onContentReceived: (content) async {
           setState(() {
             _responseMessage += content;
           });
         },
-        onComplete: () {
+        // 3. AI 응답을 다시 사용자 언어로 번역
+        onComplete: () async {
+          String translatedOutput = await translateText(_responseMessage, "en", _sourceLang);
           setState(() {
+            _responseMessage = translatedOutput;
             _isLoading = false;
           });
         },
@@ -122,12 +132,12 @@ class _CounslerState extends State<Counsler> {
         },
       );
       _controller.clear();
-    }else{
+    } else {
       setState(() {
-        if(points < 10){
-          _responseMessage = 'Sorry.. Need 10 coins to talk more';
-        }else{
-          _responseMessage = 'Sorry?.. Can you tell me again?..';
+        if (points < 10) {
+          _responseMessage = lang('죄송하지만 코인이 부족합니다..');
+        } else {
+          _responseMessage = lang('다시 말씀해주시겠어요?..');
         }
       });
     }
@@ -254,7 +264,7 @@ class _CounslerState extends State<Counsler> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 child: Text(
-                  'Bar Tender',
+                  lang('바텐더'),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -281,7 +291,7 @@ class _CounslerState extends State<Counsler> {
                     child: Text(
                       _responseMessage.isNotEmpty
                           ? _responseMessage
-                          : '[ Thinking.. ]',
+                          : '${lang('[ 생각중.. ]')} \n \n ${lang('(영어로 입력하시면 더 정확한 답변을 얻습니다)')}',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,
@@ -300,8 +310,8 @@ class _CounslerState extends State<Counsler> {
                             LengthLimitingTextInputFormatter(30), // 글자 최대한도
                           ],
                           decoration: InputDecoration(
-                            hintText: 'Type message..(max 30 letter)',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
+                            hintText: lang('글자를 입력하세요.. (최대 30글자)'),
+                            hintStyle: TextStyle(color: Colors.grey[500]),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
                             border: OutlineInputBorder(
@@ -329,7 +339,7 @@ class _CounslerState extends State<Counsler> {
                           ),
                         ),
                         child: Text(
-                          _isLoading ? 'send' : 'Send', // 로딩 중일 때 텍스트 변경
+                          _isLoading ? lang('전송') : lang('전송'), // 로딩 중일 때 텍스트 변경
                           style: TextStyle(
                             fontSize: 18,
                             color: _isLoading ? Colors.black45 : Colors.black, // 비활성화 시 흐린 검은색
@@ -348,4 +358,110 @@ class _CounslerState extends State<Counsler> {
     )
     );
   }
+}
+
+String lang(String textKey) {
+  final localizedTexts = {
+    "KOR": {
+      "어서오세요, 주문하시겠습니까?": "어서오세요, 주문하시겠습니까?",
+      "대화당 10 코인": "대화당 10 코인",
+      "죄송하지만 코인이 부족합니다..": "죄송하지만 코인이 부족합니다..",
+      "다시 말씀해주시겠어요?..": "다시 말씀해주시겠어요?..",
+      "바텐더": "바텐더",
+      "[ 생각중.. ]": "[ 생각중.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "글자를 입력하세요.. (최대 30글자)",
+      "전송": "전송",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(영어로 입력하시면 더 정확한 답변을 얻습니다)"
+    },
+    "ENG": {
+      "어서오세요, 주문하시겠습니까?": "Welcome, may I take your order?",
+      "대화당 10 코인": "10 coins per conversation",
+      "죄송하지만 코인이 부족합니다..": "Sorry, you don't have enough coins..",
+      "다시 말씀해주시겠어요?..": "Could you say that again?..",
+      "바텐더": "Bartender",
+      "[ 생각중.. ]": "[ Thinking.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "Enter text.. (up to 30 characters)",
+      "전송": "Send",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Type in English for a more accurate response)"
+    },
+    "ARA": {
+      "어서오세요, 주문하시겠습니까?": "مرحبًا، هل ترغب في الطلب؟",
+      "대화당 10 코인": "10 عملات لكل محادثة",
+      "죄송하지만 코인이 부족합니다..": "عذرًا، ليس لديك عملات كافية..",
+      "다시 말씀해주시겠어요?..": "هل يمكنك إعادة ما قلته؟..",
+      "바텐더": "نادل",
+      "[ 생각중.. ]": "[ يفكر.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "أدخل النص.. (بحد أقصى 30 حرفًا)",
+      "전송": "إرسال",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(اكتب بالإنجليزية للحصول على إجابة دقيقة)"
+    },
+    "CHN": {
+      "어서오세요, 주문하시겠습니까?": "欢迎光临，请问要点什么？",
+      "대화당 10 코인": "每次对话10个金币",
+      "죄송하지만 코인이 부족합니다..": "很抱歉，您的金币不足..",
+      "다시 말씀해주시겠어요?..": "请再说一遍好吗?..",
+      "바텐더": "调酒师",
+      "[ 생각중.. ]": "[ 思考中.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "请输入文字..（最多30个字）",
+      "전송": "发送",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(输入英文可获得更准确的回复)"
+    },
+    "JPN": {
+      "어서오세요, 주문하시겠습니까?": "いらっしゃいませ、ご注文は？",
+      "대화당 10 코인": "1会話10コイン",
+      "죄송하지만 코인이 부족합니다..": "申し訳ありません、コインが不足しています..",
+      "다시 말씀해주시겠어요?..": "もう一度おっしゃっていただけますか？..",
+      "바텐더": "バーテンダー",
+      "[ 생각중.. ]": "[ 考え中.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "文字を入力してください..（最大30文字）",
+      "전송": "送信",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(英語で入力すると、より正確な返事が得られます)"
+    },
+    "GER": {
+      "어서오세요, 주문하시겠습니까?": "Willkommen, was möchten Sie bestellen?",
+      "대화당 10 코인": "10 Münzen pro Gespräch",
+      "죄송하지만 코인이 부족합니다..": "Entschuldigung, Sie haben nicht genug Münzen..",
+      "다시 말씀해주시겠어요?..": "Könnten Sie das bitte wiederholen?..",
+      "바텐더": "Barkeeper",
+      "[ 생각중.. ]": "[ Denkt nach.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "Text eingeben.. (maximal 30 Zeichen)",
+      "전송": "Senden",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Geben Sie Englisch ein, um eine genauere Antwort zu erhalten)"
+    },
+    "RUS": {
+      "어서오세요, 주문하시겠습니까?": "Добро пожаловать, что закажете?",
+      "대화당 10 코인": "10 монет за разговор",
+      "죄송하지만 코인이 부족합니다..": "Извините, у вас недостаточно монет..",
+      "다시 말씀해주시겠어요?..": "Не могли бы вы повторить?..",
+      "바텐더": "Бармен",
+      "[ 생각중.. ]": "[ Думает.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "Введите текст.. (до 30 символов)",
+      "전송": "Отправить",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Введите на английском для более точного ответа)"
+    },
+    "FRA": {
+      "어서오세요, 주문하시겠습니까?": "Bienvenue, puis-je prendre votre commande?",
+      "대화당 10 코인": "10 pièces par conversation",
+      "죄송하지만 코인이 부족합니다..": "Désolé, vous n'avez pas assez de pièces..",
+      "다시 말씀해주시겠어요?..": "Pourriez-vous répéter cela?..",
+      "바텐더": "Barman",
+      "[ 생각중.. ]": "[ Réflexion.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "Saisissez du texte.. (30 caractères max)",
+      "전송": "Envoyer",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Tapez en anglais pour une réponse plus précise)"
+    },
+    "ESP": {
+      "어서오세요, 주문하시겠습니까?": "Bienvenido, ¿desea ordenar?",
+      "대화당 10 코인": "10 monedas por conversación",
+      "죄송하지만 코인이 부족합니다..": "Lo siento, no tienes suficientes monedas..",
+      "다시 말씀해주시겠어요?..": "¿Podrías repetir eso?..",
+      "바텐더": "Cantinero",
+      "[ 생각중.. ]": "[ Pensando.. ]",
+      "글자를 입력하세요.. (최대 30글자)": "Escriba el texto.. (máximo 30 caracteres)",
+      "전송": "Enviar",
+      "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Escriba en inglés para una respuesta más precisa)"
+    }
+  };
+
+  return localizedTexts[MyApp.currentLanguage]?[textKey] ?? textKey;
 }
