@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:video_player/video_player.dart'; // 비디오 플레이어 패키지 임포트
 import 'package:audioplayers/audioplayers.dart';
 import 'translate.dart';
 
@@ -23,6 +24,7 @@ class _CounslerState extends State<Counsler> {
   int points = 0;
   final AudioPlayer _audioPlayer = AudioPlayer(); // 효과음 플레이어
   final AudioPlayer _bgmPlayer = AudioPlayer(); // 배경 음악 플레이어
+  late VideoPlayerController _videoController; // 비디오 컨트롤러
 
   // 배경 음악 시작 함수
   Future<void> _startBackgroundMusic() async {
@@ -48,13 +50,26 @@ class _CounslerState extends State<Counsler> {
     _startBackgroundMusic(); // 배경 음악 시작
     _getUserName(MyApp.user_id);
     _getPointValue(0); // 순차적으로 실행하도록 별도 메서드 호출
+    // 비디오 컨트롤러 초기화
+    _videoController = VideoPlayerController.asset('assets/Game/counsler.mp4')
+      ..setLooping(true) // 무한 반복
+      ..initialize().then((_) {
+        setState(() {});
+        _videoController.play(); // 비디오 재생
+      });
   }
+
   @override
   void dispose() {
     _bgmPlayer.dispose(); // 배경 음악 플레이어 해제
-    _audioPlayer.dispose(); // 카드 클릭 효과음 플레이어 해제
+    _audioPlayer.dispose(); // 효과음 플레이어 해제
+    if (_videoController.value.isInitialized) { // 비디오 컨트롤러 초기화 여부 확인
+      _videoController.dispose(); // 초기화된 경우에만 해제
+    }
     MyApp.bgmPlayer.resume();
+    super.dispose();
   }
+
 
   Future<void> _getPointValue(n) async {
     final url = Uri.parse('${MyApp.url}/user/point');
@@ -141,6 +156,9 @@ class _CounslerState extends State<Counsler> {
         }
       });
     }
+
+    //setState로 인한 영상 멈춤 방지용
+    _videoController.play();
   }
 
   @override
@@ -149,20 +167,24 @@ class _CounslerState extends State<Counsler> {
         onWillPop: () async {
       // 뒤로 가기 키 막기
       return false;
-    },
-    child: Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/Game/counsler.png'),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.0),
-              BlendMode.darken,
-            ),
+      },
+        child: Scaffold(
+          body: Stack(
+              children: [
+              // 비디오 배경
+              if (_videoController.value.isInitialized)
+          SizedBox.expand(
+        child: FittedBox(
+        fit: BoxFit.cover,
+          child: SizedBox(
+            width: _videoController.value.size.width,
+            height: _videoController.value.size.height,
+            child: VideoPlayer(_videoController),
           ),
         ),
-        child: Column(
+      ),
+      // 기존 UI 위젯
+      Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
@@ -354,7 +376,8 @@ class _CounslerState extends State<Counsler> {
             ),
           ],
         ),
-      ),
+      ],
+    )
     )
     );
   }
@@ -369,7 +392,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "다시 말씀해주시겠어요?..",
       "바텐더": "바텐더",
       "[ 생각중.. ]": "[ 생각중.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "글자를 입력하세요.. (최대 30글자)",
+      "글자를 입력하세요.. (최대 40글자)": "글자를 입력하세요.. (최대 40글자)",
       "전송": "전송",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(영어로 입력하시면 더 정확한 답변을 얻습니다)"
     },
@@ -380,7 +403,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "Could you say that again?..",
       "바텐더": "Bartender",
       "[ 생각중.. ]": "[ Thinking.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "Enter text.. (up to 30 characters)",
+      "글자를 입력하세요.. (최대 40글자)": "Enter text.. (up to 40 characters)",
       "전송": "Send",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Type in English for a more accurate response)"
     },
@@ -391,7 +414,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "هل يمكنك إعادة ما قلته؟..",
       "바텐더": "نادل",
       "[ 생각중.. ]": "[ يفكر.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "أدخل النص.. (بحد أقصى 30 حرفًا)",
+      "글자를 입력하세요.. (최대 40글자)": "أدخل النص.. (بحد أقصى 40 حرفًا)",
       "전송": "إرسال",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(اكتب بالإنجليزية للحصول على إجابة دقيقة)"
     },
@@ -402,7 +425,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "请再说一遍好吗?..",
       "바텐더": "调酒师",
       "[ 생각중.. ]": "[ 思考中.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "请输入文字..（最多30个字）",
+      "글자를 입력하세요.. (최대 40글자)": "请输入文字..（最多40个字）",
       "전송": "发送",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(输入英文可获得更准确的回复)"
     },
@@ -413,7 +436,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "もう一度おっしゃっていただけますか？..",
       "바텐더": "バーテンダー",
       "[ 생각중.. ]": "[ 考え中.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "文字を入力してください..（最大30文字）",
+      "글자를 입력하세요.. (최대 40글자)": "文字を入力してください..（最大40文字）",
       "전송": "送信",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(英語で入力すると、より正確な返事が得られます)"
     },
@@ -424,7 +447,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "Könnten Sie das bitte wiederholen?..",
       "바텐더": "Barkeeper",
       "[ 생각중.. ]": "[ Denkt nach.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "Text eingeben.. (maximal 30 Zeichen)",
+      "글자를 입력하세요.. (최대 40글자)": "Text eingeben.. (maximal 40 Zeichen)",
       "전송": "Senden",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Geben Sie Englisch ein, um eine genauere Antwort zu erhalten)"
     },
@@ -435,7 +458,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "Не могли бы вы повторить?..",
       "바텐더": "Бармен",
       "[ 생각중.. ]": "[ Думает.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "Введите текст.. (до 30 символов)",
+      "글자를 입력하세요.. (최대 40글자)": "Введите текст.. (до 40 символов)",
       "전송": "Отправить",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Введите на английском для более точного ответа)"
     },
@@ -446,7 +469,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "Pourriez-vous répéter cela?..",
       "바텐더": "Barman",
       "[ 생각중.. ]": "[ Réflexion.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "Saisissez du texte.. (30 caractères max)",
+      "글자를 입력하세요.. (최대 40글자)": "Saisissez du texte.. (40 caractères max)",
       "전송": "Envoyer",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Tapez en anglais pour une réponse plus précise)"
     },
@@ -457,7 +480,7 @@ String lang(String textKey) {
       "다시 말씀해주시겠어요?..": "¿Podrías repetir eso?..",
       "바텐더": "Cantinero",
       "[ 생각중.. ]": "[ Pensando.. ]",
-      "글자를 입력하세요.. (최대 30글자)": "Escriba el texto.. (máximo 30 caracteres)",
+      "글자를 입력하세요.. (최대 40글자)": "Escriba el texto.. (máximo 40 caracteres)",
       "전송": "Enviar",
       "(영어로 입력하시면 더 정확한 답변을 얻습니다)": "(Escriba en inglés para una respuesta más precisa)"
     }
