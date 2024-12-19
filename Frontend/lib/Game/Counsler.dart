@@ -307,10 +307,10 @@ class _CounslerState extends State<Counsler> {
                           controller: _controller,
                           enabled: !_isLoading,
                           inputFormatters: [
-                            LengthLimitingTextInputFormatter(30), // 글자 최대한도
+                            LengthLimitingTextInputFormatter(40), // 글자 최대한도
                           ],
                           decoration: InputDecoration(
-                            hintText: lang('글자를 입력하세요.. (최대 30글자)'),
+                            hintText: lang('글자를 입력하세요.. (최대 40글자)'),
                             hintStyle: TextStyle(color: Colors.grey[500]),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.8),
