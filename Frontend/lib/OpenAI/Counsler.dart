@@ -67,7 +67,7 @@ class _CounslerState extends State<Counsler> {
   void dispose() {
     _bgmPlayer.dispose(); // 배경 음악 플레이어 해제
     _audioPlayer.dispose(); // 효과음 플레이어 해제
-    _videoController.dispose();
+    _videoController.dispose(); // 초기화된 경우에만 해제
     MyApp.bgmPlayer.resume();
     super.dispose();
   }
@@ -104,6 +104,7 @@ class _CounslerState extends State<Counsler> {
     if (response.statusCode == 200) {
       setState(() {
         _responseMessage = '${response.body}! ${lang('어서오세요, 주문하시겠습니까?')} \n (${lang('대화당 10 코인')})';
+        _videoController.play(); // 비디오 재생
       });
     }
   }

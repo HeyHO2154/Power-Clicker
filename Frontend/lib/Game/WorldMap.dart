@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 
-class WorldMap extends StatefulWidget {
-  @override
-  _WorldMapState createState() => _WorldMapState();
-}
-
-class _WorldMapState extends State<WorldMap> {
+class WorldMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('World Map')),
-      body: InteractiveViewer(
-        boundaryMargin: EdgeInsets.all(0), // 드래그 여백 설정
-        minScale: 1.0, // 기본 크기
-        maxScale: 3.0, // 최대 확대 비율
-        child: Image.asset(
-          'assets/map.jpg', // 이미지 경로
-          width: 2000, // 이미지 원본 가로 크기
-          height: 2000, // 이미지 원본 세로 크기
-          fit: BoxFit.fill, // 이미지를 원본 크기에 맞게 채움
-          alignment: Alignment.topLeft, // 드래그 시작 위치
+      body: Center(
+        child: ClipRect(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return InteractiveViewer(
+                panEnabled: true, // 드래그 가능
+                boundaryMargin: EdgeInsets.all(double.infinity), // 드래그 제한 없음
+                minScale: 1.0, // 최소 확대 비율
+                maxScale: 5.0, // 최대 확대 비율
+                child: FittedBox(
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxWidth * (8 / 16), // 사진 원본 비율 유지
+                    child: Image.asset(
+                      'assets/map.jpg',
+                      fit: BoxFit.fill, // 원본 비율 유지
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
