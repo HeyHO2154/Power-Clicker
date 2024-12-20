@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Game/Counsler.dart';
+import 'package:frontend/Game/WorldMap.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -193,7 +194,8 @@ class _MainPageState extends State<MainPage> {
                                         lang('카드게임'),
                                         'assets/Game/${MyApp.currentTheme}/2.png',
                                         50,
-                                        LobbyPage(),
+                                        //LobbyPage(),
+                                        WorldMap(),
                                       ),
                                     ),
                                   ),
