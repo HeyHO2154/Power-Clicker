@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart'; // 비디오 플레이어 패키지 임포트
 import 'package:audioplayers/audioplayers.dart';
-import 'translate.dart';
+import '../OpenAI/translate.dart';
 
 class Counsler extends StatefulWidget {
   @override
@@ -19,12 +19,13 @@ class Counsler extends StatefulWidget {
 class _CounslerState extends State<Counsler> {
   final TextEditingController _controller = TextEditingController();
   String _sourceLang = 'en'; // 초기 입력 언어를 저장할 변수
-  String _responseMessage = 'How can I help you?';
+  String _responseMessage = '...';
   bool _isLoading = false;
   int points = 0;
   final AudioPlayer _audioPlayer = AudioPlayer(); // 효과음 플레이어
   final AudioPlayer _bgmPlayer = AudioPlayer(); // 배경 음악 플레이어
   late VideoPlayerController _videoController; // 비디오 컨트롤러
+  late SolamaService _solamaService;
 
   // 배경 음악 시작 함수
   Future<void> _startBackgroundMusic() async {
@@ -46,6 +47,9 @@ class _CounslerState extends State<Counsler> {
   @override
   void initState() {
     super.initState();
+    _solamaService = SolamaService(
+        role: "You are iron smith of medieval age. Please respond with fewer than 20 characters."
+    );
     MyApp.bgmPlayer.pause();
     _startBackgroundMusic(); // 배경 음악 시작
     _getUserName(MyApp.user_id);
@@ -63,9 +67,7 @@ class _CounslerState extends State<Counsler> {
   void dispose() {
     _bgmPlayer.dispose(); // 배경 음악 플레이어 해제
     _audioPlayer.dispose(); // 효과음 플레이어 해제
-    if (_videoController.value.isInitialized) { // 비디오 컨트롤러 초기화 여부 확인
-      _videoController.dispose(); // 초기화된 경우에만 해제
-    }
+    _videoController.dispose();
     MyApp.bgmPlayer.resume();
     super.dispose();
   }
@@ -124,7 +126,7 @@ class _CounslerState extends State<Counsler> {
       await _getPointValue(-10);
 
       // 2. 번역된 메시지를 AI에게 전송
-      SolamaService.streamResponse(
+      _solamaService.streamResponse(
         prompt: translatedInput,
         onContentReceived: (content) async {
           setState(() {

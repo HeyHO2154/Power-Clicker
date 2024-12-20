@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/Game/Counsler.dart';
+import 'package:frontend/OpenAI/Counsler.dart';
 import 'package:frontend/Game/WorldMap.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +10,7 @@ import '../Game/Card.dart';
 import 'Lobby.dart';
 import 'Shop.dart';
 import 'MyInfo.dart';
-import '../Game/solama_service.dart';
+import '../OpenAI/solama_service.dart';
 
 class MainPage extends StatefulWidget {
   static String? currentUserId;
