@@ -25,10 +25,11 @@ public class TaskSchedulerConfig {
     	//새 가문 생성
     	gamedata = schedulerService.NewDynasty(gamedata);
         
-    	System.out.println("모든 가문 순환");
+    	
         //모든 가문 순환
+    	System.out.println("모든 가문 순환");
         for (int i = 0; i < gamedata.getDynasties().size(); i++) {
-			System.out.println(gamedata.getDynasties().get(i).getId()+" id의 가문");
+			System.out.print(","+gamedata.getDynasties().get(i).getId()+"가문");
 		}
         
         
