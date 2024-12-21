@@ -8,7 +8,8 @@ public class SchedulerService {
 
     // 1초마다 실행되는 작업
     public synchronized void incrementCounter() {
-        a++;
+    	a++;
+        System.out.println(a);
     }
 
     // 현재 변수 값을 반환
