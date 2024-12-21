@@ -49,7 +49,7 @@ class _CounslerState extends State<Counsler> {
     super.initState();
     _solamaService = SolamaService(
         //role: "You are iron smith of medieval age. Please respond with fewer than 20 characters."
-        role: "You are Mafia. act like you are citizen"
+        role: "You are Docter and you saved Tom yesterday"
     );
     MyApp.bgmPlayer.pause();
     _startBackgroundMusic(); // 배경 음악 시작
