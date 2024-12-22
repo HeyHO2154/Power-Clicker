@@ -11,7 +11,6 @@ public class nomad {
 		Dynasty dynasty = gamedata.getDynasties().get(num);
 		System.out.print(dynasty.getName()+" 턴: ");
 		int act = (int) (Math.random()*3);
-		if(dynasty.getLocation().getAdjacent().size() == 0) act = 1; //최초엔 무조건 탐험
 		switch (act) {
 			case 0:
 				//인접한 지역 랜덤으로 선택
@@ -41,7 +40,8 @@ public class nomad {
 				}
 				//새로운 지역으로 확장
 				Faction nature = gamedata.getFactions().get(0);
-				Region newLand = gamedata.getRegions().get((int) (Math.random()*gamedata.getRegions().size()));
+				//Region newLand = gamedata.getRegions().get((int) (Math.random()*gamedata.getRegions().size()));
+				Region newLand = dynasty.getLocation().getAdjacent().get((int) (Math.random()*dynasty.getLocation().getAdjacent().size()));
 				if(newLand == dynasty.getLocation() || dynasty.getLocation().getAdjacent().contains(newLand) || newLand.getAdjacent().size()>=4) {
 					newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature, 0);
 					gamedata.getRegions().add(newLand);

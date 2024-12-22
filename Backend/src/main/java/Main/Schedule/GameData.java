@@ -15,12 +15,19 @@ public class GameData {
     
     // 생성자
     public GameData() {
-        //자연 생성 및 최초 땅 생성
+        //자연 생성
         Faction nature = new Faction(id++, "자연", 0);
         factions.add(nature);
-        Region firstLand = new Region(id++, "0지역", nature, 0);
-        regions.add(firstLand);
-        nature.getOccupy().add(firstLand);
+        //최초 땅 생성(연결성 위해 2개 생성)
+        for (int i = 0; i < 2; i++) {
+        	Region firstLand = new Region(id, id+"지역", nature, 0);
+        	id++;
+            regions.add(firstLand);
+            nature.getOccupy().add(firstLand);
+		}
+        nature.getOccupy().get(0).getAdjacent().add(nature.getOccupy().get(1));
+        nature.getOccupy().get(1).getAdjacent().add(nature.getOccupy().get(0));
+        
     }
     
 	public long getId() {
