@@ -18,7 +18,7 @@ public class GameData {
         //자연 생성 및 최초 땅 생성
         Faction nature = new Faction(id++, "자연", 0);
         factions.add(nature);
-        Region firstLand = new Region(id++, "최초 지역", nature);
+        Region firstLand = new Region(id++, "0지역", nature);
         regions.add(firstLand);
         nature.getOccupy().add(firstLand);
     }

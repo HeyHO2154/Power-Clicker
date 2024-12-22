@@ -28,10 +28,8 @@ public class SchedulerService {
         	Dynasty dynasty = gamedata.getDynasties().get(i);
 			System.out.print(dynasty.getName()+" 턴: ");
 			if(dynasty.isNomad()) {
-				int act = (int) (Math.random())*3;
-				if(dynasty.getLocation().getAdjacent().size() > 1) {
-					act = 0;
-				}else {
+				int act = (int) (Math.random()*3);
+				if(dynasty.getLocation().getAdjacent().size() == 0) {
 					act = 1;
 				}
 				switch (act) {
@@ -47,7 +45,8 @@ public class SchedulerService {
 					case 1:
 						//새로운 지역으로 확장
 						Faction nature = gamedata.getFactions().get(0);
-						Region newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature);
+						Region newLand = gamedata.getRegions().get((int) (Math.random()*gamedata.getRegions().size()));
+						if(newLand == dynasty.getLocation()) newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature);
 				        gamedata.getRegions().add(newLand);
 				        nature.getOccupy().add(newLand);
 				        //인접지역으로 추가
@@ -60,6 +59,7 @@ public class SchedulerService {
 						dynasty.setLocation(newLand);
 						break;
 					default:
+						System.out.println(dynasty.getLocation().getName()+"에 대기");
 						break;
 				}
 			}

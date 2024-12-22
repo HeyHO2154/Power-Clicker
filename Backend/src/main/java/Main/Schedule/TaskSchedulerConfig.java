@@ -27,12 +27,13 @@ public class TaskSchedulerConfig {
         //모든 가문 순환
     	gamedata = schedulerService.DynastyTrun(gamedata);
     	
-    	System.err.println("각 지역의 인접지역 확인");
+    	System.err.println("인접 지역 확인");
     	for (int i = 0; i < gamedata.getRegions().size(); i++) {
-			System.out.print(gamedata.getRegions().get(i).getName()+"의 인접지역: ");
+			System.out.print(gamedata.getRegions().get(i).getName()+": ");
 			for (int j = 0; j < gamedata.getRegions().get(i).getAdjacent().size(); j++) {
-				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+", ");
+				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+" ");
 			}
+			System.out.println();
 		}
 
     }
