@@ -1,5 +1,8 @@
 package Main.Schedule.act;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Main.Schedule.GameData;
 import Main.Schedule.object.Dynasty;
 import Main.Schedule.object.Faction;
@@ -40,20 +43,32 @@ public class nomad {
 				}
 				//새로운 지역으로 확장
 				Faction nature = gamedata.getFactions().get(0);
-				//Region newLand = gamedata.getRegions().get((int) (Math.random()*gamedata.getRegions().size()));
-				Region newLand = dynasty.getLocation().getAdjacent().get((int) (Math.random()*dynasty.getLocation().getAdjacent().size()));
+				List<Region> nearLand = new ArrayList<>();
+				//인접지역의 인접지역 중 랜덤하게 하나 선택
+				for (int i = 0; i < dynasty.getLocation().getAdjacent().size(); i++) {
+					for (int j = 0; j < dynasty.getLocation().getAdjacent().get(i).getAdjacent().size(); j++) {
+						nearLand.add(dynasty.getLocation().getAdjacent().get(i).getAdjacent().get(j));
+					}
+				}
+				Region newLand = nearLand.get((int) (Math.random()*nearLand.size()));
+				//조건 안맞으면 아예 새 영토 생성
 				if(newLand == dynasty.getLocation() || dynasty.getLocation().getAdjacent().contains(newLand) || newLand.getAdjacent().size()>=4) {
+					/*
+					 * 이거 지형 생성할때, type(사막, 설원 등)이 매끄럽게 생성되게 시도해보자
+					 * 사막 눈 사막 눈 이런식으로 뜬금뜬금 가면 몰입도 떨어지니까
+					 */
 					newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature, 0);
 					gamedata.getRegions().add(newLand);
 					nature.getOccupy().add(newLand);
-				}		             
+					System.out.println("asd");
+				}
 		        //인접지역으로 추가
 		        newLand.getAdjacent().add(dynasty.getLocation());
 		        dynasty.getLocation().getAdjacent().add(newLand);
 		        //새로운 지역으로 이동
 		        dynasty.getLocation().getNomad().remove(dynasty);
 		        newLand.getNomad().add(dynasty);
-				System.out.print(dynasty.getLocation().getName()+"에서 "+newLand.getName()+"로 이동");
+				System.out.print("탐험 성공! "+dynasty.getLocation().getName()+"에서 "+newLand.getName()+"로 이동");
 				dynasty.setLocation(newLand);
 				break;
 			default:
@@ -83,7 +98,7 @@ public class nomad {
 				for (int i = 0; i < rand; i++) {
 					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0);
 					dynasty.getMember().add(baby);
-					System.out.print(baby.getName()+"이 태어남 ");
+					System.out.print(" "+baby.getName()+"이 태어남");
 				}
 			}
 		}

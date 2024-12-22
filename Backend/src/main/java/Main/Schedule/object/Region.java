@@ -17,7 +17,7 @@ public class Region {
         this.id = id;
         this.name = name;
         this.occupy = occupy;
-        this.setType(type);
+        this.type = type;
     }
 
     // Getter & Setter
