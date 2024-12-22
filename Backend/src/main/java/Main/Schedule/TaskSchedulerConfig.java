@@ -27,14 +27,33 @@ public class TaskSchedulerConfig {
         //모든 가문 순환
     	gamedata = schedulerService.DynastyTrun(gamedata);
     	
-    	System.err.println("인접 지역 확인");
-    	for (int i = 0; i < gamedata.getRegions().size(); i++) {
-			System.out.print(gamedata.getRegions().get(i).getName()+": ");
-			for (int j = 0; j < gamedata.getRegions().get(i).getAdjacent().size(); j++) {
-				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+" ");
-			}
-			System.out.println();
-		}
+    	Debug();
+    	
+    	
 
+    }
+    
+    private void Debug() {
+    	System.out.println("\n \033[31m<세력 리스트>");
+    	for (int i = 0; i < gamedata.getFactions().size(); i++) {
+			System.out.print(gamedata.getFactions().get(i).getName()+" ");
+		}
+    	System.out.println("\n \033[32m<지역 리스트>");
+    	for (int i = 0; i < gamedata.getRegions().size(); i++) {
+			System.out.print(gamedata.getRegions().get(i).getName()+"=");
+			for (int j = 0; j < gamedata.getRegions().get(i).getAdjacent().size(); j++) {
+				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+",");
+			}
+			System.out.print("/ ");
+		}
+    	System.out.println("\n \033[36m<가문 리스트>");
+    	for (int i = 0; i < gamedata.getDynasties().size(); i++) {
+			System.out.print(gamedata.getDynasties().get(i).getName()+"=");
+			for (int j = 0; j < gamedata.getDynasties().get(i).getMember().size(); j++) {
+				System.out.print(gamedata.getDynasties().get(i).getMember().get(j).getName()+",");
+			}
+			System.out.print("/ ");
+		}
+    	System.out.print("\033[0m");
     }
 }
