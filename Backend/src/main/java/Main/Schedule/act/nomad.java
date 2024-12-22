@@ -119,7 +119,7 @@ public class nomad {
 				dynasty.getLocation().getNomad().remove(dynasty);
 				dynasty.getLocation().getSettled().add(dynasty);
 				dynasty.setFaction(Kingdom);
-				System.out.print("/ "+Kingdom.getName()+"에 "+dynasty.getLocation().getName()+"가 합류하였습니다.");
+				System.out.print("/ "+Kingdom.getName()+"에 "+dynasty.getName()+"가 합류하였습니다.");
 			}
 		}
 		

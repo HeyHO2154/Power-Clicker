@@ -3,6 +3,7 @@ package Main.Schedule;
 import org.springframework.stereotype.Service;
 
 import Main.Schedule.act.nomad;
+import Main.Schedule.act.settled;
 import Main.Schedule.object.Dynasty;
 import Main.Schedule.object.Person;
 import Main.Schedule.object.Region;
@@ -28,10 +29,11 @@ public class SchedulerService {
         	Dynasty dynasty = gamedata.getDynasties().get(i);
         	System.out.print(dynasty.getName()+" 턴: ");
 			if(dynasty.getFaction()==gamedata.getFactions().get(0)) {
+				//유목민
 				gamedata = nomad.act(gamedata, i);
 			}else {
-				System.out.print(dynasty.getFaction().getName()+"의 "+dynasty.getLocation().getName()+"에서 대기중");
-				System.out.println();
+				//정착민
+				gamedata = settled.act(gamedata, i);
 			}
 			
 		}

@@ -23,7 +23,7 @@ public class TaskSchedulerConfig {
     }
 	
     // 매 작업 완료 후, 1초 뒤 실행 (1000ms)
-    @Scheduled(fixedDelay = 100)
+    @Scheduled(fixedDelay = 1000)
     public void scheduleTask() {
     	//새 가문 생성
     	gamedata = schedulerService.NewDynasty(gamedata); 	
