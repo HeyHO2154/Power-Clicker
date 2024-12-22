@@ -5,13 +5,15 @@ import java.util.List;
 
 public class Faction {
     private long id;
+    private String name;
     private int type;
     private List<Region> occupy = new ArrayList<>();
     private List<Faction> war = new ArrayList<>();
 
     // 생성자
-    public Faction(long id, int type) {
+    public Faction(long id, String name, int type) {
         this.id = id;
+        this.name = name;
         this.type = type;
     }
 
@@ -47,5 +49,13 @@ public class Faction {
     public void addWar(Faction faction) {
         this.war.add(faction);
     }
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 }

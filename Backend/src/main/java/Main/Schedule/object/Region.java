@@ -5,14 +5,16 @@ import java.util.List;
 
 public class Region {
     private long id;
+    private String name;
     private Faction occupy;
     private List<Region> adjacent = new ArrayList<>();
     private List<Dynasty> settled = new ArrayList<>();
     private List<Dynasty> nomad = new ArrayList<>();
 
     // 생성자
-    public Region(long id, Faction occupy) {
+    public Region(long id, String name, Faction occupy) {
         this.id = id;
+        this.name = name;
         this.occupy = occupy;
     }
 
@@ -56,4 +58,12 @@ public class Region {
     public void addNomad(Dynasty dynasty) {
         this.nomad.add(dynasty);
     }
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

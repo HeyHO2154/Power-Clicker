@@ -23,16 +23,17 @@ public class TaskSchedulerConfig {
     @Scheduled(fixedDelay = 1000)
     public void scheduleTask() {
     	//새 가문 생성
-    	gamedata = schedulerService.NewDynasty(gamedata);
-        
-    	
+    	gamedata = schedulerService.NewDynasty(gamedata); 	
         //모든 가문 순환
-    	System.out.println("모든 가문 순환");
-        for (int i = 0; i < gamedata.getDynasties().size(); i++) {
-			System.out.print(","+gamedata.getDynasties().get(i).getId()+"가문");
+    	gamedata = schedulerService.DynastyTrun(gamedata);
+    	
+    	System.err.println("각 지역의 인접지역 확인");
+    	for (int i = 0; i < gamedata.getRegions().size(); i++) {
+			System.out.print(gamedata.getRegions().get(i).getName()+"의 인접지역: ");
+			for (int j = 0; j < gamedata.getRegions().get(i).getAdjacent().size(); j++) {
+				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+", ");
+			}
 		}
-        
-        
 
     }
 }

@@ -8,18 +8,17 @@ import Main.Schedule.object.Faction;
 import Main.Schedule.object.Region;
 
 public class GameData {
-    private long id;    
+    private long id = 0;    
     private List<Faction> factions = new ArrayList<>();
     private List<Region> regions = new ArrayList<>();
     private List<Dynasty> dynasties = new ArrayList<>();
     
     // 생성자
     public GameData() {
-        id = 0;
         //자연 생성 및 최초 땅 생성
-        Faction nature = new Faction(id++, 0);
+        Faction nature = new Faction(id++, "자연", 0);
         factions.add(nature);
-        Region firstLand = new Region(id++, nature);
+        Region firstLand = new Region(id++, "최초 지역", nature);
         regions.add(firstLand);
         nature.getOccupy().add(firstLand);
     }
