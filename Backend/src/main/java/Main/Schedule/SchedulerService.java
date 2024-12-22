@@ -43,12 +43,19 @@ public class SchedulerService {
 						dynasty.setLocation(moveLocation);
 						break;
 					case 1:
+						if(dynasty.getLocation().getAdjacent().size() >= 4) break;
+						if((int) (Math.random()*gamedata.getRegions().size()) != 0) {
+							System.out.println("탐험 실패, "+dynasty.getLocation().getName()+"에 대기");
+							break;
+						}
 						//새로운 지역으로 확장
 						Faction nature = gamedata.getFactions().get(0);
 						Region newLand = gamedata.getRegions().get((int) (Math.random()*gamedata.getRegions().size()));
-						if(newLand == dynasty.getLocation()) newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature);
-				        gamedata.getRegions().add(newLand);
-				        nature.getOccupy().add(newLand);
+						if(newLand == dynasty.getLocation() || dynasty.getLocation().getAdjacent().contains(newLand) || newLand.getAdjacent().size()>=4) {
+							newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature);
+							gamedata.getRegions().add(newLand);
+							nature.getOccupy().add(newLand);
+						}		             
 				        //인접지역으로 추가
 				        newLand.getAdjacent().add(dynasty.getLocation());
 				        dynasty.getLocation().getAdjacent().add(newLand);
