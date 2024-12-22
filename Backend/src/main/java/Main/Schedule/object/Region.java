@@ -5,17 +5,19 @@ import java.util.List;
 
 public class Region {
     private long id;
+    private int type;
     private String name;
-    private Faction occupy;
+    private Faction occupy; 
     private List<Region> adjacent = new ArrayList<>();
     private List<Dynasty> settled = new ArrayList<>();
     private List<Dynasty> nomad = new ArrayList<>();
 
     // 생성자
-    public Region(long id, String name, Faction occupy) {
+    public Region(long id, String name, Faction occupy, int type) {
         this.id = id;
         this.name = name;
         this.occupy = occupy;
+        this.setType(type);
     }
 
     // Getter & Setter
@@ -65,5 +67,13 @@ public class Region {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 }
