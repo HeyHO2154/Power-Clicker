@@ -1,6 +1,6 @@
 package Main.Schedule.object;
 
-public class Player {
+public class Person {
     private long id;
     private String name;
     private int gender; // 0: 남성, 1: 여성
@@ -9,7 +9,7 @@ public class Player {
     private int race;
 
     // 생성자
-    public Player(long id, String name, int gender, int race) {
+    public Person(long id, String name, int gender, int race) {
         this.id = id;
         this.name = name;
         this.gender = gender;

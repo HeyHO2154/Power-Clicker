@@ -3,7 +3,7 @@ package Main.Schedule.act;
 import Main.Schedule.GameData;
 import Main.Schedule.object.Dynasty;
 import Main.Schedule.object.Faction;
-import Main.Schedule.object.Player;
+import Main.Schedule.object.Person;
 import Main.Schedule.object.Region;
 
 public class nomad {
@@ -62,12 +62,13 @@ public class nomad {
 		}
 		
 		//만나면 결혼
-		Player a = dynasty.getMember().get((int) (Math.random()*dynasty.getMember().size()));
+		Person a = dynasty.getMember().get((int) (Math.random()*dynasty.getMember().size()));
 		if(!a.isMarried()) {
 			//현 위치에서 랜덤 가문 선택, 거기서 랜덤 인원 선택
 			Dynasty B = dynasty.getLocation().getNomad().get((int) (Math.random()*dynasty.getLocation().getNomad().size()));
-			Player b = B.getMember().get((int) (Math.random()*B.getMember().size()));
+			Person b = B.getMember().get((int) (Math.random()*B.getMember().size()));
 			if(!b.isMarried() && a.getGender()!=b.getGender() && B!=dynasty) {
+				//결혼 조건이 맞으면 진행
 				System.out.print(" "+dynasty.getName()+"의 "+a.getName()+"와 "+B.getName()+"의 "+b.getName()+"가 결혼하였습니다. ");
 				B.getMember().remove(b);
 				if(B.getMember().size()==0) {
@@ -80,7 +81,7 @@ public class nomad {
 				b.setMarried(true);
 				int rand = (int) (Math.random()*4)+1;
 				for (int i = 0; i < rand; i++) {
-					Player baby = new Player(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0);
+					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0);
 					dynasty.getMember().add(baby);
 					System.out.print(baby.getName()+"이 태어남 ");
 				}

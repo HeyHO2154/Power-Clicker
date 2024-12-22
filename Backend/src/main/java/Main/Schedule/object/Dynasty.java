@@ -9,7 +9,7 @@ public class Dynasty {
     private boolean playable;
     private boolean isNomad = true;
     private Region location;
-    private List<Player> member = new ArrayList<>();
+    private List<Person> member = new ArrayList<>();
 
     // 생성자
     public Dynasty(long id, String name, boolean playable, Region location) {
@@ -35,11 +35,11 @@ public class Dynasty {
 		this.playable = playable;
 	}
 
-	public List<Player> getMember() {
+	public List<Person> getMember() {
 		return member;
 	}
 
-	public void setMember(List<Player> member) {
+	public void setMember(List<Person> member) {
 		this.member = member;
 	}
 

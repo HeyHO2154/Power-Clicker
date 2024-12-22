@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import Main.Schedule.act.nomad;
 import Main.Schedule.object.Dynasty;
-import Main.Schedule.object.Player;
+import Main.Schedule.object.Person;
 import Main.Schedule.object.Region;
 
 @Service
@@ -16,7 +16,7 @@ public class SchedulerService {
     	Region location = gamedata.getFactions().get(0).getOccupy().get((int) (Math.random()*gamedata.getFactions().get(0).getOccupy().size()));
     	Dynasty dynasty = new Dynasty(gamedata.getId(), (gamedata.getId()-1)+"가문", false, location);
     	gamedata.getDynasties().add(dynasty);
-        dynasty.getMember().add(new Player(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0));   
+        dynasty.getMember().add(new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0));   
         location.addNomad(dynasty);
         return gamedata;
     }
