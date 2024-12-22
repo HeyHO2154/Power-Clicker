@@ -1,6 +1,8 @@
 package Main.Schedule;
 
 
+import java.util.Scanner;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,7 +38,7 @@ public class TaskSchedulerConfig {
     private void Debug() {
     	System.out.println("\n \033[31m<세력 리스트>");
     	for (int i = 0; i < gamedata.getFactions().size(); i++) {
-			System.out.print(gamedata.getFactions().get(i).getName()+" ");
+			System.out.print(gamedata.getFactions().get(i).getName()+",");
 		}
     	System.out.println("\n \033[32m<지역 리스트>");
     	for (int i = 0; i < gamedata.getRegions().size(); i++) {

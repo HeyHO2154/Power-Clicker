@@ -3,13 +3,13 @@ package Main.Schedule.object;
 public class Player {
     private long id;
     private String name;
-    private boolean gender; // true: 남성, false: 여성
+    private int gender; // 0: 남성, 1: 여성
     private int age;
     private boolean married;
     private int race;
 
     // 생성자
-    public Player(long id, String name, boolean gender, int race) {
+    public Player(long id, String name, int gender, int race) {
         this.id = id;
         this.name = name;
         this.gender = gender;
@@ -35,11 +35,11 @@ public class Player {
         this.name = name;
     }
 
-    public boolean isGender() {
+    public int getGender() {
         return gender;
     }
 
-    public void setGender(boolean gender) {
+    public void setGender(int gender) {
         this.gender = gender;
     }
 

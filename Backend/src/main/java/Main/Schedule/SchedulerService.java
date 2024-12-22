@@ -16,14 +16,14 @@ public class SchedulerService {
     	Region location = gamedata.getFactions().get(0).getOccupy().get((int) (Math.random()*gamedata.getFactions().get(0).getOccupy().size()));
     	Dynasty dynasty = new Dynasty(gamedata.getId(), (gamedata.getId()-1)+"가문", false, location);
     	gamedata.getDynasties().add(dynasty);
-        dynasty.getMember().add(new Player(gamedata.getId(), "이름"+(gamedata.getId()-1), true, 0));       
+        dynasty.getMember().add(new Player(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0));   
         location.addNomad(dynasty);
         return gamedata;
     }
 
     //모든 가문 순환
 	public GameData DynastyTrun(GameData gamedata) {
-		System.out.println("\n모든 가문 순환");
+		System.out.println("\n 모든 가문 순환");
         for (int i = 0; i < gamedata.getDynasties().size(); i++) {
         	Dynasty dynasty = gamedata.getDynasties().get(i);
 			if(dynasty.isNomad()) gamedata = nomad.act(gamedata, i);
