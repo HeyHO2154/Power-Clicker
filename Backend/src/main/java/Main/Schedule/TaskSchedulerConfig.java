@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import Main.Schedule.object.Dynasty;
 import Main.Schedule.object.Region;
 
 @Component
@@ -22,7 +23,7 @@ public class TaskSchedulerConfig {
     }
 	
     // 매 작업 완료 후, 1초 뒤 실행 (1000ms)
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 100)
     public void scheduleTask() {
     	//새 가문 생성
     	gamedata = schedulerService.NewDynasty(gamedata); 	
@@ -37,10 +38,14 @@ public class TaskSchedulerConfig {
     
     private void Debug() {
     	System.out.println("\n \033[31m<세력 리스트>");
-    	for (int i = 0; i < gamedata.getFactions().size(); i++) {
+    	for (int i = 1; i < gamedata.getFactions().size(); i++) {
     		System.out.print(gamedata.getFactions().get(i).getName()+"=");
 			for (int j = 0; j < gamedata.getFactions().get(i).getOccupies().size(); j++) {
-				System.out.print(gamedata.getFactions().get(i).getOccupies().get(j).getName()+",");
+				System.out.print(gamedata.getFactions().get(i).getOccupies().get(j).getName()+":");
+				for (int k = 0; k < gamedata.getFactions().get(i).getOccupies().get(j).getSettled().size(); k++) {
+					Dynasty dynasty = gamedata.getFactions().get(i).getOccupies().get(j).getSettled().get(k);
+					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+")"+",");
+				}
 			}
 			System.out.print("/ ");
 		}
