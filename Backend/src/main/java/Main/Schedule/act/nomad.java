@@ -12,7 +12,6 @@ import Main.Schedule.object.Region;
 public class nomad {
 	public static GameData act(GameData gamedata, int num) {
 		Dynasty dynasty = gamedata.getDynasties().get(num);
-		System.out.print(dynasty.getName()+" 턴: ");
 		int act = (int) (Math.random()*3);
 		switch (act) {
 			case 0:
@@ -53,14 +52,13 @@ public class nomad {
 				Region newLand = nearLand.get((int) (Math.random()*nearLand.size()));
 				//조건 안맞으면 아예 새 영토 생성
 				if(newLand == dynasty.getLocation() || dynasty.getLocation().getAdjacent().contains(newLand) || newLand.getAdjacent().size()>=4) {
-					/*
-					 * 이거 지형 생성할때, type(사막, 설원 등)이 매끄럽게 생성되게 시도해보자
-					 * 사막 눈 사막 눈 이런식으로 뜬금뜬금 가면 몰입도 떨어지니까
-					 */
-					newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature, 0);
+					int biome = dynasty.getLocation().getType();
+					if((int) (Math.random()*4) == 0) {
+						biome = (int) (Math.random()*4);
+					}
+					newLand = new Region(gamedata.getId(), (gamedata.getId()-1)+"지역", nature, biome);
 					gamedata.getRegions().add(newLand);
-					nature.getOccupy().add(newLand);
-					System.out.println("asd");
+					nature.getOccupies().add(newLand);
 				}
 		        //인접지역으로 추가
 		        newLand.getAdjacent().add(dynasty.getLocation());
@@ -84,10 +82,10 @@ public class nomad {
 			Person b = B.getMember().get((int) (Math.random()*B.getMember().size()));
 			if(!b.isMarried() && a.getGender()!=b.getGender() && B!=dynasty) {
 				//결혼 조건이 맞으면 진행
-				System.out.print(" "+dynasty.getName()+"의 "+a.getName()+"와 "+B.getName()+"의 "+b.getName()+"가 결혼하였습니다. ");
+				System.out.print("/ "+dynasty.getName()+"의 "+a.getName()+"와 "+B.getName()+"의 "+b.getName()+"가 결혼하였습니다. ");
 				B.getMember().remove(b);
 				if(B.getMember().size()==0) {
-					System.out.print(" "+B.getName()+"이 흡수됨");
+					System.out.print("/ "+B.getName()+"이 흡수됨");
 					dynasty.getLocation().getNomad().remove(B);
 					gamedata.getDynasties().remove(B);
 				}
@@ -98,10 +96,27 @@ public class nomad {
 				for (int i = 0; i < rand; i++) {
 					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0);
 					dynasty.getMember().add(baby);
-					System.out.print(" "+baby.getName()+"이 태어남");
+					System.out.print("/ "+baby.getName()+"이 태어남");
 				}
 			}
 		}
+		
+		//정착하기로 결심
+		if((int) (Math.random()*10) == 1) {
+			if(dynasty.getLocation().getOccupy().getId()==0) {
+				//건국
+				Faction newKingdom = new Faction(gamedata.getId(), dynasty.getName()+"의 왕국", 1);
+				newKingdom.getOccupies().add(dynasty.getLocation());
+				dynasty.getLocation().setOccupy(newKingdom);
+				dynasty.setFaction(newKingdom);	
+				gamedata.getFactions().add(newKingdom);
+				System.out.print("/ "+newKingdom.getName()+"이 "+dynasty.getLocation().getName()+"에 건국되었습니다.");
+			}else {
+				//합류
+				
+			}
+		}
+		
 		
 		System.out.println();
 		return gamedata;

@@ -7,16 +7,17 @@ public class Dynasty {
     private long id;
     private String name;
     private boolean playable;
-    private boolean isNomad = true;
     private Region location;
+    private Faction faction;
     private List<Person> member = new ArrayList<>();
 
     // 생성자
-    public Dynasty(long id, String name, boolean playable, Region location) {
+    public Dynasty(long id, String name, boolean playable, Region location, Faction faction) {
         this.id = id;
         this.name = name;
         this.playable = playable;
         this.location = location;
+        this.faction = faction;
     }
 
 	public long getId() {
@@ -58,13 +59,13 @@ public class Dynasty {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public boolean isNomad() {
-		return isNomad;
+	
+	public Faction getFaction() {
+		return faction;
 	}
 
-	public void setNomad(boolean isNomad) {
-		this.isNomad = isNomad;
+	public void setFaction(Faction faction) {
+		this.faction = faction;
 	}
     
     

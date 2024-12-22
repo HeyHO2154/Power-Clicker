@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Region {
     private long id;
-    private int type;
+    private int type;	// 0:초지, 1~3:기타
     private String name;
     private Faction occupy; 
     private List<Region> adjacent = new ArrayList<>();

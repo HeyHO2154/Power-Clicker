@@ -1,11 +1,11 @@
 package Main.Schedule;
 
 
-import java.util.Scanner;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import Main.Schedule.object.Region;
 
 @Component
 public class TaskSchedulerConfig {
@@ -38,11 +38,16 @@ public class TaskSchedulerConfig {
     private void Debug() {
     	System.out.println("\n \033[31m<세력 리스트>");
     	for (int i = 0; i < gamedata.getFactions().size(); i++) {
-			System.out.print(gamedata.getFactions().get(i).getName()+",");
+    		System.out.print(gamedata.getFactions().get(i).getName()+"=");
+			for (int j = 0; j < gamedata.getFactions().get(i).getOccupies().size(); j++) {
+				System.out.print(gamedata.getFactions().get(i).getOccupies().get(j).getName()+",");
+			}
+			System.out.print("/ ");
 		}
     	System.out.println("\n \033[32m<지역 리스트>");
     	for (int i = 0; i < gamedata.getRegions().size(); i++) {
-			System.out.print(gamedata.getRegions().get(i).getName()+"=");
+    		Region region = gamedata.getRegions().get(i);
+			System.out.print(region.getName()+"["+region.getType()+"]"+"=");
 			for (int j = 0; j < gamedata.getRegions().get(i).getAdjacent().size(); j++) {
 				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+",");
 			}

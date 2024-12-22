@@ -7,7 +7,7 @@ public class Faction {
     private long id;
     private String name;
     private int type;
-    private List<Region> occupy = new ArrayList<>();
+    private List<Region> occupies = new ArrayList<>();
     private List<Faction> war = new ArrayList<>();
 
     // 생성자
@@ -34,14 +34,6 @@ public class Faction {
         this.type = type;
     }
 
-    public List<Region> getOccupy() {
-        return occupy;
-    }
-
-    public void addRegion(Region region) {
-        this.occupy.add(region);
-    }
-
     public List<Faction> getWar() {
         return war;
     }
@@ -56,6 +48,14 @@ public class Faction {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public List<Region> getOccupies() {
+		return occupies;
+	}
+
+	public void setOccupies(List<Region> occupies) {
+		this.occupies = occupies;
 	}
 
 }

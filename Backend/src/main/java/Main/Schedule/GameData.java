@@ -23,10 +23,10 @@ public class GameData {
         	Region firstLand = new Region(id, id+"지역", nature, 0);
         	id++;
             regions.add(firstLand);
-            nature.getOccupy().add(firstLand);
+            nature.getOccupies().add(firstLand);
 		}
-        nature.getOccupy().get(0).getAdjacent().add(nature.getOccupy().get(1));
-        nature.getOccupy().get(1).getAdjacent().add(nature.getOccupy().get(0));
+        nature.getOccupies().get(0).getAdjacent().add(nature.getOccupies().get(1));
+        nature.getOccupies().get(1).getAdjacent().add(nature.getOccupies().get(0));
         
     }
     
