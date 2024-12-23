@@ -106,16 +106,22 @@ public class nomad {
 		//정착하기로 결심
 		if((int) (Math.random()*10) == 1) {
 			if(dynasty.getLocation().getOccupy().getId()==0) {
-				//건국
-				Faction newKingdom = new Faction(gamedata.getId(), dynasty.getName()+"의 왕국", 1);
-				dynasty.getLocation().getOccupy().getOccupies().remove(dynasty.getLocation());
-				newKingdom.getOccupies().add(dynasty.getLocation());				
-				dynasty.getLocation().setOccupy(newKingdom);
-				dynasty.getLocation().getNomad().remove(dynasty);
-				dynasty.getLocation().getSettled().add(dynasty);
-				dynasty.setFaction(newKingdom);
-				gamedata.getFactions().add(newKingdom);
-				System.out.print("/ "+newKingdom.getName()+"이 "+dynasty.getLocation().getName()+"에 건국되었습니다.");
+				if(dynasty.getMoney() >= 100) {
+					//건국
+					Faction newKingdom = new Faction(gamedata.getId(), dynasty.getName()+"의 왕국", 1);
+					dynasty.getLocation().getOccupy().getOccupies().remove(dynasty.getLocation());
+					newKingdom.getOccupies().add(dynasty.getLocation());				
+					dynasty.getLocation().setOccupy(newKingdom);
+					dynasty.getLocation().getNomad().remove(dynasty);
+					dynasty.getLocation().getSettled().add(dynasty);
+					dynasty.setFaction(newKingdom);
+					gamedata.getFactions().add(newKingdom);
+					System.out.print("/ "+newKingdom.getName()+"이 "+dynasty.getLocation().getName()+"에 건국되었습니다.");
+					dynasty.setMoney(dynasty.getMoney()-100);
+					dynasty.getLocation().setMoney(100);
+				}else {
+					System.out.print("/ 건국하려 했으나 자금이 모자랍니다..");
+				}
 			}else {
 				//합류
 				Faction Kingdom = dynasty.getLocation().getOccupy();

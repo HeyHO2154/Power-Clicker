@@ -10,9 +10,19 @@ public class settled {
 		int act = (int) (Math.random()*3);
 		switch (act) {
 			case 0:
+				System.out.print(dynasty.getLocation().getName()+"에서 생산직! ");
+				dynasty.setMoney(dynasty.getMoney()+2); //평균 기대 수입
+				break;
 			case 1:
+				System.out.print(dynasty.getLocation().getName()+"에서 가공직? ");
+				dynasty.setMoney(dynasty.getMoney()+(int) (Math.random()*5)); //0,1,2,3,4 중 랜덤 수입
+				break;
+			case 2:
+				System.out.print(dynasty.getLocation().getName()+"에서 고위직!? ");
+				dynasty.setMoney(dynasty.getMoney()+4); //최대 기대 수입
+				break;
 			default:
-				System.out.print(dynasty.getLocation().getName()+"에서 정착중.. ");
+				System.out.print(dynasty.getLocation().getName()+"에서 무직.. ");	//무수입
 				break;
 		}
 		
