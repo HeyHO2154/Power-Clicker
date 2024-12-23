@@ -29,7 +29,9 @@ public class TaskSchedulerConfig {
     	//새 가문 생성
     	gamedata = schedulerService.NewDynasty(gamedata); 	
         //모든 가문 순환
-    	gamedata = schedulerService.DynastyTrun(gamedata);
+    	gamedata = schedulerService.DynastyTurn(gamedata);
+    	//모든 영토 순환
+    	gamedata = schedulerService.RegionTurn(gamedata);
     	
     	Debug();
     	
@@ -39,11 +41,11 @@ public class TaskSchedulerConfig {
     
     private void Debug() {
     	System.out.println("\n \033[31m<세력 리스트>");
-    	for (int i = 1; i < gamedata.getFactions().size(); i++) {
-    		System.out.print(gamedata.getFactions().get(i).getName()+"=");
+    	for (int i = 0; i < gamedata.getFactions().size(); i++) {
+    		System.out.print("\n "+gamedata.getFactions().get(i).getName()+"=");
 			for (int j = 0; j < gamedata.getFactions().get(i).getOccupies().size(); j++) {
 				Region region = gamedata.getFactions().get(i).getOccupies().get(j);
-				System.out.print(region.getName()+"["+region.getArmy().size()+"]:");
+				System.out.print("\n"+region.getName()+"["+region.getArmy().size()+"]:");
 				for (int k = 0; k < gamedata.getFactions().get(i).getOccupies().get(j).getSettled().size(); k++) {
 					Dynasty dynasty = gamedata.getFactions().get(i).getOccupies().get(j).getSettled().get(k);
 					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+"),");

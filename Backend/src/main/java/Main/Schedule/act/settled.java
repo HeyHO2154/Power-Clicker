@@ -53,10 +53,7 @@ public class settled {
 			}
 			
 		}
-		
-		//세금 납부
-		
-		
+	
 		System.out.println();
 		return gamedata;
 	}

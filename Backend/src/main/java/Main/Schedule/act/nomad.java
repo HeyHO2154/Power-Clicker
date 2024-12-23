@@ -106,7 +106,8 @@ public class nomad {
 			if(dynasty.getLocation().getOccupy().getId()==0) {
 				//건국
 				Faction newKingdom = new Faction(gamedata.getId(), dynasty.getName()+"의 왕국", 1);
-				newKingdom.getOccupies().add(dynasty.getLocation());
+				dynasty.getLocation().getOccupy().getOccupies().remove(dynasty.getLocation());
+				newKingdom.getOccupies().add(dynasty.getLocation());				
 				dynasty.getLocation().setOccupy(newKingdom);
 				dynasty.getLocation().getNomad().remove(dynasty);
 				dynasty.getLocation().getSettled().add(dynasty);
