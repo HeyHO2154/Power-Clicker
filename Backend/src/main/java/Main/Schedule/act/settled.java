@@ -41,7 +41,21 @@ public class settled {
 					System.out.print("/ "+baby.getName()+"이 태어남");
 				}
 			}
+		}else {
+			//기혼자(독거 가문 제외)라면 군 입대, 보상 100G 일시불
+			if((int) (Math.random()*4)==0) {
+				if(dynasty.getMember().size()>1) {
+					dynasty.getMember().remove(a);
+					dynasty.getLocation().getArmy().add(a);
+					dynasty.setMoney(dynasty.getMoney()+100);
+					System.out.print("/ "+dynasty.getName()+"의 "+a.getName()+"이 군 입대 함");
+				}
+			}
+			
 		}
+		
+		//세금 납부
+		
 		
 		System.out.println();
 		return gamedata;

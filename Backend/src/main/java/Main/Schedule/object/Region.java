@@ -11,6 +11,9 @@ public class Region {
     private List<Region> adjacent = new ArrayList<>();
     private List<Dynasty> settled = new ArrayList<>();
     private List<Dynasty> nomad = new ArrayList<>();
+    
+    private int money = 0;
+    private List<Person> army = new ArrayList<>();
 
     // 생성자
     public Region(long id, String name, Faction occupy, int type) {
@@ -75,5 +78,21 @@ public class Region {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public int getMoney() {
+		return money;
+	}
+
+	public void setMoney(int money) {
+		this.money = money;
+	}
+
+	public List<Person> getArmy() {
+		return army;
+	}
+
+	public void setArmy(List<Person> army) {
+		this.army = army;
 	}
 }

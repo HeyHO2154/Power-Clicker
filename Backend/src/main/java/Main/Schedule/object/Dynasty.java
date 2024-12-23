@@ -10,6 +10,8 @@ public class Dynasty {
     private Region location;
     private Faction faction;
     private List<Person> member = new ArrayList<>();
+    
+    private int money = 0;
 
     // 생성자
     public Dynasty(long id, String name, boolean playable, Region location, Faction faction) {
@@ -66,6 +68,14 @@ public class Dynasty {
 
 	public void setFaction(Faction faction) {
 		this.faction = faction;
+	}
+
+	public int getMoney() {
+		return money;
+	}
+
+	public void setMoney(int money) {
+		this.money = money;
 	}
     
     

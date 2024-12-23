@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import Main.Schedule.object.Dynasty;
+import Main.Schedule.object.Faction;
 import Main.Schedule.object.Region;
 
 @Component
@@ -41,10 +42,11 @@ public class TaskSchedulerConfig {
     	for (int i = 1; i < gamedata.getFactions().size(); i++) {
     		System.out.print(gamedata.getFactions().get(i).getName()+"=");
 			for (int j = 0; j < gamedata.getFactions().get(i).getOccupies().size(); j++) {
-				System.out.print(gamedata.getFactions().get(i).getOccupies().get(j).getName()+":");
+				Region region = gamedata.getFactions().get(i).getOccupies().get(j);
+				System.out.print(region.getName()+"["+region.getArmy().size()+"]:");
 				for (int k = 0; k < gamedata.getFactions().get(i).getOccupies().get(j).getSettled().size(); k++) {
 					Dynasty dynasty = gamedata.getFactions().get(i).getOccupies().get(j).getSettled().get(k);
-					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+")"+",");
+					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+"),");
 				}
 			}
 			System.out.print("/ ");
@@ -60,7 +62,8 @@ public class TaskSchedulerConfig {
 		}
     	System.out.println("\n \033[36m<가문 리스트>");
     	for (int i = 0; i < gamedata.getDynasties().size(); i++) {
-			System.out.print(gamedata.getDynasties().get(i).getName()+"=");
+    		Dynasty dynasty = gamedata.getDynasties().get(i);
+			System.out.print(dynasty.getName()+"["+dynasty.getMoney()+"]=");
 			for (int j = 0; j < gamedata.getDynasties().get(i).getMember().size(); j++) {
 				System.out.print(gamedata.getDynasties().get(i).getMember().get(j).getName()+",");
 			}
