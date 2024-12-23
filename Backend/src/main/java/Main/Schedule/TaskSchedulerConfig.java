@@ -53,7 +53,7 @@ public class TaskSchedulerConfig {
 				}
 				for (int k = 0; k < region.getSettled().size(); k++) {
 					Dynasty dynasty = region.getSettled().get(k);
-					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+"),");
+					System.out.print(dynasty.getName()+"["+dynasty.getMember().size()+"명]("+dynasty.getMoney()+"G),");
 				}
 			}
 			System.out.print("/ ");

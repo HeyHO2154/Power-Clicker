@@ -19,7 +19,7 @@ public class city {
 		}
 		
 		//관직 알고리즘
-		if(region.getOffice()[0]==null) region.getOffice()[0] = region.getSettled().get((int) (Math.random()*region.getSettled().size()));
+		if(region.getOffice()[0]==null && region.getSettled().size()>0) region.getOffice()[0] = region.getSettled().get((int) (Math.random()*region.getSettled().size()));
 		
 		//거주민 세금 거두기
 		int tax_total = 0;
@@ -58,7 +58,7 @@ public class city {
 					}else {
 						target.getOccupy().getOccupies().remove(target);
 						//점령 도시가 수도라면 수도 이전
-						if(target.getOccupy().getCapital()==target) {
+						if(target.getOccupy().getCapital()==target && target.getOccupy()!=gamedata.getFactions().get(0)) {
 							Region newCapital = target.getOccupy().getOccupies().get((int) (Math.random()*target.getOccupy().getOccupies().size()));
 							target.getOccupy().setCapital(newCapital);
 							System.out.print(" /"+target.getOccupy().getName()+"의 새로운 수도 "+newCapital.getName());
