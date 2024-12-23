@@ -9,12 +9,15 @@ public class Faction {
     private int type;
     private List<Region> occupies = new ArrayList<>();
     private List<Faction> war = new ArrayList<>();
+    
+    private Region capital;
 
     // 생성자
-    public Faction(long id, String name, int type) {
+    public Faction(long id, String name, int type, Region capital) {
         this.id = id;
         this.name = name;
         this.type = type;
+        this.setCapital(capital);
     }
 
     // Getter & Setter
@@ -56,6 +59,14 @@ public class Faction {
 
 	public void setOccupies(List<Region> occupies) {
 		this.occupies = occupies;
+	}
+
+	public Region getCapital() {
+		return capital;
+	}
+
+	public void setCapital(Region capital) {
+		this.capital = capital;
 	}
 
 }

@@ -16,7 +16,7 @@ public class GameData {
     // 생성자
     public GameData() {
         //자연 생성
-        Faction nature = new Faction(id++, "자연", 0);
+        Faction nature = new Faction(id++, "자연", 0, null);
         factions.add(nature);
         //최초 땅 생성(연결성 위해 2개 생성)
         for (int i = 0; i < 2; i++) {

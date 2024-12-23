@@ -108,7 +108,7 @@ public class nomad {
 			if(dynasty.getLocation().getOccupy().getId()==0) {
 				if(dynasty.getMoney() >= 100) {
 					//건국
-					Faction newKingdom = new Faction(gamedata.getId(), dynasty.getName()+"의 왕국", 1);
+					Faction newKingdom = new Faction(gamedata.getId(), dynasty.getName()+"의 왕국", 1, dynasty.getLocation());
 					dynasty.getLocation().getOccupy().getOccupies().remove(dynasty.getLocation());
 					newKingdom.getOccupies().add(dynasty.getLocation());				
 					dynasty.getLocation().setOccupy(newKingdom);

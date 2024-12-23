@@ -54,11 +54,11 @@ public class settled {
 		}else {
 			//기혼자(독거 가문 제외)라면 군 입대, 보상 100G 일시불
 			if((int) (Math.random()*4)==0) {
-				if(dynasty.getMember().size()>1) {
+				if(dynasty.getMember().size()>1 && dynasty.getLocation().getMoney() >= 100) {
 					dynasty.getMember().remove(a);
 					dynasty.getLocation().getArmy().add(a);
 					dynasty.setMoney(dynasty.getMoney()+100);
-					dynasty.getLocation().setMoney(dynasty.getLocation().getMoney()-100); //추후 국고 유무에 따라 징병 거절될 수 있음
+					dynasty.getLocation().setMoney(dynasty.getLocation().getMoney()-100);
 					System.out.print("/ "+dynasty.getName()+"의 "+a.getName()+"이 군 입대 함");
 				}
 			}
