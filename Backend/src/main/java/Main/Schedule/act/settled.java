@@ -48,6 +48,7 @@ public class settled {
 					dynasty.getMember().remove(a);
 					dynasty.getLocation().getArmy().add(a);
 					dynasty.setMoney(dynasty.getMoney()+100);
+					dynasty.getLocation().setMoney(dynasty.getLocation().getMoney()-100); //추후 국고 유무에 따라 징병 거절될 수 있음
 					System.out.print("/ "+dynasty.getName()+"의 "+a.getName()+"이 군 입대 함");
 				}
 			}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import Main.Schedule.GameData;
 import Main.Schedule.object.Dynasty;
-import Main.Schedule.object.Person;
 import Main.Schedule.object.Region;
 
 public class city {
@@ -20,6 +19,15 @@ public class city {
 		}
 		
 		//거주민 세금 거두기
+		int tax_total = 0;
+		for (int i = 0; i < region.getSettled().size(); i++) {
+			Dynasty citizen = region.getSettled().get(i);
+			int tax = (int) (citizen.getMoney()*0.1); //임시 세율 10%
+			citizen.setMoney(citizen.getMoney()-tax);
+			region.setMoney(region.getMoney()+tax);
+			tax_total+=tax;
+		}
+		System.out.print(" / 총 "+tax_total+"의 세금을 거두었습니다.");
 		
 		
 		//인접 지역 정복
@@ -29,8 +37,9 @@ public class city {
 				Region target = region.getAdjacent().get(i);
 				if(region.getArmy().size() > target.getArmy().size() && region.getOccupy() != target.getOccupy()) {
 					//일단은 1대1 대응 전투
-					for (int j = 0; j < region.getArmy().size()-target.getArmy().size(); j++) {
-						region.getArmy().remove(j);
+					int survive = region.getArmy().size()-target.getArmy().size();
+					for (int j = 0; j < survive; j++) {
+						region.getArmy().remove((int) (Math.random()*region.getArmy().size()));	//랜덤 전사
 					}
 					target.setArmy(new ArrayList<>());
 					if(target.getOccupy().getOccupies().size()<2 && target.getOccupy()!=gamedata.getFactions().get(0)) {

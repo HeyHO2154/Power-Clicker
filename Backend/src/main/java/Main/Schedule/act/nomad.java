@@ -21,6 +21,7 @@ public class nomad {
 				dynasty.getLocation().getNomad().remove(dynasty);
 				moveLocation.getNomad().add(dynasty);
 				System.out.print(dynasty.getLocation().getName()+"에서 "+moveLocation.getName()+"로 이동");
+				dynasty.setMoney(dynasty.getMoney()+(int) (Math.random()*5)); //수렵&채집
 				dynasty.setLocation(moveLocation);
 				break;
 			case 1:
@@ -67,6 +68,7 @@ public class nomad {
 		        dynasty.getLocation().getNomad().remove(dynasty);
 		        newLand.getNomad().add(dynasty);
 				System.out.print("탐험 성공! "+dynasty.getLocation().getName()+"에서 "+newLand.getName()+"로 이동");
+				dynasty.setMoney(dynasty.getMoney()+(int) (Math.random()*5)*4); //모험 보상 x4
 				dynasty.setLocation(newLand);
 				break;
 			default:

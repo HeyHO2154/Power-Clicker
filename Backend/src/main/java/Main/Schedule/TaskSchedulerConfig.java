@@ -45,7 +45,7 @@ public class TaskSchedulerConfig {
     		System.out.print("\n "+gamedata.getFactions().get(i).getName()+"=");
 			for (int j = 0; j < gamedata.getFactions().get(i).getOccupies().size(); j++) {
 				Region region = gamedata.getFactions().get(i).getOccupies().get(j);
-				System.out.print("\n"+region.getName()+"["+region.getArmy().size()+"]:");
+				System.out.print("\n"+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
 				for (int k = 0; k < gamedata.getFactions().get(i).getOccupies().get(j).getSettled().size(); k++) {
 					Dynasty dynasty = gamedata.getFactions().get(i).getOccupies().get(j).getSettled().get(k);
 					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+"),");
@@ -56,7 +56,7 @@ public class TaskSchedulerConfig {
     	System.out.println("\n \033[32m<지역 리스트>");
     	for (int i = 0; i < gamedata.getRegions().size(); i++) {
     		Region region = gamedata.getRegions().get(i);
-			System.out.print(region.getName()+"["+region.getType()+"]"+"=");
+			System.out.print(region.getName()+"<"+region.getType()+"바이옴>=");
 			for (int j = 0; j < gamedata.getRegions().get(i).getAdjacent().size(); j++) {
 				System.out.print(gamedata.getRegions().get(i).getAdjacent().get(j).getName()+",");
 			}
@@ -65,10 +65,10 @@ public class TaskSchedulerConfig {
     	System.out.println("\n \033[36m<가문 리스트>");
     	for (int i = 0; i < gamedata.getDynasties().size(); i++) {
     		Dynasty dynasty = gamedata.getDynasties().get(i);
-			System.out.print(dynasty.getName()+"["+dynasty.getMoney()+"]=");
-			for (int j = 0; j < gamedata.getDynasties().get(i).getMember().size(); j++) {
-				System.out.print(gamedata.getDynasties().get(i).getMember().get(j).getName()+",");
-			}
+			System.out.print(dynasty.getName()+"["+dynasty.getMember().size()+"명]("+dynasty.getMoney()+"G)");
+//			for (int j = 0; j < gamedata.getDynasties().get(i).getMember().size(); j++) {
+//				System.out.print(gamedata.getDynasties().get(i).getMember().get(j).getName()+",");
+//			}
 			System.out.print("/ ");
 		}
     	System.out.print("\033[0m");
