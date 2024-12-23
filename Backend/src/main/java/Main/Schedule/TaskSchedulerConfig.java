@@ -24,7 +24,7 @@ public class TaskSchedulerConfig {
     }
 	
     // 매 작업 완료 후, 1초 뒤 실행 (1000ms)
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 500)
     public void scheduleTask() {
     	//새 가문 생성
     	gamedata = schedulerService.NewDynasty(gamedata); 	
@@ -42,12 +42,17 @@ public class TaskSchedulerConfig {
     private void Debug() {
     	System.out.println("\n \033[31m<세력 리스트>");
     	for (int i = 0; i < gamedata.getFactions().size(); i++) {
-    		System.out.print("\n "+gamedata.getFactions().get(i).getName()+"=");
-			for (int j = 0; j < gamedata.getFactions().get(i).getOccupies().size(); j++) {
-				Region region = gamedata.getFactions().get(i).getOccupies().get(j);
-				System.out.print("\n"+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
-				for (int k = 0; k < gamedata.getFactions().get(i).getOccupies().get(j).getSettled().size(); k++) {
-					Dynasty dynasty = gamedata.getFactions().get(i).getOccupies().get(j).getSettled().get(k);
+    		Faction faction = gamedata.getFactions().get(i);
+    		System.out.print("\n "+faction.getName()+"="+faction.getCapital().getName());
+			for (int j = 0; j < faction.getOccupies().size(); j++) {
+				Region region = faction.getOccupies().get(j);
+				if(region.getOffice()[0] != null) {
+					System.out.print("\n"+region.getOffice()[0].getName()+"의 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
+				}else {
+					System.out.print("\n빈땅의 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
+				}
+				for (int k = 0; k < region.getSettled().size(); k++) {
+					Dynasty dynasty = region.getSettled().get(k);
 					System.out.print(dynasty.getName()+"("+dynasty.getMember().size()+"),");
 				}
 			}

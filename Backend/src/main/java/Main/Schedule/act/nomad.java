@@ -68,7 +68,7 @@ public class nomad {
 		        dynasty.getLocation().getNomad().remove(dynasty);
 		        newLand.getNomad().add(dynasty);
 				System.out.print("탐험 성공! "+dynasty.getLocation().getName()+"에서 "+newLand.getName()+"로 이동");
-				dynasty.setMoney(dynasty.getMoney()+(int) (Math.random()*5)*4); //모험 보상 x4
+				dynasty.setMoney(dynasty.getMoney()+(int) (Math.random()*5)*10); //모험 보상 x10
 				dynasty.setLocation(newLand);
 				break;
 			default:
@@ -117,6 +117,8 @@ public class nomad {
 					dynasty.setFaction(newKingdom);
 					gamedata.getFactions().add(newKingdom);
 					System.out.print("/ "+newKingdom.getName()+"이 "+dynasty.getLocation().getName()+"에 건국되었습니다.");
+					newKingdom.setCapital(dynasty.getLocation());
+					dynasty.getLocation().getOffice()[0] = dynasty;
 					dynasty.setMoney(dynasty.getMoney()-100);
 					dynasty.getLocation().setMoney(100);
 				}else {

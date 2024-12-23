@@ -12,6 +12,7 @@ public class Region {
     private List<Dynasty> settled = new ArrayList<>();
     private List<Dynasty> nomad = new ArrayList<>();
     
+    private Dynasty[] office = new Dynasty[3]; //관직
     private int money = 0;
     private List<Person> army = new ArrayList<>();
 
@@ -94,5 +95,13 @@ public class Region {
 
 	public void setArmy(List<Person> army) {
 		this.army = army;
+	}
+
+	public Dynasty[] getOffice() {
+		return office;
+	}
+
+	public void setOffice(Dynasty[] office) {
+		this.office = office;
 	}
 }

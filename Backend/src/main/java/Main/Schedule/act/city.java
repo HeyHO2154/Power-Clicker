@@ -18,16 +18,26 @@ public class city {
 				break;
 		}
 		
+		//관직 알고리즘
+		if(region.getOffice()[0]==null) region.getOffice()[0] = region.getSettled().get((int) (Math.random()*region.getSettled().size()));
+		
 		//거주민 세금 거두기
 		int tax_total = 0;
 		for (int i = 0; i < region.getSettled().size(); i++) {
 			Dynasty citizen = region.getSettled().get(i);
-			int tax = (int) (citizen.getMoney()*0.1); //임시 세율 10%
+			int tax = (int) (citizen.getMoney()*0.1); //임시 가문세 10%
 			citizen.setMoney(citizen.getMoney()-tax);
 			region.setMoney(region.getMoney()+tax);
 			tax_total+=tax;
 		}
-		System.out.print(" / 총 "+tax_total+"의 세금을 거두었습니다.");
+		System.out.print(" /총 "+tax_total+"의 세금을 거두었습니다.");
+		
+		//도시세 납부하기
+		Region capital = region.getOccupy().getCapital();
+		int tax2 = (int) (tax_total*0.1); //임시 도시세 10%
+		capital.setMoney(capital.getMoney()+tax2);
+		region.setMoney(region.getMoney()-tax2);
+		System.out.print(" /도시세로 "+capital.getName()+"에"+tax2+"납부");
 		
 		
 		//인접 지역 정복
@@ -47,6 +57,12 @@ public class city {
 						System.out.print(" /"+target.getOccupy().getName()+" 멸망..");
 					}else {
 						target.getOccupy().getOccupies().remove(target);
+						//점령 도시가 수도라면 수도 이전
+						if(target.getOccupy().getCapital()==target) {
+							Region newCapital = target.getOccupy().getOccupies().get((int) (Math.random()*target.getOccupy().getOccupies().size()));
+							target.getOccupy().setCapital(newCapital);
+							System.out.print(" /"+target.getOccupy().getName()+"의 새로운 수도 "+newCapital.getName());
+						}
 					}
 					target.setOccupy(region.getOccupy());
 					region.getOccupy().getOccupies().add(target);

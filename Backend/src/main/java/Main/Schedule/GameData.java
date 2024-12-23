@@ -27,6 +27,7 @@ public class GameData {
 		}
         nature.getOccupies().get(0).getAdjacent().add(nature.getOccupies().get(1));
         nature.getOccupies().get(1).getAdjacent().add(nature.getOccupies().get(0));
+        nature.setCapital(nature.getOccupies().get(0));
         
     }
     
