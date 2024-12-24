@@ -39,6 +39,15 @@ public class city {
 		region.setMoney(region.getMoney()-tax2);
 		System.out.print(" /도시세로 "+capital.getName()+"에"+tax2+"납부");
 		
+		//군인 봉급(10G, 일시불 - 100G)
+		int salary_total = 0;
+		for (int i = 0; i < region.getArmy().size(); i++) {
+			Dynasty soldierDynasty = region.getArmy().get(i).getDynasty();
+			region.setMoney(region.getMoney()-10);
+			soldierDynasty.setMoney(soldierDynasty.getMoney()+10);
+			salary_total+=10;
+		}
+		System.out.print(" /군인 유지비로 "+salary_total+"만큼 지출");
 		
 		//인접 지역 정복
 		if((int) (Math.random()*4)==0) {

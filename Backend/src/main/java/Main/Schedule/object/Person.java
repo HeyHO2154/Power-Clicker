@@ -7,15 +7,18 @@ public class Person {
     private int age;
     private boolean married;
     private int race;
+    
+    private Dynasty dynasty;
 
     // 생성자
-    public Person(long id, String name, int gender, int race) {
+    public Person(long id, String name, int gender, int race, Dynasty dynasty) {
         this.id = id;
         this.name = name;
         this.gender = gender;
         this.age = 0;
         this.married = false;
         this.race = race;
+        this.setDynasty(dynasty);
     }
 
     // Getter & Setter
@@ -66,4 +69,12 @@ public class Person {
     public void setRace(int race) {
         this.race = race;
     }
+
+	public Dynasty getDynasty() {
+		return dynasty;
+	}
+
+	public void setDynasty(Dynasty dynasty) {
+		this.dynasty = dynasty;
+	}
 }

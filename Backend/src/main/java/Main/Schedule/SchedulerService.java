@@ -23,7 +23,7 @@ public class SchedulerService {
     	Region location = bornFaction.getOccupies().get((int) (Math.random()*bornFaction.getOccupies().size()));
     	Dynasty dynasty = new Dynasty(gamedata.getId(), (gamedata.getId()-1)+"가문", false, location, gamedata.getFactions().get(0));
     	gamedata.getDynasties().add(dynasty);
-        dynasty.getMember().add(new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0));   
+        dynasty.getMember().add(new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0, dynasty));   
         location.addNomad(dynasty);
         return gamedata;
     }

@@ -46,13 +46,13 @@ public class settled {
 				b.setMarried(true);
 				int rand = (int) (Math.random()*4)+1;
 				for (int i = 0; i < rand; i++) {
-					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0);
+					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0, dynasty);
 					dynasty.getMember().add(baby);
 					System.out.print("/ "+baby.getName()+"이 태어남");
 				}
 			}
 		}else {
-			//기혼자(독거 가문 제외)라면 군 입대, 보상 100G 일시불
+			//기혼자(독거 가문 제외)라면 군 입대, 보상 100G 일시불 / 10G 봉급
 			if((int) (Math.random()*4)==0) {
 				if(dynasty.getMember().size()>1 && dynasty.getLocation().getMoney() >= 100) {
 					dynasty.getMember().remove(a);

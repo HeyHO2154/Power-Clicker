@@ -96,7 +96,7 @@ public class nomad {
 				b.setMarried(true);
 				int rand = (int) (Math.random()*4)+1;
 				for (int i = 0; i < rand; i++) {
-					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0);
+					Person baby = new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0, dynasty);
 					dynasty.getMember().add(baby);
 					System.out.print("/ "+baby.getName()+"이 태어남");
 				}
