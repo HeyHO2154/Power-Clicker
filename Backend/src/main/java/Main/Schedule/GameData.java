@@ -18,17 +18,29 @@ public class GameData {
         //자연 생성
         Faction nature = new Faction(id++, "자연", 0, null);
         factions.add(nature);
-        //최초 땅 생성(연결성 위해 2개 생성)
-        for (int i = 0; i < 2; i++) {
-        	Region firstLand = new Region(id, id+"지역", nature, 0);
-        	id++;
-            regions.add(firstLand);
-            nature.getOccupies().add(firstLand);
-		}
+        //최초 5지역 생성
+        initialLand("태초의 땅");
+        initialLand("북부의 땅");
+        initialLand("서부의 땅");
+        initialLand("동부의 땅");
+        initialLand("남부의 땅");
+
         nature.getOccupies().get(0).getAdjacent().add(nature.getOccupies().get(1));
+        nature.getOccupies().get(0).getAdjacent().add(nature.getOccupies().get(2));
+        nature.getOccupies().get(0).getAdjacent().add(nature.getOccupies().get(3));
+        nature.getOccupies().get(0).getAdjacent().add(nature.getOccupies().get(4));
         nature.getOccupies().get(1).getAdjacent().add(nature.getOccupies().get(0));
-        nature.setCapital(nature.getOccupies().get(0));
+        nature.getOccupies().get(2).getAdjacent().add(nature.getOccupies().get(0));
+        nature.getOccupies().get(3).getAdjacent().add(nature.getOccupies().get(0));
+        nature.getOccupies().get(4).getAdjacent().add(nature.getOccupies().get(0));
         
+        nature.setCapital(nature.getOccupies().get(0));       
+    }
+    
+    private void initialLand(String name) {
+    	Region firstLand = new Region(id++, name, factions.get(0), 0);
+        regions.add(firstLand);
+        factions.get(0).getOccupies().add(firstLand);
     }
     
 	public long getId() {

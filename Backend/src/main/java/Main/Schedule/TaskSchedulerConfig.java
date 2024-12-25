@@ -49,7 +49,7 @@ public class TaskSchedulerConfig {
 				if(region.getOffice()[0] != null) {
 					System.out.print("\n"+region.getOffice()[0].getName()+"의 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
 				}else {
-					System.out.print("\n빈땅의 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
+					System.out.print("\n주인없는 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
 				}
 				for (int k = 0; k < region.getSettled().size(); k++) {
 					Dynasty dynasty = region.getSettled().get(k);
