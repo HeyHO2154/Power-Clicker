@@ -6,7 +6,7 @@ import java.util.List;
 public class Faction {
     private long id;
     private String name;
-    private int type;
+    private int type;	// 0: 자연, 1~8: 떠돌이(도시 포함)~식인종
     private List<Region> occupies = new ArrayList<>();
     private List<Faction> war = new ArrayList<>();
     

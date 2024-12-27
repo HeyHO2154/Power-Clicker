@@ -15,8 +15,12 @@ public class SchedulerService {
 
 	//새로운 가문 생성
     public GameData NewDynasty(GameData gamedata) {
+    	//최초 입장시 AI는 직업 랜덤 선택
+    	int rand = (int) (Math.random()*8);
+    	String tempName[] = {"떠돌이","용병","무역상","탐험대","약탈자","노예상","기사단","식인종"};
+    	Faction bornFaction = new Faction(gamedata.getId(), tempName[rand]+(gamedata.getId()-1), rand+1, gamedata.getRegions().get(0));
+    	gamedata.getFactions().add(bornFaction);
     	//아무데나 생성
-    	Faction bornFaction = gamedata.getFactions().get(0);
     	do {
     		bornFaction = gamedata.getFactions().get((int) (Math.random()*gamedata.getFactions().size()));
 		} while (bornFaction.getOccupies().size()==0);
