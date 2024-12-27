@@ -4,31 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Faction {
-    private long id;
     private String name;
     private int type;	// 0: 자연, 1~8: 떠돌이(도시 포함)~식인종
     private List<Region> occupies = new ArrayList<>();
     private List<Faction> war = new ArrayList<>();
     
-    private Region capital;
+    private Region capital;	//null이면 유목민
 
     // 생성자
-    public Faction(long id, String name, int type, Region capital) {
-        this.id = id;
+    public Faction(String name, int type, Region capital) {
         this.name = name;
         this.type = type;
         this.setCapital(capital);
     }
 
     // Getter & Setter
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public int getType() {
         return type;
     }

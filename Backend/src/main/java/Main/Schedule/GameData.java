@@ -16,7 +16,7 @@ public class GameData {
     // 생성자
     public GameData() {
         //자연 생성
-        Faction nature = new Faction(id++, "자연", 0, null);
+        Faction nature = new Faction("자연", 0, null);
         factions.add(nature);
         //최초 5지역 생성
         initialLand("태초의 땅");

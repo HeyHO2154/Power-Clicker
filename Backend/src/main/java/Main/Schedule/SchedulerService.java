@@ -15,17 +15,15 @@ public class SchedulerService {
 
 	//새로운 가문 생성
     public GameData NewDynasty(GameData gamedata) {
-    	//최초 입장시 AI는 직업 랜덤 선택
+    	//세력 랜덤 선택
     	int rand = (int) (Math.random()*8);
     	String tempName[] = {"떠돌이","용병","무역상","탐험대","약탈자","노예상","기사단","식인종"};
-    	Faction bornFaction = new Faction(gamedata.getId(), tempName[rand]+(gamedata.getId()-1), rand+1, gamedata.getRegions().get(0));
+    	Faction bornFaction = new Faction(tempName[rand]+gamedata.getId(), rand+1, null);
     	gamedata.getFactions().add(bornFaction);
     	//아무데나 생성
-    	do {
-    		bornFaction = gamedata.getFactions().get((int) (Math.random()*gamedata.getFactions().size()));
-		} while (bornFaction.getOccupies().size()==0);
-    	Region location = bornFaction.getOccupies().get((int) (Math.random()*bornFaction.getOccupies().size()));
-    	Dynasty dynasty = new Dynasty(gamedata.getId(), (gamedata.getId()-1)+"가문", false, location, gamedata.getFactions().get(0));
+    	Faction nature = gamedata.getFactions().get(0);
+    	Region location = nature.getOccupies().get((int) (Math.random()*nature.getOccupies().size()));
+    	Dynasty dynasty = new Dynasty(gamedata.getId(), (gamedata.getId()-1)+"가문", false, location, bornFaction);
     	gamedata.getDynasties().add(dynasty);
         dynasty.getMember().add(new Person(gamedata.getId(), "이름"+(gamedata.getId()-1), (int) (Math.random()*2), 0, dynasty));   
         location.addNomad(dynasty);
@@ -38,7 +36,7 @@ public class SchedulerService {
         for (int i = 0; i < gamedata.getDynasties().size(); i++) {
         	Dynasty dynasty = gamedata.getDynasties().get(i);
         	System.out.print(dynasty.getName()+" 턴: ");
-			if(dynasty.getFaction()==gamedata.getFactions().get(0)) {
+			if(dynasty.getFaction().getCapital()==null) {
 				//유목민
 				gamedata = nomad.act(gamedata, i);
 			}else {

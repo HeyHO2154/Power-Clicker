@@ -43,20 +43,22 @@ public class TaskSchedulerConfig {
     	System.out.println("\n \033[31m<세력 리스트>");
     	for (int i = 0; i < gamedata.getFactions().size(); i++) {
     		Faction faction = gamedata.getFactions().get(i);
-    		System.out.print("\n "+faction.getName()+"="+faction.getCapital().getName());
-			for (int j = 0; j < faction.getOccupies().size(); j++) {
-				Region region = faction.getOccupies().get(j);
-				if(region.getOffice()[0] != null) {
-					System.out.print("\n"+region.getOffice()[0].getName()+"의 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
-				}else {
-					System.out.print("\n주인없는 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
-				}
-				for (int k = 0; k < region.getSettled().size(); k++) {
-					Dynasty dynasty = region.getSettled().get(k);
-					System.out.print(dynasty.getName()+"["+dynasty.getMember().size()+"명]("+dynasty.getMoney()+"G),");
-				}
-			}
-			System.out.print("/ ");
+    		if(faction.getCapital()!=null) {
+        		System.out.print("\n "+faction.getName()+"="+faction.getCapital().getName());
+    			for (int j = 0; j < faction.getOccupies().size(); j++) {
+    				Region region = faction.getOccupies().get(j);
+    				if(region.getOffice()[0] != null) {
+    					System.out.print("\n"+region.getOffice()[0].getName()+"의 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
+    				}else {
+    					System.out.print("\n주인없는 "+region.getName()+"["+region.getArmy().size()+"병사]("+region.getMoney()+"G):");
+    				}
+    				for (int k = 0; k < region.getSettled().size(); k++) {
+    					Dynasty dynasty = region.getSettled().get(k);
+    					System.out.print(dynasty.getName()+"["+dynasty.getMember().size()+"명]("+dynasty.getMoney()+"G),");
+    				}
+    			}
+    			System.out.print("/ ");
+    		}
 		}
     	System.out.println("\n \033[32m<지역 리스트>");
     	for (int i = 0; i < gamedata.getRegions().size(); i++) {
@@ -70,10 +72,7 @@ public class TaskSchedulerConfig {
     	System.out.println("\n \033[36m<가문 리스트>");
     	for (int i = 0; i < gamedata.getDynasties().size(); i++) {
     		Dynasty dynasty = gamedata.getDynasties().get(i);
-			System.out.print(dynasty.getName()+"["+dynasty.getMember().size()+"명]("+dynasty.getMoney()+"G)");
-//			for (int j = 0; j < gamedata.getDynasties().get(i).getMember().size(); j++) {
-//				System.out.print(gamedata.getDynasties().get(i).getMember().get(j).getName()+",");
-//			}
+			System.out.print(dynasty.getFaction().getName()+dynasty.getName()+"["+dynasty.getMember().size()+"명]("+dynasty.getMoney()+"G)");
 			System.out.print("/ ");
 		}
     	System.out.print("\033[0m");
