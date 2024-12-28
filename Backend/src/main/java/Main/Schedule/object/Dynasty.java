@@ -79,6 +79,14 @@ public class Dynasty {
 	public void setMoney(int money) {
 		this.money = money;
 	}
+
+	public String getReligion() {
+		return religion;
+	}
+
+	public void setReligion(String religion) {
+		this.religion = religion;
+	}
     
     
 }
