@@ -11,6 +11,8 @@ public class Dynasty {
     private Faction faction;
     private List<Person> member = new ArrayList<>();
     
+    private String religion = null; //최초에는 무교
+    
     private int money = 0;
 
     // 생성자
