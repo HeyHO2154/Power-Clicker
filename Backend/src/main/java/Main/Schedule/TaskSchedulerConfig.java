@@ -15,13 +15,8 @@ public class TaskSchedulerConfig {
 	@Autowired
     private SchedulerService schedulerService;
 
-	//클래스 필드
+	//게임데이터 생성
 	private GameData gamedata = new GameData();
-	
-	// 생성자 또는 초기화 블록에서 실행
-    public TaskSchedulerConfig() {
-
-    }
 	
     // 매 작업 완료 후, 1초 뒤 실행 (1000ms)
     @Scheduled(fixedDelay = 500)
