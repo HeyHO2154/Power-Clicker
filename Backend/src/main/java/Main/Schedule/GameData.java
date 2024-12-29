@@ -19,7 +19,7 @@ public class GameData {
         Faction nature = new Faction("자연", 0, null);
         factions.add(nature);
         //최초 지역 생성
-        Region firstLand = new Region(id++, "태초의 땅", factions.get(0), 0);
+        Region firstLand = new Region(id++, "태초의 땅", factions.get(0), (int) (Math.random()*4));
         regions.add(firstLand);
         factions.get(0).getOccupies().add(firstLand);
     }
