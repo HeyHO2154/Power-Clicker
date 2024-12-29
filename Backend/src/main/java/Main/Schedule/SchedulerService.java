@@ -15,17 +15,8 @@ public class SchedulerService {
 
 	//새로운 가문 생성
     public GameData NewDynasty(GameData gamedata) {
-    	
-    	/*
-    	 * 이거 이렇게 하지말고
-    	 * 처음에는 다 떠돌이로 시작하되, 기초 자금이 쌓이면 세력을 고르는 식으로 해야함
-    	 * 아니면 빈털털이라서 [기아]로 시작해 전투불능이라 성장을 못하는 딜레마 생김
-    	 */
-    	
-    	//세력 랜덤 선택
-    	int rand = (int) (Math.random()*8);
-    	String tempName[] = {"떠돌이","용병","무역상","탐험대","약탈자","노예상","기사단","식인종"};
-    	Faction bornFaction = new Faction(tempName[rand]+gamedata.getId(), rand+1, null);
+    	//처음에는 떠돌이 스타트, 이후 기초자금 생기면 다른 직업으로 옮겨타기
+    	Faction bornFaction = new Faction("떠돌이"+gamedata.getId(), 1, null);
     	gamedata.getFactions().add(bornFaction);
     	//아무데나 생성
     	Faction nature = gamedata.getFactions().get(0);
