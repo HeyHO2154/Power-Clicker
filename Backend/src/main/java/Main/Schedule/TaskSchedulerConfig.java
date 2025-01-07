@@ -27,7 +27,7 @@ public class TaskSchedulerConfig {
     	gamedata = schedulerService.DynastyTurn(gamedata);
     	//모든 영토 순환
     	gamedata = schedulerService.RegionTurn(gamedata);
-    	
+    	//
     	Debug();
     	
     	
